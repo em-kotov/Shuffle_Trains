@@ -17,13 +17,6 @@ public class ParkingSlotsHandler : MonoBehaviour
         InitializeGrid();
     }
 
-    public void SnapCarToCellFromPosition(Car car, Vector3 position)
-    {
-        Vector2Int cell = WorldToGrid(position);
-        cell = ClampToGrid(cell);
-        car.transform.position = GridToWorld(cell);
-    }
-
     public void RegisterCar(Vector3 newPosition, Car car)
     {
         Vector2Int newCell = WorldToGrid(newPosition);
@@ -47,9 +40,9 @@ public class ParkingSlotsHandler : MonoBehaviour
 
     public void RegisterTail(Car car, Vector3 current, CarOrientation orientation, float sign, float length)
     {
-        float opposite = -1f;
+        float oppositeDirection = -1f;
         float exclusiveDistance = 1f;
-        Vector3 target = CalculateTargetPosition(current, orientation, sign * opposite, length - exclusiveDistance);
+        Vector3 target = CalculateTargetPosition(current, orientation, sign * oppositeDirection, length - exclusiveDistance);
         List<Vector2Int> tailCells = GetVisitedCells(target, current);
 
         int minCountForRegisterTail = 2;
@@ -71,9 +64,9 @@ public class ParkingSlotsHandler : MonoBehaviour
     }
 
     public Vector3 GetFurthestCellToMove(Car car, Vector3 current, CarOrientation orientation,
-                                            float sign, out int codeWhatIsForward)
+                                            float sign, out CellOccupancy cellOccupancy)
     {
-        codeWhatIsForward = 0;
+        cellOccupancy = CellOccupancy.Free;
         Vector2Int currentCell = WorldToGrid(current);
         Vector2Int furthestCell = currentCell;
 
@@ -87,7 +80,7 @@ public class ParkingSlotsHandler : MonoBehaviour
 
             if (occupyingCar != null && occupyingCar != car)
             {
-                codeWhatIsForward = 1;
+                cellOccupancy = CellOccupancy.Car;
 
                 if (i == 0)
                 {

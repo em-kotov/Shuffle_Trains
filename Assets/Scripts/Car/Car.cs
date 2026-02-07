@@ -4,15 +4,14 @@ using UnityEngine;
 
 public class Car : MonoBehaviour
 {
-    [SerializeField] private CarOrientation _orientation = CarOrientation.Horizontal;
     [SerializeField] private ParkingSlotsHandler _parkingSlotHandler;
     [SerializeField] private Mover _mover;
+    [SerializeField] private CarOrientation _orientation = CarOrientation.Horizontal;
     [SerializeField] private float _signDirection = 1;
     [SerializeField] private int _length;
 
     private Vector3 _carStartPosition;
     private bool _isMoving = false;
-    private const int _codeBumped = 1;
 
     public event Action Bumped;
 
@@ -20,7 +19,6 @@ public class Car : MonoBehaviour
     {
         _carStartPosition = transform.position;
         _parkingSlotHandler.RegisterCar(_carStartPosition, this);
-        _parkingSlotHandler.SnapCarToCellFromPosition(this, _carStartPosition);
     }
 
     public void OnClick()
@@ -31,14 +29,14 @@ public class Car : MonoBehaviour
         _carStartPosition = transform.position;
 
         Vector3 furthestSlotToMoveIn = _parkingSlotHandler.GetFurthestCellToMove(this, _carStartPosition,
-                                        _orientation, _signDirection, out int code);
+                                        _orientation, _signDirection, out CellOccupancy cellOccupancy);
 
         if (transform.position != furthestSlotToMoveIn)
         {
             StartCoroutine(SmoothMoveTo(furthestSlotToMoveIn));
         }
 
-        if (code == _codeBumped)
+        if (cellOccupancy == CellOccupancy.Car)
         {
             Bumped?.Invoke();
         }
