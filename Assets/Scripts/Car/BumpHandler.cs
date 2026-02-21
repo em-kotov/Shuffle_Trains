@@ -2,7 +2,12 @@ using UnityEngine;
 
 public class BumpHandler : MonoBehaviour
 {
-    [SerializeField] private Car _car;
+    private Car _car;
+
+    public void Initialize(Car car)
+    {
+        _car = car;
+    }
 
     private void OnEnable()
     {

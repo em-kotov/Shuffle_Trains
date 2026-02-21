@@ -11,7 +11,7 @@ public class ParkingSlotsHandler : MonoBehaviour
     private float _distanceMultiplier;
     private Car[,] _gridCells;
 
-    private void Awake()
+    public void Initialize()
     {
         _distanceMultiplier = _gridWidth + _gridHeight;
         InitializeGrid();
@@ -93,6 +93,12 @@ public class ParkingSlotsHandler : MonoBehaviour
 
                 break;
             }
+        }
+
+        if (cellOccupancy == CellOccupancy.Free && furthestCell == visitedCells[visitedCells.Count - 1])
+        {
+            Debug.Log("can go to border. visited cells count " + visitedCells.Count + ". furthest cell " + furthestCell);
+            cellOccupancy = CellOccupancy.Border;
         }
 
         return GridToWorld(furthestCell);

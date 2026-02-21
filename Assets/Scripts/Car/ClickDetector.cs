@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[RequireComponent(typeof(Collider))]
 public class ClickDetector : MonoBehaviour, IPointerClickHandler
 {
     private PhysicsRaycaster _raycaster;

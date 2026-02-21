@@ -4,19 +4,23 @@ using UnityEngine;
 
 public class Car : MonoBehaviour
 {
-    [SerializeField] private ParkingSlotsHandler _parkingSlotHandler;
-    [SerializeField] private Mover _mover;
     [SerializeField] private CarOrientation _orientation = CarOrientation.Horizontal;
     [SerializeField] private float _signDirection = 1;
     [SerializeField] private int _length;
 
+    private ParkingSlotsHandler _parkingSlotHandler;
+    private Mover _mover;
     private Vector3 _carStartPosition;
     private bool _isMoving = false;
+    private bool _isReadyToEnterTrack = false;
 
     public event Action Bumped;
+    public event Action IsOnBorder;
 
-    private void Start()
+    public void Initialize(ParkingSlotsHandler parkingHandler, Mover mover)
     {
+        _parkingSlotHandler = parkingHandler;
+        _mover = mover;
         _carStartPosition = transform.position;
         _parkingSlotHandler.RegisterCar(_carStartPosition, this);
     }
@@ -40,13 +44,25 @@ public class Car : MonoBehaviour
         {
             Bumped?.Invoke();
         }
+
+        if (cellOccupancy == CellOccupancy.Border)
+        {
+            _isReadyToEnterTrack = true;
+        }
     }
 
     public void OnFinishedMoving()
     {
+        _isMoving = false;
+
+        if (_isReadyToEnterTrack)
+        {
+            IsOnBorder?.Invoke();
+            return;
+        }
+
         _parkingSlotHandler.RegisterCar(transform.position, this);
         _parkingSlotHandler.RegisterTail(this, transform.position, _orientation, _signDirection, _length);
-        _isMoving = false;
     }
 
     private IEnumerator SmoothMoveTo(Vector3 target)
