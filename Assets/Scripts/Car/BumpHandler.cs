@@ -6,17 +6,17 @@ public class BumpHandler : MonoBehaviour
 
     public void Initialize(Car car)
     {
-        _car = car;
+        // _car = car;
     }
 
     private void OnEnable()
     {
-        _car.Bumped += OnBumped;
+        // _car.Bumped += OnBumped;
     }
 
     private void OnDisable()
     {
-        _car.Bumped -= OnBumped;
+        // _car.Bumped -= OnBumped;
     }
 
     private void OnBumped()

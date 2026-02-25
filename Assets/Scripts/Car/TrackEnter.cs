@@ -37,6 +37,7 @@ public class TrackEnter : MonoBehaviour
         _currentPosition = _carHead.position;
 
         Vector3 enterPoint = _trackSwitcher.GetEnterPoint(_currentPosition, out _interpolatedSplinePosition);
+       Debug.Log(_interpolatedSplinePosition);
         StartCoroutine(SmoothMoveTo(enterPoint));
     }
 
@@ -57,6 +58,7 @@ public class TrackEnter : MonoBehaviour
         _splineAnimate.enabled = true;
         _splineAnimate.Container = _track;
         _splineAnimate.StartOffset = _interpolatedSplinePosition;
+        _splineAnimate.Duration = 3.3f; // calculate with speed and spline length and set
         _splineAnimate.Play();
     }
 }
