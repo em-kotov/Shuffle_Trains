@@ -13,14 +13,13 @@ public class TrackSwitcher : MonoBehaviour
         _track = track;
     }
 
-    public Vector3 GetEnterPoint(Vector3 position, out float _interpolatedSplinePosition)
+    public Vector3 GetEnterPoint(Vector3 position, float searchMin, float searchMax, out float _interpolatedSplinePosition)
     {
         Vector3 localPosition = _track.transform.InverseTransformPoint(position);
 
-        float searchMin = 0f;
-        float searchMax = 0.4f; // should receive in method
         SplineUtilityExtension.GetNearestPoint(_track.Spline, localPosition, out float3 nearest,
                                     out _interpolatedSplinePosition, searchMin, searchMax, _resolutiion, _iterations);
+
         return _track.transform.TransformPoint(nearest);
     }
 }

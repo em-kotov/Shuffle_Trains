@@ -2,69 +2,25 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ParkingSlotsHandler : MonoBehaviour
+public class GridCalculator : MonoBehaviour
 {
-    [SerializeField] private int _gridWidth = 6;
-    [SerializeField] private int _gridHeight = 8;
-    [SerializeField] private float _cellSize = 1f;
-
+    private int _width;
+    private int _height;
+    private float _cellSize;
     private float _distanceMultiplier;
-    private Car[,] _gridCells;
+    private ParkingRegistrator _registrator;
 
-    public void Initialize()
+    public void Initialize(int width, int height, float cellSize, ParkingRegistrator registrator)
     {
-        _distanceMultiplier = _gridWidth + _gridHeight;
-        InitializeGrid();
-    }
-
-    public void RegisterCar(Vector3 newPosition, Car car)
-    {
-        Vector2Int newCell = WorldToGrid(newPosition);
-        newCell = ClampToGrid(newCell);
-
-        if (_gridCells[newCell.x, newCell.y] == null)
-        {
-            _gridCells[newCell.x, newCell.y] = car;
-            car.transform.position = GridToWorld(newCell);
-        }
-    }
-
-    public void UnregisterCar(Vector3 oldPosition, Car car)
-    {
-        Vector2Int oldCell = WorldToGrid(oldPosition);
-        oldCell = ClampToGrid(oldCell);
-
-        if (_gridCells[oldCell.x, oldCell.y] == car)
-            _gridCells[oldCell.x, oldCell.y] = null;
-    }
-
-    public void RegisterTail(Car car, Vector3 current, CarOrientation orientation, float sign, float length)
-    {
-        float oppositeDirection = -1f;
-        float exclusiveDistance = 1f;
-        Vector3 target = CalculateTargetPosition(current, orientation, sign * oppositeDirection, length - exclusiveDistance);
-        List<Vector2Int> tailCells = GetVisitedCells(target, current);
-
-        int minCountForRegisterTail = 2;
-
-        if (tailCells.Count < minCountForRegisterTail)
-        {
-            return;
-        }
-
-        int tailStartIndex = 1;
-
-        for (int i = tailStartIndex; i < tailCells.Count; i++)
-        {
-            if (_gridCells[tailCells[i].x, tailCells[i].y] == null)
-            {
-                _gridCells[tailCells[i].x, tailCells[i].y] = car;
-            }
-        }
+        _width = width;
+        _height = height;
+        _cellSize = cellSize;
+        _registrator = registrator;
+        _distanceMultiplier = _width + _height;
     }
 
     public Vector3 GetFurthestCellToMove(Car car, Vector3 current, CarOrientation orientation,
-                                            float sign, out CellOccupancy cellOccupancy)
+                                         float sign, out CellOccupancy cellOccupancy)
     {
         cellOccupancy = CellOccupancy.Free;
         Vector2Int currentCell = WorldToGrid(current);
@@ -76,7 +32,7 @@ public class ParkingSlotsHandler : MonoBehaviour
         for (int i = 0; i < visitedCells.Count; i++)
         {
             furthestCell = visitedCells[i];
-            Car occupyingCar = _gridCells[furthestCell.x, furthestCell.y];
+            Car occupyingCar = _registrator.GetCar(furthestCell.x, furthestCell.y);
 
             if (occupyingCar != null && occupyingCar != car)
             {
@@ -104,7 +60,7 @@ public class ParkingSlotsHandler : MonoBehaviour
         return GridToWorld(furthestCell);
     }
 
-    private Vector3 CalculateTargetPosition(Vector3 current, CarOrientation orientation, float sign, float distance)
+    public Vector3 CalculateTargetPosition(Vector3 current, CarOrientation orientation, float sign, float distance)
     {
         Vector3 target = current;
 
@@ -120,7 +76,7 @@ public class ParkingSlotsHandler : MonoBehaviour
         return target;
     }
 
-    private List<Vector2Int> GetVisitedCells(Vector3 target, Vector3 current)
+    public List<Vector2Int> GetVisitedCells(Vector3 target, Vector3 current)
     {
         List<Vector2Int> visitedCells = new List<Vector2Int>();
         Vector2Int currentCell = WorldToGrid(current);
@@ -155,15 +111,15 @@ public class ParkingSlotsHandler : MonoBehaviour
         return visitedCells;
     }
 
-    private Vector2Int ClampToGrid(Vector2Int target)
+    public Vector2Int ClampToGrid(Vector2Int target)
     {
-        int newX = Mathf.Clamp(target.x, 0, _gridWidth - 1);
-        int newY = Mathf.Clamp(target.y, 0, _gridHeight - 1);
+        int newX = Mathf.Clamp(target.x, 0, _width - 1);
+        int newY = Mathf.Clamp(target.y, 0, _height - 1);
 
         return new Vector2Int(newX, newY);
     }
 
-    private Vector2Int WorldToGrid(Vector3 worldPosition)
+    public Vector2Int WorldToGrid(Vector3 worldPosition)
     {
         int x = Mathf.RoundToInt(worldPosition.x / _cellSize);
         int y = Mathf.RoundToInt(worldPosition.z / _cellSize);
@@ -171,29 +127,31 @@ public class ParkingSlotsHandler : MonoBehaviour
         return new Vector2Int(x, y);
     }
 
-    private Vector3 GridToWorld(Vector2Int gridPosition)
+    public Vector3 GridToWorld(Vector2Int gridPosition)
     {
         return new Vector3(gridPosition.x * _cellSize, 0, gridPosition.y * _cellSize);
     }
 
-    private void InitializeGrid()
+    public Car[,] InitializeGrid()
     {
-        _gridCells = new Car[_gridWidth, _gridHeight];
+        Car[,] cells = new Car[_width, _height];
 
-        for (int x = 0; x < _gridWidth; x++)
+        for (int x = 0; x < _width; x++)
         {
-            for (int y = 0; y < _gridHeight; y++)
+            for (int y = 0; y < _height; y++)
             {
-                _gridCells[x, y] = null;
+                cells[x, y] = null;
             }
         }
+
+        return cells;
     }
 
     private void OnDrawGizmos()
     {
-        for (int x = 0; x < _gridWidth; x++)
+        for (int x = 0; x < _width; x++)
         {
-            for (int y = 0; y < _gridHeight; y++)
+            for (int y = 0; y < _height; y++)
             {
                 Vector3 cellCenter = GridToWorld(new Vector2Int(x, y));
                 Gizmos.DrawWireCube(cellCenter, new Vector3(_cellSize * 0.9f, 0.1f, _cellSize * 0.9f));

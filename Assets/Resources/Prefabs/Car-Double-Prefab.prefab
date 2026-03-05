@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5001789233333343762}
   - component: {fileID: 6443444232799090446}
   m_Layer: 0
-  m_Name: TrackEnter
+  m_Name: SplineCar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -215,8 +215,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6439151042556543893}
+  - component: {fileID: 4903853139547112680}
   m_Layer: 0
-  m_Name: Car-Prefab-2
+  m_Name: Car-Double-Prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -235,7 +236,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4999367259116668634}
   - {fileID: 2556304729057334673}
   - {fileID: 7902700774514996186}
   - {fileID: 5001789233333343762}
@@ -243,6 +243,30 @@ Transform:
   - {fileID: 637760703992913797}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4903853139547112680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2021630113312413390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 732f72238209acc4095f7a34ea8abe8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _orientation: 0
+  _signDirection: 1
+  _length: 2
+  _car: {fileID: 1420782088659658804}
+  _mover: {fileID: 3911854181696882068}
+  _splineCar: {fileID: 6443444232799090446}
+  _trackSwitcher: {fileID: 920604102250071739}
+  _splineAnimate: {fileID: 8279809572554868432}
+  _bumpHandler: {fileID: 8152044447660097066}
+  _clickDetectors:
+  - {fileID: 1063004317116569943}
+  - {fileID: 6799410402606415554}
 --- !u!1 &3384597169899907810
 GameObject:
   m_ObjectHideFlags: 0
@@ -365,9 +389,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c836a07e7a87080488ffb1ad4df232c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _orientation: 1
-  _signDirection: 1
-  _length: 2
 --- !u!114 &1063004317116569943
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -403,62 +424,6 @@ MonoBehaviour:
   m_ObjectForwardAxis: 2
   m_ObjectUpAxis: 1
   m_StartOffset: 0
---- !u!1 &4387699445247623761
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4999367259116668634}
-  - component: {fileID: 5822033923915808259}
-  m_Layer: 0
-  m_Name: Subscriber
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4999367259116668634
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4387699445247623761}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6439151042556543893}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5822033923915808259
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4387699445247623761}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 732f72238209acc4095f7a34ea8abe8f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _car: {fileID: 1420782088659658804}
-  _mover: {fileID: 3911854181696882068}
-  _trackEnter: {fileID: 6443444232799090446}
-  _trackSwitcher: {fileID: 920604102250071739}
-  _splineAnimate: {fileID: 8279809572554868432}
-  _bumpHandler: {fileID: 8152044447660097066}
-  _parkingHandler: {fileID: 0}
-  _raycaster: {fileID: 0}
-  _origSpline: {fileID: 0}
-  _clickDetectors:
-  - {fileID: 1063004317116569943}
-  - {fileID: 6799410402606415554}
 --- !u!1 &4635632996203738524
 GameObject:
   m_ObjectHideFlags: 0
@@ -586,7 +551,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da24c12192f974149acdf5e4099fdae0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slideDuration: 0.3
 --- !u!1 &7648764141376827274
 GameObject:
   m_ObjectHideFlags: 0

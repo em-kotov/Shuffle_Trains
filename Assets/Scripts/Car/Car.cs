@@ -4,12 +4,11 @@ using UnityEngine;
 
 public class Car : MonoBehaviour
 {
-    [SerializeField] private CarOrientation _orientation = CarOrientation.Horizontal;
-    [SerializeField] private float _signDirection = 1;
-    [SerializeField] private int _length;
-
-    private ParkingSlotsHandler _parkingSlotHandler;
+    private ParkingRegistrator _parkingRegistrator;
     private Mover _mover;
+    private CarOrientation _orientation = CarOrientation.Horizontal;
+    private float _signDirection = 1;
+    private int _length;
     private Vector3 _carStartPosition;
     private bool _isMoving = false;
     private bool _isReadyToEnterTrack = false;
@@ -17,12 +16,17 @@ public class Car : MonoBehaviour
     public event Action Bumped;
     public event Action IsOnBorder;
 
-    public void Initialize(ParkingSlotsHandler parkingHandler, Mover mover)
+    public void Initialize(ParkingRegistrator parkingRegistrator, Mover mover,
+                        CarOrientation orientation, float sign, int length)
     {
-        _parkingSlotHandler = parkingHandler;
+        _parkingRegistrator = parkingRegistrator;
         _mover = mover;
+        _orientation = orientation;
+        _signDirection = sign;
+        _length = length;
+
         _carStartPosition = transform.position;
-        _parkingSlotHandler.RegisterCar(_carStartPosition, this);
+        _parkingRegistrator.RegisterCar(_carStartPosition, this);
     }
 
     public void OnClick()
@@ -32,7 +36,7 @@ public class Car : MonoBehaviour
 
         _carStartPosition = transform.position;
 
-        Vector3 furthestSlotToMoveIn = _parkingSlotHandler.GetFurthestCellToMove(this, _carStartPosition,
+        Vector3 furthestSlotToMoveIn = _parkingRegistrator.GetFurthestCellToMove(this, _carStartPosition,
                                         _orientation, _signDirection, out CellOccupancy cellOccupancy);
 
         if (transform.position != furthestSlotToMoveIn)
@@ -61,14 +65,14 @@ public class Car : MonoBehaviour
             return;
         }
 
-        _parkingSlotHandler.RegisterCar(transform.position, this);
-        _parkingSlotHandler.RegisterTail(this, transform.position, _orientation, _signDirection, _length);
+        _parkingRegistrator.RegisterCar(transform.position, this);
+        _parkingRegistrator.RegisterTail(this, transform.position, _orientation, _signDirection, _length);
     }
 
     private IEnumerator SmoothMoveTo(Vector3 target)
     {
         _isMoving = true;
-        _parkingSlotHandler.UnregisterCar(transform.position, this);
+        _parkingRegistrator.UnregisterCar(transform.position, this);
 
         _mover.MoveTo(target);
 

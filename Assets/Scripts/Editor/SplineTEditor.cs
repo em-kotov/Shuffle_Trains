@@ -1,4 +1,3 @@
-using Codice.CM.Client.Gui;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Splines;

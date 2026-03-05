@@ -44,7 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da24c12192f974149acdf5e4099fdae0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slideDuration: 0.3
 --- !u!1 &2705692504999341279
 GameObject:
   m_ObjectHideFlags: 0
@@ -56,7 +55,7 @@ GameObject:
   - component: {fileID: 2103917308034236876}
   - component: {fileID: 5118304154973608041}
   m_Layer: 0
-  m_Name: TrackEnter
+  m_Name: SplineCar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -98,8 +97,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 78357037341294642}
+  - component: {fileID: 932233675597853620}
   m_Layer: 0
-  m_Name: Car-Prefab-1
+  m_Name: Car-Single-Prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -118,7 +118,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5703421632429438663}
   - {fileID: 2432423777827142527}
   - {fileID: 8603367419631025815}
   - {fileID: 2103917308034236876}
@@ -126,6 +125,29 @@ Transform:
   - {fileID: 2965842637205853227}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &932233675597853620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4679206124925034484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 732f72238209acc4095f7a34ea8abe8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _orientation: 0
+  _signDirection: 1
+  _length: 1
+  _car: {fileID: 4425348424977963031}
+  _mover: {fileID: 3019781803366710036}
+  _splineCar: {fileID: 5118304154973608041}
+  _trackSwitcher: {fileID: 8603393180534695104}
+  _splineAnimate: {fileID: 6969717632204824738}
+  _bumpHandler: {fileID: 2787256987741247521}
+  _clickDetectors:
+  - {fileID: 843679079303846804}
 --- !u!1 &4972385137166045152
 GameObject:
   m_ObjectHideFlags: 0
@@ -209,61 +231,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1 &5708349477245977910
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5703421632429438663}
-  - component: {fileID: 4253338733549381224}
-  m_Layer: 0
-  m_Name: Subscriber
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5703421632429438663
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5708349477245977910}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 78357037341294642}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4253338733549381224
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5708349477245977910}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 732f72238209acc4095f7a34ea8abe8f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _car: {fileID: 4425348424977963031}
-  _mover: {fileID: 3019781803366710036}
-  _trackEnter: {fileID: 5118304154973608041}
-  _trackSwitcher: {fileID: 8603393180534695104}
-  _splineAnimate: {fileID: 6969717632204824738}
-  _bumpHandler: {fileID: 2787256987741247521}
-  _parkingHandler: {fileID: 0}
-  _raycaster: {fileID: 0}
-  _origSpline: {fileID: 0}
-  _clickDetectors:
-  - {fileID: 843679079303846804}
 --- !u!1 &6399026050969559486
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,9 +440,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c836a07e7a87080488ffb1ad4df232c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _orientation: 0
-  _signDirection: 1
-  _length: 2
 --- !u!114 &843679079303846804
 MonoBehaviour:
   m_ObjectHideFlags: 0

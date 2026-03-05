@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class Mover : MonoBehaviour
 {
-    [SerializeField] private float _slideDuration = 0.3f;
-
+    private float _slideDuration = 0.3f;
     private Transform _carHead;
 
     public event Action FinishedMoving;
 
-    public void Initialize(Transform carHead)
+    public void Initialize(Transform carHead, float duration = 0.3f)
     {
         _carHead = carHead;
+        _slideDuration = duration;
     }
 
     public void MoveTo(Vector3 target)
