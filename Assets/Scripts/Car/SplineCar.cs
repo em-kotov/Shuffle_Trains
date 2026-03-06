@@ -10,6 +10,7 @@ public class SplineCar : MonoBehaviour
     private SplineAnimate _splineAnimate;
     private SplineContainer _track;
     private Vector3 _currentPosition;
+    private Vector3 _enterPoint;
     private bool _isMoving = false;
     private float _interpolatedSplinePosition;
     private float _speed;
@@ -30,7 +31,7 @@ public class SplineCar : MonoBehaviour
         _searchMax = searchMax;
 
         _trackSwitcher.Initialize(track);
-        _mover.FinishedMoving += OnFinishedMoving;
+        _mover.FinishedMoving += OnPausedMoving;
     }
 
     public void OnBorder()
@@ -40,30 +41,67 @@ public class SplineCar : MonoBehaviour
 
         _currentPosition = _carHead.position;
 
-        Vector3 enterPoint = _trackSwitcher.GetEnterPoint(_currentPosition, _searchMin,
+        _enterPoint = _trackSwitcher.GetEnterPoint(_currentPosition, _searchMin,
                                             _searchMax, out _interpolatedSplinePosition);
-        StartCoroutine(SmoothMoveTo(enterPoint));
+        StartCoroutine(SmoothMoveTo(_enterPoint));
     }
 
-    public void OnFinishedMoving()
+    private void OnPausedMoving()
     {
         _isMoving = false;
-        _mover.FinishedMoving -= OnFinishedMoving;
+        _mover.FinishedMoving -= OnPausedMoving;
+        Debug.Log("on paused moving");
 
-        _splineAnimate.enabled = true;
-        _splineAnimate.Container = _track;
-        _splineAnimate.StartOffset = _interpolatedSplinePosition;
-        _splineAnimate.Duration = CalculateDuration(_track.Spline);
-        _splineAnimate.Play();
+        StartCoroutine(WaitFreeEntrance());
     }
 
     private IEnumerator SmoothMoveTo(Vector3 target)
     {
         _isMoving = true;
-        _mover.MoveTo(target);
+        _mover.MoveToPercent(target, 0.1f);
         _carHead.LookAt(target);
 
         yield return new WaitUntil(() => _isMoving == false);
+    }
+
+    private IEnumerator WaitFreeEntrance()
+    {
+        WaitForSeconds wait = new(0.5f);
+        bool isFree = _trackSwitcher.IsEntranceFree(_enterPoint);
+
+        while (isFree == false)
+        {
+            yield return wait;
+            isFree = _trackSwitcher.IsEntranceFree(_enterPoint);
+        }
+
+        _isMoving = true;
+        _mover.FinishedMoving -= MovedToTheTarget;
+        _mover.FinishedMoving -= OnPausedMoving;
+        _mover.FinishedMoving += MovedToTheTarget;
+        Debug.Log("wait free entrance - sending car to move");
+        _mover.MoveTo(_enterPoint);
+        _carHead.LookAt(_enterPoint);
+        
+        yield return new WaitUntil(() => _isMoving == false);
+
+        EnterSpline();
+    }
+
+    private void MovedToTheTarget()
+    {
+        _isMoving = false;
+        Debug.Log("moved to the target");
+        _mover.FinishedMoving -= MovedToTheTarget;
+    }
+
+    private void EnterSpline()
+    {
+        _splineAnimate.enabled = true;
+        _splineAnimate.Container = _track;
+        _splineAnimate.StartOffset = _interpolatedSplinePosition;
+        _splineAnimate.Duration = CalculateDuration(_track.Spline);
+        _splineAnimate.Play();
     }
 
     private float CalculateDuration(ISpline spline)

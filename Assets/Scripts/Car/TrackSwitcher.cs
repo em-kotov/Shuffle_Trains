@@ -22,4 +22,9 @@ public class TrackSwitcher : MonoBehaviour
 
         return _track.transform.TransformPoint(nearest);
     }
+
+    public bool IsEntranceFree(Vector3 enterPoint)
+    {
+        return true;
+    }
 }
