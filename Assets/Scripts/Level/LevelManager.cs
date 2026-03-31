@@ -11,6 +11,11 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private float _cellSize = 1f;
 
     [Header("Track")]
+    [SerializeField] private int _segmentsCount = 10;
+    [SerializeField] private int _maxCarsOnTrackCount = 6;
+    [SerializeField] private float _waitTime = 0.3f;
+
+    [Header("Cars")]
     [SerializeField] private float _trackSpeed = 16f;
     [SerializeField] private float _slideDuration = 0.3f;
     [SerializeField] private float _searchMin = 0f;
@@ -19,7 +24,9 @@ public class LevelManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private ParkingRegistrator _parkingRegistrator;
     [SerializeField] private GridCalculator _gridCalculator;
-    [SerializeField] private SplineContainer _origSpline;
+    [SerializeField] private TrackRegistrator _trackRegistrator;
+    [SerializeField] private CounterUI _counterUI;
+    [SerializeField] private SplineContainer _trackSpline;
     [SerializeField] private PhysicsRaycaster _raycaster;
     [SerializeField] private List<Subscriber> _carSubscribers;
 
@@ -28,10 +35,14 @@ public class LevelManager : MonoBehaviour
         _parkingRegistrator.Initialize(_parkingGridWidth, _parkingGridHeight,
                                         _cellSize, _gridCalculator);
 
+        _trackRegistrator.Initialize(_trackSpline, _counterUI, _segmentsCount, 
+                                    _maxCarsOnTrackCount);
+
         foreach (Subscriber subscriber in _carSubscribers)
         {
-            subscriber.Initialize(_parkingRegistrator, _origSpline, _raycaster, _trackSpeed,
-                                _slideDuration, _searchMin, _searchMax);
+            subscriber.Initialize(_parkingRegistrator, _trackSpline, _raycaster,
+                                    _trackRegistrator, _trackSpeed, _slideDuration,
+                                    _waitTime, _searchMin, _searchMax);
         }
     }
 }

@@ -53,7 +53,7 @@ public class GridCalculator : MonoBehaviour
 
         if (cellOccupancy == CellOccupancy.Free && furthestCell == visitedCells[visitedCells.Count - 1])
         {
-            Debug.Log("can go to border. visited cells count " + visitedCells.Count + ". furthest cell " + furthestCell);
+            // Debug.Log("can go to border. visited cells count " + visitedCells.Count + ". furthest cell " + furthestCell);
             cellOccupancy = CellOccupancy.Border;
         }
 

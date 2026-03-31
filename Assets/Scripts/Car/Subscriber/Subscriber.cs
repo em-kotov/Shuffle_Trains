@@ -17,18 +17,21 @@ public class Subscriber : MonoBehaviour
     [SerializeField] private SplineAnimate _splineAnimate;
     [SerializeField] private BumpHandler _bumpHandler;
     [SerializeField] private List<ClickDetector> _clickDetectors;
+    [SerializeField] private List<BumpDetector> _bumpDetectors;
 
     private ParkingRegistrator _parkingRegistrator;
+    private TrackRegistrator _trackRegistrator;
     private SplineContainer _origSpline;
     private PhysicsRaycaster _raycaster;
     private float _trackSpeed = 16f;
     private float _slideDuration = 0.3f;
     private float _searchMin;
     private float _searchMax;
+    private float _waitTime;
 
     private void OnEnable()
     {
-        SubscribeClickDetectors();
+        SubscribeLists();
         _mover.FinishedMoving += _car.OnFinishedMoving;
 
         if (_splineCar != null)
@@ -40,7 +43,7 @@ public class Subscriber : MonoBehaviour
 
     private void OnDisable()
     {
-        UnsubscribeClickDetectors();
+        UnsubscribeLists();
         _mover.FinishedMoving -= _car.OnFinishedMoving;
 
         if (_splineCar != null)
@@ -51,14 +54,17 @@ public class Subscriber : MonoBehaviour
     }
 
     public void Initialize(ParkingRegistrator parkingRegistrator, SplineContainer origSpline,
-                        PhysicsRaycaster raycaster, float trackSpeed, float slideDuration,
+                        PhysicsRaycaster raycaster, TrackRegistrator trackRegistrator,
+                        float trackSpeed, float slideDuration, float waitTime,
                         float searchMin = 0f, float searchMax = 1f)
     {
         _parkingRegistrator = parkingRegistrator;
+        _trackRegistrator = trackRegistrator;
         _origSpline = origSpline;
         _raycaster = raycaster;
         _trackSpeed = trackSpeed;
         _slideDuration = slideDuration;
+        _waitTime = waitTime;
         _searchMin = searchMin;
         _searchMax = searchMax;
 
@@ -67,20 +73,30 @@ public class Subscriber : MonoBehaviour
         _bumpHandler.Initialize(_car);
     }
 
-    private void SubscribeClickDetectors()
+    private void SubscribeLists()
     {
         foreach (ClickDetector clickDetector in _clickDetectors)
         {
             clickDetector.Initialize(_raycaster);
             clickDetector.Clicked += _car.OnClick;
         }
+
+        foreach (BumpDetector listener in _bumpDetectors)
+        {
+            listener.Bumped += _splineCar.OnBumped;
+        }
     }
 
-    private void UnsubscribeClickDetectors()
+    private void UnsubscribeLists()
     {
         foreach (ClickDetector clickDetector in _clickDetectors)
         {
             clickDetector.Clicked -= _car.OnClick;
+        }
+
+        foreach (BumpDetector listener in _bumpDetectors)
+        {
+            listener.Bumped -= _splineCar.OnBumped;
         }
     }
 
@@ -89,6 +105,7 @@ public class Subscriber : MonoBehaviour
         _car.enabled = false;
         _splineCar.enabled = true;
         _splineCar.Initialize(_mover, _car.transform, _trackSwitcher, _splineAnimate,
-                            _origSpline, _trackSpeed, _searchMin, _searchMax);
+                            _origSpline, _trackSpeed, _searchMin, _searchMax, _trackRegistrator,
+                            _waitTime, _clickDetectors.Count);
     }
 }
