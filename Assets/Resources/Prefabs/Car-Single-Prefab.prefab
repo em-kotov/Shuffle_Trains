@@ -88,6 +88,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a207d5d9f78c05a46afa8a0d353c3e23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &2902724533143159377
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3215646939952598553}
+  m_Layer: 6
+  m_Name: BumBackward
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3215646939952598553
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2902724533143159377}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.51}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2432423777827142527}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &4679206124925034484
 GameObject:
   m_ObjectHideFlags: 0
@@ -233,6 +264,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &4975636524899943855
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4907238793337141171}
+  m_Layer: 6
+  m_Name: BumForward
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4907238793337141171
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4975636524899943855}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.51}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2432423777827142527}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6399026050969559486
 GameObject:
   m_ObjectHideFlags: 0
@@ -321,6 +383,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3018bef6d7861254488fbe0a3d0634ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _forwardOrigin: {fileID: 4907238793337141171}
+  _backwardOrigin: {fileID: 3215646939952598553}
 --- !u!1 &6852631390873581923
 GameObject:
   m_ObjectHideFlags: 0
@@ -402,6 +466,8 @@ Transform:
   m_Children:
   - {fileID: 5795669542421429602}
   - {fileID: 5260313371057471095}
+  - {fileID: 4907238793337141171}
+  - {fileID: 3215646939952598553}
   m_Father: {fileID: 78357037341294642}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4646472644134753142

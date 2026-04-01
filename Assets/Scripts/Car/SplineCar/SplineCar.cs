@@ -126,13 +126,17 @@ public class SplineCar : MonoBehaviour
     //spherecast methods
     //
 
-    public void OnBumped(Vector3 direction, float distance)
+    public void OnBumped(bool isForward, float distance)
     {
-        if (direction == Vector3.forward)
+        if (isForward)
         {
             Debug.Log("Bumped at forward point");
 
             MoveOneStepBack();
+        }
+        else
+        {
+            
         }
 
         // Vector3 direction = collisionPoint - otherObjectPosition;
@@ -152,34 +156,34 @@ public class SplineCar : MonoBehaviour
         // ChangeT(sign);
     }
 
-    private void ChangeT(int sign)
-    {
-        //float currentT = _splineAnimate.NormalizedTime % 1f; //get currentT to a [0,1]
-        float additionalT = 0.2f * sign;
-        // _splineAnimate.NormalizedTime = (_splineAnimate.NormalizedTime + additionalT) % 1f; //looping
-        float targetT = (_splineAnimate.NormalizedTime + additionalT) % 1f;
-        StartCoroutine(ApplyBump(targetT));
-    }
+    // private void ChangeT(int sign)
+    // {
+    //     //float currentT = _splineAnimate.NormalizedTime % 1f; //get currentT to a [0,1]
+    //     float additionalT = 0.2f * sign;
+    //     // _splineAnimate.NormalizedTime = (_splineAnimate.NormalizedTime + additionalT) % 1f; //looping
+    //     float targetT = (_splineAnimate.NormalizedTime + additionalT) % 1f;
+    //     StartCoroutine(ApplyBump(targetT));
+    // }
 
-    private IEnumerator ApplyBump(float targetT)
-    {
-        float elapsed = 0f;
-        float startT = _splineAnimate.NormalizedTime;
-        float bumpDuration = 0.1f;
+    // private IEnumerator ApplyBump(float targetT)
+    // {
+    //     float elapsed = 0f;
+    //     float startT = _splineAnimate.NormalizedTime;
+    //     float bumpDuration = 0.1f;
 
-        while (elapsed < bumpDuration)
-        {
-            float t = elapsed / bumpDuration;
-            _splineAnimate.NormalizedTime = Mathf.Lerp(startT, targetT, t);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
+    //     while (elapsed < bumpDuration)
+    //     {
+    //         float t = elapsed / bumpDuration;
+    //         _splineAnimate.NormalizedTime = Mathf.Lerp(startT, targetT, t);
+    //         elapsed += Time.deltaTime;
+    //         yield return null;
+    //     }
 
-        _splineAnimate.NormalizedTime = targetT;
-        // Mathf.SmoothStep or Vector3.SmoothDamp on position for easing-in/out
+    //     _splineAnimate.NormalizedTime = targetT;
+    //     // Mathf.SmoothStep or Vector3.SmoothDamp on position for easing-in/out
 
-        Debug.Log("bump applied");
-    }
+    //     Debug.Log("bump applied");
+    // }
 
     private void MoveOneStepBack()
     {
