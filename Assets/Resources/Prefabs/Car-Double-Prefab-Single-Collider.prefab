@@ -101,8 +101,6 @@ GameObject:
   - component: {fileID: 157922372014354079}
   - component: {fileID: 7744120013562547474}
   - component: {fileID: 4626512540875327083}
-  - component: {fileID: 7905394392459416041}
-  - component: {fileID: 6799410402606415554}
   m_Layer: 6
   m_Name: Tail
   m_TagString: Untagged
@@ -175,39 +173,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &7905394392459416041
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1634656374414503660}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6799410402606415554
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1634656374414503660}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20ef0205087f2f649803edd66d5c3e1c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1766227014738638488
 GameObject:
   m_ObjectHideFlags: 0
@@ -263,7 +228,7 @@ GameObject:
   - component: {fileID: 6439151042556543893}
   - component: {fileID: 4903853139547112680}
   m_Layer: 0
-  m_Name: Car-Double-Prefab
+  m_Name: Car-Double-Prefab-Single-Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -312,7 +277,6 @@ MonoBehaviour:
   _bumpHandler: {fileID: 8152044447660097066}
   _clickDetectors:
   - {fileID: 1063004317116569943}
-  - {fileID: 6799410402606415554}
   _bumpDetectors:
   - {fileID: 3317639115707316861}
 --- !u!1 &3111017036188647274
@@ -457,8 +421,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1, y: 1, z: 2}
+  m_Center: {x: 0, y: 0, z: -0.5}
 --- !u!114 &1420782088659658804
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -702,7 +666,7 @@ Transform:
   m_GameObject: {fileID: 9140912314017565321}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 0.49}
+  m_LocalPosition: {x: 0, y: 0, z: 0.48}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

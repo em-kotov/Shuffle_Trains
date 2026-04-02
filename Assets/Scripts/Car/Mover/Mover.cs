@@ -19,7 +19,7 @@ public class Mover : MonoBehaviour
     {
         StartCoroutine(SmoothMoveTo(target, percent));
     }
-    
+
     public void MoveToPercent(Vector3 target, float percent = 1f)
     {
         StartCoroutine(SmoothMoveToPercent(target, percent));
@@ -29,7 +29,7 @@ public class Mover : MonoBehaviour
     {
         float elapsed = 0f;
         Vector3 start = _carHead.position;
-        
+
         while (elapsed < _slideDuration)
         {
             elapsed += Time.deltaTime;

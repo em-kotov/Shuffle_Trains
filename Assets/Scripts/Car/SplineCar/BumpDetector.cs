@@ -1,57 +1,53 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class BumpDetector : MonoBehaviour
 {
-    //raycast 4 sides, spline onle 2 sides 
-
     [SerializeField] private Transform _forwardOrigin;
     [SerializeField] private Transform _backwardOrigin;
 
     private float _radius = 0.3f;
-    private float _maxDistance = 0.2f;
+    private float _maxRayDistance = 2f;
+    private float _bumpedDistance = 2f;
     private LayerMask _detectLayer;
 
-    public event Action<bool, float> Bumped;
+    public event Action<float> Bumped;
 
     private void Awake()
     {
         _detectLayer = LayerMask.GetMask("Cars");
+        StartCoroutine(RaycastWithInterval());
     }
 
-    private void FixedUpdate()
+    private void Scan(Vector3 origin, Vector3 direction)
     {
-        Scan(_forwardOrigin.position, _forwardOrigin.forward, true);
-        Scan(_backwardOrigin.position, _backwardOrigin.forward, false);
-    }
-
-    private void Scan(Vector3 origin, Vector3 direction, bool isForward)
-    {
-        if (Physics.SphereCast(origin, _radius, direction, out RaycastHit hit, _maxDistance, _detectLayer))
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, _maxRayDistance, _detectLayer))
         {
-            // Debug.Log($"Object detected: {hit.collider.gameObject.name}, Distance: {hit.distance}");
-            Bumped?.Invoke(isForward, hit.distance);
+            float distanceToObject = hit.distance;
+
+            if (distanceToObject <= _bumpedDistance)
+            {
+                Bumped?.Invoke(distanceToObject);
+            }
+        }
+    }
+
+    private IEnumerator RaycastWithInterval()
+    {
+        while (true)
+        {
+            Physics.SyncTransforms();
+
+            Scan(_backwardOrigin.position, _backwardOrigin.forward);
+
+            yield return new WaitForSeconds(0.2f);
         }
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(_forwardOrigin.position, _radius);
-        Gizmos.DrawRay(_forwardOrigin.position, _forwardOrigin.forward * _maxDistance);
-
-        Gizmos.DrawWireSphere(_backwardOrigin.position, _radius);
-        Gizmos.DrawRay(_backwardOrigin.position, _backwardOrigin.forward * _maxDistance);
+        Gizmos.DrawRay(_backwardOrigin.position, _backwardOrigin.forward * _maxRayDistance);
     }
-
-    // private void OnCollisionEnter(Collision collision)
-    // {
-    //         Debug.Log(this + " collided with " + collision.gameObject);
-
-    //     if (collision.gameObject.TryGetComponent(out BumpDetector listener) == true)
-    //     {
-    //         Debug.Log("collision have listener");
-    //         Bumped?.Invoke(collision.GetContact(0).point, collision.gameObject.transform.position);
-    //     }
-    // }
 }

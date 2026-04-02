@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Text;
 using UnityEngine;
 using UnityEngine.Splines;
 
@@ -7,7 +6,6 @@ public class SplineCar : MonoBehaviour
 {
     private Mover _mover;
     private Transform _carHead;
-    private TrackSwitcher _trackSwitcher;
     private TrackRegistrator _trackRegistrator;
     private SplineAnimate _splineAnimate;
     private SplineContainer _track;
@@ -28,7 +26,6 @@ public class SplineCar : MonoBehaviour
     {
         _mover = mover;
         _carHead = carHead;
-        _trackSwitcher = trackSwitcher;
         _trackRegistrator = trackRegistrator;
         _splineAnimate = splineAnimate;
         _track = track;
@@ -38,7 +35,6 @@ public class SplineCar : MonoBehaviour
         _waitTime = waitTime;
         _wagonCount = wagonCount;
 
-        // _trackSwitcher.Initialize(track, trackRegistrator, this);
         _mover.FinishedMoving += OnPausedMoving;
     }
 
@@ -63,7 +59,6 @@ public class SplineCar : MonoBehaviour
     {
         _isMoving = false;
         _mover.FinishedMoving -= OnPausedMoving;
-        // Debug.Log("on paused moving");
 
         StartCoroutine(WaitFreeEntrance());
     }
@@ -92,7 +87,6 @@ public class SplineCar : MonoBehaviour
         _mover.FinishedMoving -= MovedToTheTarget;
         _mover.FinishedMoving -= OnPausedMoving;
         _mover.FinishedMoving += MovedToTheTarget;
-        // Debug.Log("wait free entrance - sending car to move");
         _mover.MoveTo(_enterPoint);
         _carHead.LookAt(_enterPoint);
 
@@ -105,7 +99,6 @@ public class SplineCar : MonoBehaviour
     private void MovedToTheTarget()
     {
         _isMoving = false;
-        // Debug.Log("moved to the target");
         _mover.FinishedMoving -= MovedToTheTarget;
     }
 
@@ -126,71 +119,14 @@ public class SplineCar : MonoBehaviour
     //spherecast methods
     //
 
-    public void OnBumped(bool isForward, float distance)
+    public void OnBumped(float distance)
     {
-        if (isForward)
-        {
-            Debug.Log("Bumped at forward point");
-
-            MoveOneStepBack();
-        }
-        else
-        {
-            
-        }
-
-        // Vector3 direction = collisionPoint - otherObjectPosition;
-
-        // float directionSign = Vector3.Dot(direction.normalized, transform.forward);
-        // int sign;
-
-        // if (directionSign >= 0)
-        // {
-        //     sign = 1;
-        // }
-        // else
-        // {
-        //     sign = -1;
-        // }
-
-        // ChangeT(sign);
+        MoveOneStepForward();
     }
 
-    // private void ChangeT(int sign)
-    // {
-    //     //float currentT = _splineAnimate.NormalizedTime % 1f; //get currentT to a [0,1]
-    //     float additionalT = 0.2f * sign;
-    //     // _splineAnimate.NormalizedTime = (_splineAnimate.NormalizedTime + additionalT) % 1f; //looping
-    //     float targetT = (_splineAnimate.NormalizedTime + additionalT) % 1f;
-    //     StartCoroutine(ApplyBump(targetT));
-    // }
-
-    // private IEnumerator ApplyBump(float targetT)
-    // {
-    //     float elapsed = 0f;
-    //     float startT = _splineAnimate.NormalizedTime;
-    //     float bumpDuration = 0.1f;
-
-    //     while (elapsed < bumpDuration)
-    //     {
-    //         float t = elapsed / bumpDuration;
-    //         _splineAnimate.NormalizedTime = Mathf.Lerp(startT, targetT, t);
-    //         elapsed += Time.deltaTime;
-    //         yield return null;
-    //     }
-
-    //     _splineAnimate.NormalizedTime = targetT;
-    //     // Mathf.SmoothStep or Vector3.SmoothDamp on position for easing-in/out
-
-    //     Debug.Log("bump applied");
-    // }
-
-    private void MoveOneStepBack()
+    private void MoveOneStepForward()
     {
-        float stepSize = 0.05f; // Adjust this for a "one step" back
-        // Subtract from the current animation time
-        _splineAnimate.NormalizedTime = Mathf.Max(0f, _splineAnimate.NormalizedTime - stepSize);
-        // The SplineAnimate will continue forward on its own in the next frame
-        Debug.Log("bump applied");
+        float stepSize = 0.01f;
+        _splineAnimate.NormalizedTime = Mathf.Min(1f, _splineAnimate.NormalizedTime + stepSize);
     }
 }
