@@ -24,6 +24,6 @@ public class CounterUI : MonoBehaviour
     private void ShowText()
     {
         _currentText.text = $"{_currentCount}";
-        _maxText.text = $"   / {_maxCount}";
+        _maxText.text = $" / {_maxCount}";
     }
 }

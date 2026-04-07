@@ -7,16 +7,30 @@ public class GridCalculator : MonoBehaviour
     private int _width;
     private int _height;
     private float _cellSize;
+    private int _startX;
+    private int _startY;
+    private int _endX;
+    private int _endY;
+    private float _axisYLevel;
     private float _distanceMultiplier;
+    private Vector3 _gridOrigin;
     private ParkingRegistrator _registrator;
 
-    public void Initialize(int width, int height, float cellSize, ParkingRegistrator registrator)
+    public void Initialize(int width, int height, float cellSize, int startX,
+                            int startY, float axisYLevel, ParkingRegistrator registrator)
     {
         _width = width;
         _height = height;
         _cellSize = cellSize;
+        _startX = startX;
+        _startY = startY;
+        _axisYLevel = axisYLevel;
         _registrator = registrator;
+
+        _endX = _startX + _width;
+        _endY = _startY + _height;
         _distanceMultiplier = _width + _height;
+        _gridOrigin = new Vector3(_startX, _axisYLevel, _startY);
     }
 
     public Vector3 GetFurthestCellToMove(Car car, Vector3 current, CarOrientation orientation,
@@ -29,7 +43,10 @@ public class GridCalculator : MonoBehaviour
         Vector3 target = CalculateTargetPosition(current, orientation, sign, _distanceMultiplier);
         List<Vector2Int> visitedCells = GetVisitedCells(target, current);
 
-        for (int i = 0; i < visitedCells.Count; i++)
+        int firstIndex = 0;
+        int indexStep = 1;
+
+        for (int i = firstIndex; i < visitedCells.Count; i++)
         {
             furthestCell = visitedCells[i];
             Car occupyingCar = _registrator.GetCar(furthestCell.x, furthestCell.y);
@@ -38,20 +55,20 @@ public class GridCalculator : MonoBehaviour
             {
                 cellOccupancy = CellOccupancy.Car;
 
-                if (i == 0)
+                if (i == firstIndex)
                 {
                     furthestCell = currentCell;
                 }
                 else
                 {
-                    furthestCell = visitedCells[i - 1];
+                    furthestCell = visitedCells[i - indexStep];
                 }
 
                 break;
             }
         }
 
-        if (cellOccupancy == CellOccupancy.Free && furthestCell == visitedCells[visitedCells.Count - 1])
+        if (cellOccupancy == CellOccupancy.Free && furthestCell == visitedCells[visitedCells.Count - indexStep])
         {
             // Debug.Log("can go to border. visited cells count " + visitedCells.Count + ". furthest cell " + furthestCell);
             cellOccupancy = CellOccupancy.Border;
@@ -88,7 +105,9 @@ public class GridCalculator : MonoBehaviour
 
         visitedCells.Add(currentCell); //to return at least current cell
 
-        if (differenceX != 0)
+        int noDifferenceValue = 0;
+
+        if (differenceX != noDifferenceValue)
         {
             int step = MathF.Sign(differenceX);
 
@@ -98,7 +117,7 @@ public class GridCalculator : MonoBehaviour
             }
         }
 
-        if (differenceY != 0)
+        if (differenceY != noDifferenceValue)
         {
             int step = MathF.Sign(differenceY);
 
@@ -113,48 +132,67 @@ public class GridCalculator : MonoBehaviour
 
     public Vector2Int ClampToGrid(Vector2Int target)
     {
-        int newX = Mathf.Clamp(target.x, 0, _width - 1);
-        int newY = Mathf.Clamp(target.y, 0, _height - 1);
+        int firstIndex = 0;
+        int indexStep = 1;
+
+        int newX = Mathf.Clamp(target.x, firstIndex, _width - indexStep);
+        int newY = Mathf.Clamp(target.y, firstIndex, _height - indexStep);
 
         return new Vector2Int(newX, newY);
     }
 
     public Vector2Int WorldToGrid(Vector3 worldPosition)
     {
-        int x = Mathf.RoundToInt(worldPosition.x / _cellSize);
-        int y = Mathf.RoundToInt(worldPosition.z / _cellSize);
+        int x = Mathf.RoundToInt(worldPosition.x - _gridOrigin.x / _cellSize);
+        int y = Mathf.RoundToInt(worldPosition.z - _gridOrigin.z / _cellSize);
 
         return new Vector2Int(x, y);
     }
 
     public Vector3 GridToWorld(Vector2Int gridPosition)
     {
-        return new Vector3(gridPosition.x * _cellSize, 0, gridPosition.y * _cellSize);
+        float worldX = (gridPosition.x * _cellSize) + _gridOrigin.x;
+        float worldZ = (gridPosition.y * _cellSize) + _gridOrigin.z;
+        return new Vector3(worldX, _axisYLevel, worldZ);
     }
 
     public Car[,] InitializeGrid()
     {
         Car[,] cells = new Car[_width, _height];
+        // int firstIndex = 0;
+        // int indexStep = 1;
 
-        for (int x = 0; x < _width; x++)
-        {
-            for (int y = 0; y < _height; y++)
-            {
-                cells[x, y] = null;
-            }
-        }
+        // for (int x = firstIndex; x < _width-indexStep; x++)
+        // {
+        //     for (int y = _startY; y < _endY; y++)
+        //     {
+        //         cells[x, y] = null;
+        //     }
+        // }
 
+        //1 2 - 4 5
+        //x - 1 2 3 4 
+        //y - 2 3 4 5 6
+        //new car[4, 6]
+        //indexes and axis values
         return cells;
     }
 
     private void OnDrawGizmos()
     {
-        for (int x = 0; x < _width; x++)
+        Gizmos.color = Color.blue;
+        float ySize = 0.1f;
+        float sideMultiplier = 0.9f;
+        int firstIndex = 0;
+
+        for (int x = firstIndex; x < _width; x++)
         {
-            for (int y = 0; y < _height; y++)
+            for (int y = firstIndex; y < _height; y++)
             {
                 Vector3 cellCenter = GridToWorld(new Vector2Int(x, y));
-                Gizmos.DrawWireCube(cellCenter, new Vector3(_cellSize * 0.9f, 0.1f, _cellSize * 0.9f));
+                Gizmos.DrawWireCube(cellCenter, new Vector3(
+                                   _cellSize * sideMultiplier, ySize,
+                                   _cellSize * sideMultiplier));
             }
         }
     }

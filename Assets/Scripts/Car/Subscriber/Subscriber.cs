@@ -31,7 +31,7 @@ public class Subscriber : MonoBehaviour
 
     private void OnEnable()
     {
-        SubscribeLists();
+        EnableClickDetectors();
         _mover.FinishedMoving += _car.OnFinishedMoving;
 
         if (_splineCar != null)
@@ -43,7 +43,7 @@ public class Subscriber : MonoBehaviour
 
     private void OnDisable()
     {
-        UnsubscribeLists();
+        DisableLists();
         _mover.FinishedMoving -= _car.OnFinishedMoving;
 
         if (_splineCar != null)
@@ -73,21 +73,25 @@ public class Subscriber : MonoBehaviour
         _bumpHandler.Initialize(_car);
     }
 
-    private void SubscribeLists()
+    private void EnableClickDetectors()
     {
         foreach (ClickDetector clickDetector in _clickDetectors)
         {
             clickDetector.Initialize(_raycaster);
             clickDetector.Clicked += _car.OnClick;
         }
+    }
 
-        foreach (BumpDetector listener in _bumpDetectors)
+    private void EnableBumpDetectors()
+    {
+        foreach (BumpDetector bumpDetector in _bumpDetectors)
         {
-            listener.Bumped += _splineCar.OnBumped;
+            bumpDetector.Initialize();
+            bumpDetector.Bumped += _splineCar.OnBumped;
         }
     }
 
-    private void UnsubscribeLists()
+    private void DisableLists()
     {
         foreach (ClickDetector clickDetector in _clickDetectors)
         {
@@ -106,6 +110,7 @@ public class Subscriber : MonoBehaviour
         _splineCar.enabled = true;
         _splineCar.Initialize(_mover, _car.transform, _trackSwitcher, _splineAnimate,
                             _origSpline, _trackSpeed, _searchMin, _searchMax, _trackRegistrator,
-                            _waitTime, _clickDetectors.Count);
+                            _waitTime, _length);
+        EnableBumpDetectors();
     }
 }

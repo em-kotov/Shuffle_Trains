@@ -7,14 +7,13 @@ public class BumpDetector : MonoBehaviour
     [SerializeField] private Transform _forwardOrigin;
     [SerializeField] private Transform _backwardOrigin;
 
-    private float _radius = 0.3f;
     private float _maxRayDistance = 2f;
     private float _bumpedDistance = 2f;
     private LayerMask _detectLayer;
 
     public event Action<float> Bumped;
 
-    private void Awake()
+    public void Initialize()
     {
         _detectLayer = LayerMask.GetMask("Cars");
         StartCoroutine(RaycastWithInterval());

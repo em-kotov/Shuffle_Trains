@@ -27,6 +27,7 @@ public class Car : MonoBehaviour
 
         _carStartPosition = transform.position;
         _parkingRegistrator.RegisterCar(_carStartPosition, this);
+        _parkingRegistrator.RegisterTail(this, _carStartPosition, _orientation, _signDirection, _length);
     }
 
     public void OnClick()
@@ -51,6 +52,7 @@ public class Car : MonoBehaviour
 
         if (cellOccupancy == CellOccupancy.Border)
         {
+           Debug.Log("Car is on border!");
             _isReadyToEnterTrack = true;
         }
     }
@@ -72,7 +74,7 @@ public class Car : MonoBehaviour
     private IEnumerator SmoothMoveTo(Vector3 target)
     {
         _isMoving = true;
-        _parkingRegistrator.UnregisterCar(transform.position, this);
+        _parkingRegistrator.UnregisterCar(transform.position, this, _orientation, _signDirection, _length);
 
         _mover.MoveTo(target);
 

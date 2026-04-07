@@ -9,6 +9,9 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int _parkingGridWidth = 6;
     [SerializeField] private int _parkingGridHeight = 8;
     [SerializeField] private float _cellSize = 1f;
+    [SerializeField] private int _startX = 0;
+    [SerializeField] private int _startY = 0;
+    [SerializeField] private float _axisYLevel = 0f;
 
     [Header("Track")]
     [SerializeField] private int _segmentsCount = 10;
@@ -33,9 +36,10 @@ public class LevelManager : MonoBehaviour
     private void Awake()
     {
         _parkingRegistrator.Initialize(_parkingGridWidth, _parkingGridHeight,
-                                        _cellSize, _gridCalculator);
+                                        _cellSize, _startX, _startY, _axisYLevel,
+                                        _gridCalculator);
 
-        _trackRegistrator.Initialize(_trackSpline, _counterUI, _segmentsCount, 
+        _trackRegistrator.Initialize(_trackSpline, _counterUI, _segmentsCount,
                                     _maxCarsOnTrackCount);
 
         foreach (Subscriber subscriber in _carSubscribers)

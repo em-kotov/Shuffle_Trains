@@ -45,9 +45,14 @@ public class SplineCar : MonoBehaviour
 
         _currentPosition = _carHead.position;
 
-        _enterPoint = _trackRegistrator.GetEntryPoint(_currentPosition, _searchMin,
-                                            _searchMax, out _interpolatedSplinePosition);
-        StartCoroutine(SmoothMoveTo(_enterPoint));
+        bool isTrackCountAllows = _trackRegistrator.IsCountAllows();
+
+        if (isTrackCountAllows)
+        {
+            _enterPoint = _trackRegistrator.GetEntryPoint(_currentPosition, _searchMin,
+                                                _searchMax, out _interpolatedSplinePosition);
+            StartCoroutine(SmoothMoveTo(_enterPoint));
+        }
     }
 
     public Vector3 GetPosition()
@@ -92,7 +97,7 @@ public class SplineCar : MonoBehaviour
 
         yield return new WaitUntil(() => _isMoving == false);
 
-        // _trackRegistrator.Register(_splineAnimate, _carHead);
+        _trackRegistrator.Register(_splineAnimate, _carHead);
         EnterSpline();
     }
 

@@ -40,6 +40,17 @@ public class TrackRegistrator : MonoBehaviour
         _carHeads = new();
     }
 
+    public bool IsCountAllows()
+    {
+        if (_currentCarsCount >= _maxCarsCount)
+        {
+            Debug.Log("cars count reached maximum, cannot add more car now");
+            return false;
+        }
+
+        return true;
+    }
+
     public bool IsSegmentFreeToEnter(float carEntryPoint, int wagonCount)
     {
         if (_currentCarsCount >= _maxCarsCount)
