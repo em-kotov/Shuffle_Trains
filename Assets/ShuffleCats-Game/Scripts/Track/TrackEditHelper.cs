@@ -3,8 +3,8 @@ using UnityEngine.Splines;
 
 public class TrackEditHelper : MonoBehaviour
 {
-    [SerializeField] float _segmentsCount = 53f; //change in editor to match cube with
-                                                 //car (for finding car length)
+    [Tooltip("Change to match gizmo cube (1 segment) with car wagon (for finding car length)")]
+    [SerializeField] float _segmentsCount = 53f;
     [SerializeField] SplineContainer _track;
 
     private float _segmentLength;

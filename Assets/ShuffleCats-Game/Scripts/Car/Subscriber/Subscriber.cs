@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Splines;
@@ -13,11 +12,12 @@ public class Subscriber : MonoBehaviour
     [SerializeField] private Car _car;
     [SerializeField] private Mover _mover;
     [SerializeField] private SplineCar _splineCar;
+    [SerializeField] private PassengerCar _passengerCar;
     [SerializeField] private TrackSwitcher _trackSwitcher;
     [SerializeField] private SplineAnimate _splineAnimate;
     [SerializeField] private BumpHandler _bumpHandler;
-    [SerializeField] private List<ClickDetector> _clickDetectors;
-    [SerializeField] private List<BumpDetector> _bumpDetectors;
+    [SerializeField] private ClickDetector _clickDetector;
+    [SerializeField] private BumpDetector _bumpDetector;
 
     private ParkingRegistrator _parkingRegistrator;
     private TrackRegistrator _trackRegistrator;
@@ -31,7 +31,9 @@ public class Subscriber : MonoBehaviour
 
     private void OnEnable()
     {
-        EnableClickDetectors();
+        _clickDetector.Initialize(_raycaster);
+        _clickDetector.Clicked += _car.OnClick;
+
         _mover.FinishedMoving += _car.OnFinishedMoving;
 
         if (_splineCar != null)
@@ -39,17 +41,39 @@ public class Subscriber : MonoBehaviour
             _car.IsOnBorder += OnEnterTrack;
             _car.IsOnBorder += _splineCar.OnBorder;
         }
+
+        if (_splineCar.enabled)
+        {
+            _passengerCar.StopFound += _splineCar.OnStopFound;
+            _passengerCar.PassengerReleased += _splineCar.OnPassengerReleased;
+
+            _splineCar.SplineAnimatePaused += _bumpDetector.OnSplinePaused;
+            _splineCar.SplineAnimateResumed += _bumpDetector.OnSplineResumed;
+        }
     }
 
     private void OnDisable()
     {
-        DisableLists();
+        _clickDetector.Clicked -= _car.OnClick;
+
+        _bumpDetector.Bumped -= _splineCar.OnBumped;
+        _bumpDetector.StationFound -= _passengerCar.StopAtStation;
+
         _mover.FinishedMoving -= _car.OnFinishedMoving;
 
         if (_splineCar != null)
         {
             _car.IsOnBorder -= _splineCar.OnBorder;
             _car.IsOnBorder -= OnEnterTrack;
+        }
+
+        if (_splineCar.enabled)
+        {
+            _passengerCar.StopFound -= _splineCar.OnStopFound;
+            _passengerCar.PassengerReleased -= _splineCar.OnPassengerReleased;
+
+            _splineCar.SplineAnimatePaused -= _bumpDetector.OnSplinePaused;
+            _splineCar.SplineAnimateResumed -= _bumpDetector.OnSplineResumed;
         }
     }
 
@@ -73,37 +97,6 @@ public class Subscriber : MonoBehaviour
         _bumpHandler.Initialize(_car);
     }
 
-    private void EnableClickDetectors()
-    {
-        foreach (ClickDetector clickDetector in _clickDetectors)
-        {
-            clickDetector.Initialize(_raycaster);
-            clickDetector.Clicked += _car.OnClick;
-        }
-    }
-
-    private void EnableBumpDetectors()
-    {
-        foreach (BumpDetector bumpDetector in _bumpDetectors)
-        {
-            bumpDetector.Initialize();
-            bumpDetector.Bumped += _splineCar.OnBumped;
-        }
-    }
-
-    private void DisableLists()
-    {
-        foreach (ClickDetector clickDetector in _clickDetectors)
-        {
-            clickDetector.Clicked -= _car.OnClick;
-        }
-
-        foreach (BumpDetector listener in _bumpDetectors)
-        {
-            listener.Bumped -= _splineCar.OnBumped;
-        }
-    }
-
     private void OnEnterTrack()
     {
         _car.enabled = false;
@@ -111,6 +104,9 @@ public class Subscriber : MonoBehaviour
         _splineCar.Initialize(_mover, _car.transform, _trackSwitcher, _splineAnimate,
                             _origSpline, _trackSpeed, _searchMin, _searchMax, _trackRegistrator,
                             _waitTime, _length);
-        EnableBumpDetectors();
+
+        _bumpDetector.Initialize();
+        _bumpDetector.Bumped += _splineCar.OnBumped;
+        _bumpDetector.StationFound += _passengerCar.StopAtStation;
     }
 }

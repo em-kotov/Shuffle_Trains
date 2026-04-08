@@ -40,10 +40,10 @@ public class Car : MonoBehaviour
         Vector3 furthestSlotToMoveIn = _parkingRegistrator.GetFurthestCellToMove(this, _carStartPosition,
                                         _orientation, _signDirection, out CellOccupancy cellOccupancy);
 
-        if (transform.position != furthestSlotToMoveIn)
-        {
+        // if (transform.position != furthestSlotToMoveIn)
+        // {
             StartCoroutine(SmoothMoveTo(furthestSlotToMoveIn));
-        }
+        // }
 
         if (cellOccupancy == CellOccupancy.Car)
         {
@@ -52,7 +52,6 @@ public class Car : MonoBehaviour
 
         if (cellOccupancy == CellOccupancy.Border)
         {
-           Debug.Log("Car is on border!");
             _isReadyToEnterTrack = true;
         }
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -16,8 +17,11 @@ public class SplineCar : MonoBehaviour
     private float _speed;
     private float _searchMin;
     private float _searchMax;
-    private float _waitTime;
-    private int _wagonCount;
+    // private float _waitTime;
+    // private int _wagonCount;
+
+    public event Action SplineAnimateResumed;
+    public event Action SplineAnimatePaused;
 
     public void Initialize(Mover mover, Transform carHead, TrackSwitcher trackSwitcher,
                         SplineAnimate splineAnimate, SplineContainer track, float speed,
@@ -32,8 +36,8 @@ public class SplineCar : MonoBehaviour
         _speed = speed;
         _searchMin = searchMin;
         _searchMax = searchMax;
-        _waitTime = waitTime;
-        _wagonCount = wagonCount;
+        // _waitTime = waitTime;
+        // _wagonCount = wagonCount;
 
         _mover.FinishedMoving += OnPausedMoving;
     }
@@ -133,5 +137,27 @@ public class SplineCar : MonoBehaviour
     {
         float stepSize = 0.01f;
         _splineAnimate.NormalizedTime = Mathf.Min(1f, _splineAnimate.NormalizedTime + stepSize);
+    }
+
+    //passenger car methods below
+
+    public void OnStopFound()
+    {
+        Debug.Log("SplineAnim stopped");
+        StartCoroutine(PauseSplineAnimate());
+    }
+
+    public void OnPassengerReleased()
+    {
+        Debug.Log("SplineAnim continued");
+    }
+
+    private IEnumerator PauseSplineAnimate()
+    {
+        SplineAnimatePaused?.Invoke();
+        _splineAnimate.Pause();
+        yield return new WaitForSeconds(0.8f);
+        _splineAnimate.Play();
+        SplineAnimateResumed?.Invoke();
     }
 }

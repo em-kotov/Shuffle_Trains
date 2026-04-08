@@ -228,7 +228,7 @@ GameObject:
   - component: {fileID: 6439151042556543893}
   - component: {fileID: 4903853139547112680}
   m_Layer: 0
-  m_Name: Cat-2-P
+  m_Name: Cat-2-G
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -250,6 +250,7 @@ Transform:
   - {fileID: 2556304729057334673}
   - {fileID: 7902700774514996186}
   - {fileID: 5001789233333343762}
+  - {fileID: 3761102059942068360}
   - {fileID: 3057290676367200488}
   - {fileID: 637760703992913797}
   - {fileID: 7259846428952598211}
@@ -273,6 +274,7 @@ MonoBehaviour:
   _car: {fileID: 1420782088659658804}
   _mover: {fileID: 3911854181696882068}
   _splineCar: {fileID: 6443444232799090446}
+  _passengerCar: {fileID: 3736770815315720122}
   _trackSwitcher: {fileID: 920604102250071739}
   _splineAnimate: {fileID: 8279809572554868432}
   _bumpHandler: {fileID: 8152044447660097066}
@@ -280,6 +282,8 @@ MonoBehaviour:
   - {fileID: 1063004317116569943}
   _bumpDetectors:
   - {fileID: 3317639115707316861}
+  _clickDetector: {fileID: 1063004317116569943}
+  _bumpDetector: {fileID: 3317639115707316861}
 --- !u!1 &3111017036188647274
 GameObject:
   m_ObjectHideFlags: 0
@@ -311,6 +315,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2556304729057334673}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3383763005736968381
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3761102059942068360}
+  - component: {fileID: 3736770815315720122}
+  m_Layer: 0
+  m_Name: PassengerCar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3761102059942068360
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3383763005736968381}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6439151042556543893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3736770815315720122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3383763005736968381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a18f77c951759c4cbc1392e223c08d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3384597169899907810
 GameObject:
   m_ObjectHideFlags: 0
@@ -841,7 +889,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 9b0985b1176a4d24fb0b3a3a5d592bbe, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 583ba24c30df01a4ab4b495cf763c378, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
