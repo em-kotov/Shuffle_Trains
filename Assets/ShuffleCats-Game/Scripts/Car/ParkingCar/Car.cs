@@ -11,7 +11,7 @@ public class Car : MonoBehaviour
     private int _length;
     private Vector3 _carStartPosition;
     private bool _isMoving = false;
-    private bool _isReadyToEnterTrack = false;
+    private bool _isAtBorderCell = false;
 
     public event Action Bumped;
     public event Action IsOnBorder;
@@ -27,7 +27,8 @@ public class Car : MonoBehaviour
 
         _carStartPosition = transform.position;
         _parkingRegistrator.RegisterCar(_carStartPosition, this);
-        _parkingRegistrator.RegisterTail(this, _carStartPosition, _orientation, _signDirection, _length);
+        _parkingRegistrator.RegisterTail(this, _carStartPosition,
+                            _orientation, _signDirection, _length);
     }
 
     public void OnClick()
@@ -37,12 +38,13 @@ public class Car : MonoBehaviour
 
         _carStartPosition = transform.position;
 
-        Vector3 furthestSlotToMoveIn = _parkingRegistrator.GetFurthestCellToMove(this, _carStartPosition,
-                                        _orientation, _signDirection, out CellOccupancy cellOccupancy);
+        Vector3 furthestSlotToMoveIn = _parkingRegistrator.GetFurthestCellToMove(
+                                    this, _carStartPosition, _orientation, 
+                                    _signDirection, out CellOccupancy cellOccupancy);
 
         // if (transform.position != furthestSlotToMoveIn)
         // {
-            StartCoroutine(SmoothMoveTo(furthestSlotToMoveIn));
+        StartCoroutine(SmoothMoveTo(furthestSlotToMoveIn));
         // }
 
         if (cellOccupancy == CellOccupancy.Car)
@@ -52,28 +54,37 @@ public class Car : MonoBehaviour
 
         if (cellOccupancy == CellOccupancy.Border)
         {
-            _isReadyToEnterTrack = true;
+            _isAtBorderCell = true;
         }
     }
 
     public void OnFinishedMoving()
     {
+        Debug.Log("Car on finished moving");
         _isMoving = false;
 
-        if (_isReadyToEnterTrack)
+        if (_isAtBorderCell)
         {
             IsOnBorder?.Invoke();
             return;
         }
 
         _parkingRegistrator.RegisterCar(transform.position, this);
-        _parkingRegistrator.RegisterTail(this, transform.position, _orientation, _signDirection, _length);
+        _parkingRegistrator.RegisterTail(this, transform.position,
+                            _orientation, _signDirection, _length);
+    }
+
+    public void Deactivate()
+    {
+        _parkingRegistrator.UnregisterCar(transform.position, this,
+                            _orientation, _signDirection, _length);
     }
 
     private IEnumerator SmoothMoveTo(Vector3 target)
     {
         _isMoving = true;
-        _parkingRegistrator.UnregisterCar(transform.position, this, _orientation, _signDirection, _length);
+        _parkingRegistrator.UnregisterCar(transform.position, this,
+                            _orientation, _signDirection, _length);
 
         _mover.MoveTo(target);
 

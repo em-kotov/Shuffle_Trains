@@ -17,8 +17,6 @@ public class SplineCar : MonoBehaviour
     private float _speed;
     private float _searchMin;
     private float _searchMax;
-    // private float _waitTime;
-    // private int _wagonCount;
 
     public event Action SplineAnimateResumed;
     public event Action SplineAnimatePaused;
@@ -36,27 +34,18 @@ public class SplineCar : MonoBehaviour
         _speed = speed;
         _searchMin = searchMin;
         _searchMax = searchMax;
-        // _waitTime = waitTime;
-        // _wagonCount = wagonCount;
 
-        _mover.FinishedMoving += OnPausedMoving;
+        Debug.Log("Spline Car initialized");
     }
 
-    public void OnBorder()
+    public void GoToTrack()
     {
-        if (_isMoving)
-            return;
-
+        Debug.Log("Spline Car goes to track");
         _currentPosition = _carHead.position;
 
-        bool isTrackCountAllows = _trackRegistrator.IsCountAllows();
-
-        if (isTrackCountAllows)
-        {
-            _enterPoint = _trackRegistrator.GetEntryPoint(_currentPosition, _searchMin,
-                                                _searchMax, out _interpolatedSplinePosition);
-            StartCoroutine(SmoothMoveTo(_enterPoint));
-        }
+        _enterPoint = _trackRegistrator.GetEntryPoint(_currentPosition, _searchMin,
+                                               _searchMax, out _interpolatedSplinePosition);
+        StartCoroutine(MoveWithPause());
     }
 
     public Vector3 GetPosition()
@@ -64,37 +53,26 @@ public class SplineCar : MonoBehaviour
         return _carHead.position;
     }
 
-    private void OnPausedMoving()
+    private IEnumerator MoveWithPause()
     {
-        _isMoving = false;
-        _mover.FinishedMoving -= OnPausedMoving;
+        _currentPosition = _carHead.position;
+        _enterPoint = _trackRegistrator.GetEntryPoint(_currentPosition, _searchMin,
+                                              _searchMax, out _interpolatedSplinePosition);
 
-        StartCoroutine(WaitFreeEntrance());
-    }
-
-    private IEnumerator SmoothMoveTo(Vector3 target)
-    {
         _isMoving = true;
-        _mover.MoveToPercent(target, 0.1f);
-        _carHead.LookAt(target);
+
+        _mover.FinishedMoving -= MovedToTheTarget;
+        _mover.FinishedMoving += MovedToTheTarget;
+
+        _mover.MoveToPercent(_enterPoint, 0.1f);
+        _carHead.LookAt(_enterPoint);
 
         yield return new WaitUntil(() => _isMoving == false);
-    }
 
-    private IEnumerator WaitFreeEntrance()
-    {
-        // WaitForSeconds wait = new(_waitTime);
-        // bool isFree = _trackRegistrator.IsSegmentFreeToEnter(_interpolatedSplinePosition, _wagonCount);
-
-        // while (isFree == false)
-        // {
-        //     yield return wait;
-        //     isFree = _trackRegistrator.IsSegmentFreeToEnter( _interpolatedSplinePosition, _wagonCount);
-        // }
+        _isMoving = false;
 
         _isMoving = true;
         _mover.FinishedMoving -= MovedToTheTarget;
-        _mover.FinishedMoving -= OnPausedMoving;
         _mover.FinishedMoving += MovedToTheTarget;
         _mover.MoveTo(_enterPoint);
         _carHead.LookAt(_enterPoint);
@@ -114,7 +92,9 @@ public class SplineCar : MonoBehaviour
     private void EnterSpline()
     {
         _splineAnimate.enabled = true;
+        //Debug.Log("Spline Car container splines: " + _track.Splines[0]);
         _splineAnimate.Container = _track;
+       // _splineAnimate.Container.Spline = _track.Splines[0];
         _splineAnimate.StartOffset = _interpolatedSplinePosition;
         _splineAnimate.Duration = CalculateDuration(_track.Spline);
         _splineAnimate.Play();
@@ -143,13 +123,13 @@ public class SplineCar : MonoBehaviour
 
     public void OnStopFound()
     {
-        Debug.Log("SplineAnim stopped");
+        Debug.Log("Spline Car pausing spline animate");
         StartCoroutine(PauseSplineAnimate());
     }
 
     public void OnPassengerReleased()
     {
-        Debug.Log("SplineAnim continued");
+
     }
 
     private IEnumerator PauseSplineAnimate()
@@ -159,5 +139,6 @@ public class SplineCar : MonoBehaviour
         yield return new WaitForSeconds(0.8f);
         _splineAnimate.Play();
         SplineAnimateResumed?.Invoke();
+        Debug.Log("Spline Car resumed spline animate");
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Splines;
@@ -28,44 +29,18 @@ public class Subscriber : MonoBehaviour
     private float _searchMin;
     private float _searchMax;
     private float _waitTime;
+    private bool _isCarOnBorder = false;
 
     private void OnEnable()
     {
         _clickDetector.Initialize(_raycaster);
-        _clickDetector.Clicked += _car.OnClick;
-
-        _mover.FinishedMoving += _car.OnFinishedMoving;
-
-        if (_splineCar != null)
-        {
-            _car.IsOnBorder += OnEnterTrack;
-            _car.IsOnBorder += _splineCar.OnBorder;
-        }
-
-        if (_splineCar.enabled)
-        {
-            _passengerCar.StopFound += _splineCar.OnStopFound;
-            _passengerCar.PassengerReleased += _splineCar.OnPassengerReleased;
-
-            _splineCar.SplineAnimatePaused += _bumpDetector.OnSplinePaused;
-            _splineCar.SplineAnimateResumed += _bumpDetector.OnSplineResumed;
-        }
     }
 
     private void OnDisable()
     {
-        _clickDetector.Clicked -= _car.OnClick;
-
         _bumpDetector.Bumped -= _splineCar.OnBumped;
         _bumpDetector.StationFound -= _passengerCar.StopAtStation;
-
-        _mover.FinishedMoving -= _car.OnFinishedMoving;
-
-        if (_splineCar != null)
-        {
-            _car.IsOnBorder -= _splineCar.OnBorder;
-            _car.IsOnBorder -= OnEnterTrack;
-        }
+        _bumpDetector.ResetFound -= _passengerCar.OnResetFound;
 
         if (_splineCar.enabled)
         {
@@ -92,21 +67,78 @@ public class Subscriber : MonoBehaviour
         _searchMin = searchMin;
         _searchMax = searchMax;
 
-        _car.Initialize(_parkingRegistrator, _mover, _orientation, _signDirection, _length);
+        ActivateCar();
         _mover.Initialize(_car.transform, _slideDuration);
         _bumpHandler.Initialize(_car);
+        _passengerCar.Initialize();
     }
 
-    private void OnEnterTrack()
+    private IEnumerator OnBorderArrivalRoutine()
     {
-        _car.enabled = false;
+        if (_isCarOnBorder)
+        {
+            WaitForSeconds wait = new(_waitTime);
+            bool canEnterTrack = _trackRegistrator.IsCountAllows();
+
+            while (canEnterTrack == false)
+            {
+                yield return wait;
+                canEnterTrack = _trackRegistrator.IsCountAllows();
+            }
+
+            DeactivateCar();
+            ActivateSplineCar();
+        }
+    }
+
+    private void OnBorderArrival()
+    {
+        Debug.Log("Subscriber - starting On border arrival coroutine");
+        _isCarOnBorder = true;
+        StartCoroutine(OnBorderArrivalRoutine());
+        _isCarOnBorder = false;
+    }
+
+    private void ActivateSplineCar()
+    {
         _splineCar.enabled = true;
-        _splineCar.Initialize(_mover, _car.transform, _trackSwitcher, _splineAnimate,
-                            _origSpline, _trackSpeed, _searchMin, _searchMax, _trackRegistrator,
+        _splineCar.Initialize(_mover, _car.transform, _trackSwitcher,
+                            _splineAnimate, _origSpline, _trackSpeed,
+                            _searchMin, _searchMax, _trackRegistrator,
                             _waitTime, _length);
 
-        _bumpDetector.Initialize();
+        _splineCar.SplineAnimatePaused += _bumpDetector.OnSplinePaused;
+        _splineCar.SplineAnimateResumed += _bumpDetector.OnSplineResumed;
+
         _bumpDetector.Bumped += _splineCar.OnBumped;
+
         _bumpDetector.StationFound += _passengerCar.StopAtStation;
+         _bumpDetector.ResetFound += _passengerCar.OnResetFound;
+
+        _passengerCar.StopFound += _splineCar.OnStopFound;
+        _passengerCar.PassengerReleased += _splineCar.OnPassengerReleased;
+
+        _bumpDetector.Initialize();
+
+        _splineCar.GoToTrack();
+    }
+
+    private void ActivateCar()
+    {
+        _car.Initialize(_parkingRegistrator, _mover, _orientation, _signDirection, _length);
+
+        _clickDetector.Clicked += _car.OnClick;
+        _mover.FinishedMoving += _car.OnFinishedMoving;
+        _car.IsOnBorder += OnBorderArrival;
+    }
+
+    private void DeactivateCar()
+    {
+        _clickDetector.Clicked -= _car.OnClick;
+        _mover.FinishedMoving -= _car.OnFinishedMoving;
+        _car.IsOnBorder -= OnBorderArrival;
+
+        _car.Deactivate();
+        _car.enabled = false;
     }
 }

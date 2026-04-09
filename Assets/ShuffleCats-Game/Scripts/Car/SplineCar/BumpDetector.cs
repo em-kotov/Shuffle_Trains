@@ -12,26 +12,30 @@ public class BumpDetector : MonoBehaviour
     private LayerMask _detectLayer;
     private string _carsLayerName = "Cars";
     private string _stationLayerName = "Station";
+    private string _stationResetLayerName = "StationReset";
     private bool _isScanning = true;
     private Coroutine _scanRoutine;
 
     public event Action<float> Bumped;
-    public event Action StationFound;
+    public event Action<Station> StationFound;
+    public event Action ResetFound;
 
     public void Initialize()
     {
-        _detectLayer = LayerMask.GetMask(_carsLayerName, _stationLayerName);
+        _detectLayer = LayerMask.GetMask(_carsLayerName, _stationLayerName, _stationResetLayerName);
+        Debug.Log("Bump Detector initialized");
         StartScanning();
     }
 
     private IEnumerator RaycastWithInterval()
     {
-        WaitForSeconds wait = new WaitForSeconds(0.2f);
+        WaitForSeconds wait = new WaitForSeconds(0.05f);
 
         while (_isScanning)
         {
             Physics.SyncTransforms();
 
+            Debug.Log("Bump Detector scan routine 1 cycle");
             Scan(_backwardOrigin.position, _backwardOrigin.forward);
 
             yield return wait;
@@ -46,11 +50,25 @@ public class BumpDetector : MonoBehaviour
 
             if (hitLayer == LayerMask.NameToLayer(_carsLayerName))
             {
+                Debug.Log("Bump Detector Bumped at car");
                 Bump(hit.distance);
             }
             else if (hitLayer == LayerMask.NameToLayer(_stationLayerName))
             {
-                WhenStationFound();
+                Debug.Log("Bump Detector Found a station");
+                bool hasStation = hit.transform.gameObject.TryGetComponent(out Station foundStation);
+
+                Debug.Log("Bump Detector station: " + foundStation);
+
+                if (hasStation)
+                {
+                    WhenStationFound(foundStation);
+                }
+            }
+            else if (hitLayer == LayerMask.NameToLayer(_stationResetLayerName))
+            {
+                Debug.Log("Bump Detector found a station Reset");
+                OnResetFound();
             }
         }
     }
@@ -59,12 +77,14 @@ public class BumpDetector : MonoBehaviour
     {
         StopScanning();
 
+        Debug.Log("Bump Detector starts scanning");
         _isScanning = true;
         _scanRoutine = StartCoroutine(RaycastWithInterval());
     }
 
     private void StopScanning()
     {
+        Debug.Log("Bump Detector stops scan routine");
         _isScanning = false;
 
         if (_scanRoutine != null)
@@ -82,20 +102,25 @@ public class BumpDetector : MonoBehaviour
         }
     }
 
-    private void WhenStationFound()
+    private void WhenStationFound(Station foundStation)
     {
-        StationFound?.Invoke();
+        StationFound?.Invoke(foundStation);
+    }
+
+    private void OnResetFound()
+    {
+        ResetFound?.Invoke();
     }
 
     public void OnSplinePaused()
     {
-        Debug.Log("Scanning stopped");
+        Debug.Log("Bump Detector Received inquiry for scan stop");
         StopScanning();
     }
 
     public void OnSplineResumed()
     {
-        Debug.Log("Scanning started");
+        Debug.Log("Bump Detetor Received inquiry for scan resume");
         StartScanning();
     }
 
