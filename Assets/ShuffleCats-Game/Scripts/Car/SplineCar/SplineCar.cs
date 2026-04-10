@@ -10,6 +10,7 @@ public class SplineCar : MonoBehaviour
     private TrackRegistrator _trackRegistrator;
     private SplineAnimate _splineAnimate;
     private SplineContainer _track;
+    private SplineContainer _exitTrack;
     private Vector3 _currentPosition;
     private Vector3 _enterPoint;
     private bool _isMoving = false;
@@ -24,13 +25,14 @@ public class SplineCar : MonoBehaviour
     public void Initialize(Mover mover, Transform carHead, TrackSwitcher trackSwitcher,
                         SplineAnimate splineAnimate, SplineContainer track, float speed,
                         float searchMin, float searchMax, TrackRegistrator trackRegistrator,
-                        float waitTime, int wagonCount = 1)
+                        float waitTime, SplineContainer exitTrack, int wagonCount = 1)
     {
         _mover = mover;
         _carHead = carHead;
         _trackRegistrator = trackRegistrator;
         _splineAnimate = splineAnimate;
         _track = track;
+        _exitTrack = exitTrack;
         _speed = speed;
         _searchMin = searchMin;
         _searchMax = searchMax;
@@ -94,7 +96,7 @@ public class SplineCar : MonoBehaviour
         _splineAnimate.enabled = true;
         //Debug.Log("Spline Car container splines: " + _track.Splines[0]);
         _splineAnimate.Container = _track;
-       // _splineAnimate.Container.Spline = _track.Splines[0];
+        // _splineAnimate.Container.Spline = _track.Splines[0];
         _splineAnimate.StartOffset = _interpolatedSplinePosition;
         _splineAnimate.Duration = CalculateDuration(_track.Spline);
         _splineAnimate.Play();
@@ -140,5 +142,36 @@ public class SplineCar : MonoBehaviour
         _splineAnimate.Play();
         SplineAnimateResumed?.Invoke();
         Debug.Log("Spline Car resumed spline animate");
+    }
+
+    public void OnFinishedSorting()
+    {
+        Debug.Log("Spline Car received exit, changing track");
+        //SplineAnimatePaused?.Invoke();
+        StartCoroutine(WaitUntilSpecificKnotReached());
+    }
+
+    private IEnumerator WaitUntilSpecificKnotReached()
+    {
+        float specificKnot = 0.38f;
+
+        while (_splineAnimate.NormalizedTime < specificKnot)
+        {
+            yield return null;
+        }
+
+        Debug.Log("Spline Car specific knot reached!");
+        _splineAnimate.Pause();
+        _splineAnimate.Container = _exitTrack;
+        _splineAnimate.StartOffset = 0.25f;
+        _splineAnimate.Duration = CalculateDuration(_exitTrack.Spline);
+        //_splineAnimate.Loop = SplineAnimate.LoopMode.Once;
+        _splineAnimate.Play();
+    }
+
+    public void Deactivate()
+    {
+        Debug.Log("Spline Car Received inquiry for deactivate");
+        _splineAnimate.Pause();
     }
 }

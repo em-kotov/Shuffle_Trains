@@ -13,16 +13,20 @@ public class BumpDetector : MonoBehaviour
     private string _carsLayerName = "Cars";
     private string _stationLayerName = "Station";
     private string _stationResetLayerName = "StationReset";
+    private string _liquidationAreaName = "LiquidationArea";
     private bool _isScanning = true;
+    private bool _isLiquidationFound = false;
     private Coroutine _scanRoutine;
 
     public event Action<float> Bumped;
     public event Action<Station> StationFound;
     public event Action ResetFound;
+    public event Action LiquidationFound;
 
     public void Initialize()
     {
-        _detectLayer = LayerMask.GetMask(_carsLayerName, _stationLayerName, _stationResetLayerName);
+        _detectLayer = LayerMask.GetMask(_carsLayerName, _stationLayerName,
+                                _stationResetLayerName, _liquidationAreaName);
         Debug.Log("Bump Detector initialized");
         StartScanning();
     }
@@ -70,6 +74,11 @@ public class BumpDetector : MonoBehaviour
                 Debug.Log("Bump Detector found a station Reset");
                 OnResetFound();
             }
+            else if (hitLayer == LayerMask.NameToLayer(_liquidationAreaName))
+            {
+                Debug.Log("Bump Detector found a liquidation Area");
+                OnLiquidationFound();
+            }
         }
     }
 
@@ -110,6 +119,21 @@ public class BumpDetector : MonoBehaviour
     private void OnResetFound()
     {
         ResetFound?.Invoke();
+    }
+
+    private void OnLiquidationFound()
+    {
+        if (_isLiquidationFound)
+            return;
+
+        _isLiquidationFound = true;
+        LiquidationFound?.Invoke();
+    }
+
+    public void Deactivate()
+    {
+        Debug.Log("Bump Detector Received inquiry for deactivate");
+        StopScanning();
     }
 
     public void OnSplinePaused()

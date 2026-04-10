@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.Splines;
 
 public class PassengerCar : MonoBehaviour
 {
     private List<(Station station, bool isVisited)> _stationsProgress;
     private List<Station> _stations;
 
+    private bool _isSortedPassengers = true;
+    private bool _hasInvokedSorted = false;
     private bool _isReset = true;
 
     public event Action StopFound;
     public event Action PassengerReleased;
+    public event Action FinishedSorting;
 
     [ContextMenu("Stop At the Station")]
     public void StopAtStation(Station foundStation)
@@ -20,12 +21,6 @@ public class PassengerCar : MonoBehaviour
         Debug.Log("Passenger Car stop found invoke");
         //StopFound?.Invoke();
         OnStationFound(foundStation);
-    }
-
-    [ContextMenu("Continue")]
-    public void Continue()
-    {
-        PassengerReleased?.Invoke();
     }
 
     public void Initialize()
@@ -63,15 +58,31 @@ public class PassengerCar : MonoBehaviour
     {
         Debug.Log("Passenger Car on Reset found");
 
+        if (_hasInvokedSorted == false)
+        {
+            if (_isSortedPassengers)
+            {
+                Debug.Log("Passenger Car invoking finished sorting");
+                FinishedSorting?.Invoke();
+                _hasInvokedSorted = true;
+                return;
+            }
+        }
+
+        if (_isReset == false)
+        {
+            ResetStationsProgress();
+            _isReset = true;
+        }
+    }
+
+    private void ResetStationsProgress()
+    {
+        Debug.Log("Passenger Car reseting stations");
+
         for (int i = 0; i < _stationsProgress.Count; i++)
         {
             _stationsProgress[i] = (_stationsProgress[i].station, false);
         }
-    }
-
-    private void ChooseExitSegment(SplineContainer splineContainer)
-    {
-        // S// var spline = splineContainer.Spline;
-        //var segment = spline.
     }
 }

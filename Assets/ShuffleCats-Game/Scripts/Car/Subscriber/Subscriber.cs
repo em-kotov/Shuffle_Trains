@@ -22,7 +22,8 @@ public class Subscriber : MonoBehaviour
 
     private ParkingRegistrator _parkingRegistrator;
     private TrackRegistrator _trackRegistrator;
-    private SplineContainer _origSpline;
+    private SplineContainer _trackSpline;
+    private SplineContainer _exitSpline;
     private PhysicsRaycaster _raycaster;
     private float _trackSpeed = 16f;
     private float _slideDuration = 0.3f;
@@ -36,30 +37,32 @@ public class Subscriber : MonoBehaviour
         _clickDetector.Initialize(_raycaster);
     }
 
-    private void OnDisable()
-    {
-        _bumpDetector.Bumped -= _splineCar.OnBumped;
-        _bumpDetector.StationFound -= _passengerCar.StopAtStation;
-        _bumpDetector.ResetFound -= _passengerCar.OnResetFound;
+    // private void OnDisable()
+    // {
+    //     //_bumpDetector.Bumped -= _splineCar.OnBumped;
+    //     _bumpDetector.StationFound -= _passengerCar.StopAtStation;
+    //     _bumpDetector.ResetFound -= _passengerCar.OnResetFound;
 
-        if (_splineCar.enabled)
-        {
-            _passengerCar.StopFound -= _splineCar.OnStopFound;
-            _passengerCar.PassengerReleased -= _splineCar.OnPassengerReleased;
+    //     if (_splineCar.enabled)
+    //     {
+    //         _passengerCar.StopFound -= _splineCar.OnStopFound;
+    //         _passengerCar.PassengerReleased -= _splineCar.OnPassengerReleased;
+    //         _passengerCar.FinishedSorting -= _splineCar.OnFinishedSorting;
 
-            _splineCar.SplineAnimatePaused -= _bumpDetector.OnSplinePaused;
-            _splineCar.SplineAnimateResumed -= _bumpDetector.OnSplineResumed;
-        }
-    }
+    //         //_splineCar.SplineAnimatePaused -= _bumpDetector.OnSplinePaused;
+    //         //_splineCar.SplineAnimateResumed -= _bumpDetector.OnSplineResumed;
+    //     }
+    // }
 
-    public void Initialize(ParkingRegistrator parkingRegistrator, SplineContainer origSpline,
+    public void Initialize(ParkingRegistrator parkingRegistrator, SplineContainer trackSpline,
                         PhysicsRaycaster raycaster, TrackRegistrator trackRegistrator,
                         float trackSpeed, float slideDuration, float waitTime,
-                        float searchMin = 0f, float searchMax = 1f)
+                        SplineContainer exitSpline, float searchMin = 0f, float searchMax = 1f)
     {
         _parkingRegistrator = parkingRegistrator;
         _trackRegistrator = trackRegistrator;
-        _origSpline = origSpline;
+        _trackSpline = trackSpline;
+        _exitSpline = exitSpline;
         _raycaster = raycaster;
         _trackSpeed = trackSpeed;
         _slideDuration = slideDuration;
@@ -103,9 +106,9 @@ public class Subscriber : MonoBehaviour
     {
         _splineCar.enabled = true;
         _splineCar.Initialize(_mover, _car.transform, _trackSwitcher,
-                            _splineAnimate, _origSpline, _trackSpeed,
+                            _splineAnimate, _trackSpline, _trackSpeed,
                             _searchMin, _searchMax, _trackRegistrator,
-                            _waitTime, _length);
+                            _waitTime, _exitSpline, _length);
 
         _splineCar.SplineAnimatePaused += _bumpDetector.OnSplinePaused;
         _splineCar.SplineAnimateResumed += _bumpDetector.OnSplineResumed;
@@ -113,14 +116,34 @@ public class Subscriber : MonoBehaviour
         _bumpDetector.Bumped += _splineCar.OnBumped;
 
         _bumpDetector.StationFound += _passengerCar.StopAtStation;
-         _bumpDetector.ResetFound += _passengerCar.OnResetFound;
+        _bumpDetector.ResetFound += _passengerCar.OnResetFound;
+
+        _bumpDetector.LiquidationFound += OnLiquidationFound;
 
         _passengerCar.StopFound += _splineCar.OnStopFound;
         _passengerCar.PassengerReleased += _splineCar.OnPassengerReleased;
+        _passengerCar.FinishedSorting += _splineCar.OnFinishedSorting;
 
         _bumpDetector.Initialize();
 
         _splineCar.GoToTrack();
+    }
+
+    private void DeactivateSplineCar()
+    {
+        _splineCar.Deactivate();
+
+        _splineCar.SplineAnimatePaused -= _bumpDetector.OnSplinePaused;
+        _splineCar.SplineAnimateResumed -= _bumpDetector.OnSplineResumed;
+
+        _bumpDetector.Bumped -= _splineCar.OnBumped;
+
+        _bumpDetector.StationFound -= _passengerCar.StopAtStation;
+        _bumpDetector.ResetFound -= _passengerCar.OnResetFound;
+
+        _passengerCar.StopFound -= _splineCar.OnStopFound;
+        _passengerCar.PassengerReleased -= _splineCar.OnPassengerReleased;
+        _passengerCar.FinishedSorting -= _splineCar.OnFinishedSorting;
     }
 
     private void ActivateCar()
@@ -140,5 +163,12 @@ public class Subscriber : MonoBehaviour
 
         _car.Deactivate();
         _car.enabled = false;
+    }
+
+    private void OnLiquidationFound()
+    {
+        _bumpDetector.LiquidationFound -= OnLiquidationFound;
+        DeactivateSplineCar();
+        _bumpDetector.Deactivate();
     }
 }

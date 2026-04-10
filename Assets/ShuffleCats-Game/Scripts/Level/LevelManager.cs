@@ -30,6 +30,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private TrackRegistrator _trackRegistrator;
     [SerializeField] private CounterUI _counterUI;
     [SerializeField] private SplineContainer _trackSpline;
+    [SerializeField] private SplineContainer _exitSpline;
     [SerializeField] private PhysicsRaycaster _raycaster;
     [SerializeField] private List<Subscriber> _carSubscribers;
 
@@ -46,7 +47,7 @@ public class LevelManager : MonoBehaviour
         {
             subscriber.Initialize(_parkingRegistrator, _trackSpline, _raycaster,
                                     _trackRegistrator, _trackSpeed, _slideDuration,
-                                    _waitTime, _searchMin, _searchMax);
+                                    _waitTime, _exitSpline, _searchMin, _searchMax);
         }
     }
 }
