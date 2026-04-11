@@ -39,7 +39,7 @@ public class BumpDetector : MonoBehaviour
         {
             Physics.SyncTransforms();
 
-            Debug.Log("Bump Detector scan routine 1 cycle");
+            //Debug.Log("Bump Detector scan routine 1 cycle");
             Scan(_backwardOrigin.position, _backwardOrigin.forward);
 
             yield return wait;
@@ -51,6 +51,7 @@ public class BumpDetector : MonoBehaviour
         if (Physics.Raycast(origin, direction, out RaycastHit hit, _maxRayDistance, _detectLayer))
         {
             int hitLayer = hit.transform.gameObject.layer;
+            Debug.Log("Bump Detector detected object on a layer: " + hitLayer + ", name: " + hit.transform.gameObject.name);
 
             if (hitLayer == LayerMask.NameToLayer(_carsLayerName))
             {

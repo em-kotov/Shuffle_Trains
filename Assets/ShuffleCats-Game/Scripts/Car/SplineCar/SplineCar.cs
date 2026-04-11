@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
 
@@ -153,7 +154,7 @@ public class SplineCar : MonoBehaviour
 
     private IEnumerator WaitUntilSpecificKnotReached()
     {
-        float specificKnot = 0.38f;
+        float specificKnot = 0.38f; //t of track spline to switch where
 
         while (_splineAnimate.NormalizedTime < specificKnot)
         {
@@ -163,7 +164,15 @@ public class SplineCar : MonoBehaviour
         Debug.Log("Spline Car specific knot reached!");
         _splineAnimate.Pause();
         _splineAnimate.Container = _exitTrack;
-        _splineAnimate.StartOffset = 0.25f;
+
+        Vector3 localPosition = _exitTrack.transform.InverseTransformPoint(
+                                                    _carHead.position);
+
+        SplineUtilityExtension.GetNearestPoint(_exitTrack.Spline, localPosition,
+                                        out float3 nearest, out float t);
+        //_splineAnimate.StartOffset = 0.25f; //t of exit spline to enter
+        _splineAnimate.NormalizedTime = t; //t of exit spline to enter
+
         _splineAnimate.Duration = CalculateDuration(_exitTrack.Spline);
         //_splineAnimate.Loop = SplineAnimate.LoopMode.Once;
         _splineAnimate.Play();

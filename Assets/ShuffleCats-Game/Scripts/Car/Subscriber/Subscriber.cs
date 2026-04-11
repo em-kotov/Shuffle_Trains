@@ -167,6 +167,7 @@ public class Subscriber : MonoBehaviour
 
     private void OnLiquidationFound()
     {
+        Debug.Log("Subscriber starting liquidation");
         _bumpDetector.LiquidationFound -= OnLiquidationFound;
         DeactivateSplineCar();
         _bumpDetector.Deactivate();
