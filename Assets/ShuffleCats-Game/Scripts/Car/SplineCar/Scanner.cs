@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class BumpDetector : MonoBehaviour
+public class Scanner : MonoBehaviour
 {
     [SerializeField] private Transform _forwardOrigin;
     [SerializeField] private Transform _backwardOrigin;

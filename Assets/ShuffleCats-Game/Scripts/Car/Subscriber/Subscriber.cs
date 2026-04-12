@@ -10,7 +10,7 @@ public class Subscriber : MonoBehaviour
     [SerializeField] private int _length;
 
     [Header("References")]
-    [SerializeField] private Car _car;
+    [SerializeField] private ParkingCar _parkingCar;
     [SerializeField] private Mover _mover;
     [SerializeField] private SplineCar _splineCar;
     [SerializeField] private PassengerCar _passengerCar;
@@ -18,7 +18,8 @@ public class Subscriber : MonoBehaviour
     [SerializeField] private SplineAnimate _splineAnimate;
     [SerializeField] private BumpHandler _bumpHandler;
     [SerializeField] private ClickDetector _clickDetector;
-    [SerializeField] private BumpDetector _bumpDetector;
+    [SerializeField] private Scanner _scanner;
+    [SerializeField] private SplineOperator _splineOperator;
 
     private ParkingRegistrator _parkingRegistrator;
     private TrackRegistrator _trackRegistrator;
@@ -71,8 +72,8 @@ public class Subscriber : MonoBehaviour
         _searchMax = searchMax;
 
         ActivateCar();
-        _mover.Initialize(_car.transform, _slideDuration);
-        _bumpHandler.Initialize(_car);
+        _mover.Initialize(_parkingCar.transform, _slideDuration);
+        _bumpHandler.Initialize(_parkingCar);
         _passengerCar.Initialize();
     }
 
@@ -105,26 +106,26 @@ public class Subscriber : MonoBehaviour
     private void ActivateSplineCar()
     {
         _splineCar.enabled = true;
-        _splineCar.Initialize(_mover, _car.transform, _trackSwitcher,
+        _splineCar.Initialize(_mover, _parkingCar.transform, _trackSwitcher,
                             _splineAnimate, _trackSpline, _trackSpeed,
                             _searchMin, _searchMax, _trackRegistrator,
-                            _waitTime, _exitSpline, _length);
+                            _waitTime, _exitSpline, _splineOperator, _length);
 
-        _splineCar.SplineAnimatePaused += _bumpDetector.OnSplinePaused;
-        _splineCar.SplineAnimateResumed += _bumpDetector.OnSplineResumed;
+        _splineCar.SplineAnimatePaused += _scanner.OnSplinePaused;
+        _splineCar.SplineAnimateResumed += _scanner.OnSplineResumed;
 
-        _bumpDetector.Bumped += _splineCar.OnBumped;
+        _scanner.Bumped += _splineCar.OnBumped;
 
-        _bumpDetector.StationFound += _passengerCar.StopAtStation;
-        _bumpDetector.ResetFound += _passengerCar.OnResetFound;
+        _scanner.StationFound += _passengerCar.StopAtStation;
+        _scanner.ResetFound += _passengerCar.OnResetFound;
 
-        _bumpDetector.LiquidationFound += OnLiquidationFound;
+        _scanner.LiquidationFound += OnLiquidationFound;
 
         _passengerCar.StopFound += _splineCar.OnStopFound;
         _passengerCar.PassengerReleased += _splineCar.OnPassengerReleased;
-        _passengerCar.FinishedSorting += _splineCar.OnFinishedSorting;
+        _passengerCar.FinishedSorting += _splineCar.OnFinishedPassengers;
 
-        _bumpDetector.Initialize();
+        _scanner.Initialize();
 
         _splineCar.GoToTrack();
     }
@@ -133,43 +134,43 @@ public class Subscriber : MonoBehaviour
     {
         _splineCar.Deactivate();
 
-        _splineCar.SplineAnimatePaused -= _bumpDetector.OnSplinePaused;
-        _splineCar.SplineAnimateResumed -= _bumpDetector.OnSplineResumed;
+        _splineCar.SplineAnimatePaused -= _scanner.OnSplinePaused;
+        _splineCar.SplineAnimateResumed -= _scanner.OnSplineResumed;
 
-        _bumpDetector.Bumped -= _splineCar.OnBumped;
+        _scanner.Bumped -= _splineCar.OnBumped;
 
-        _bumpDetector.StationFound -= _passengerCar.StopAtStation;
-        _bumpDetector.ResetFound -= _passengerCar.OnResetFound;
+        _scanner.StationFound -= _passengerCar.StopAtStation;
+        _scanner.ResetFound -= _passengerCar.OnResetFound;
 
         _passengerCar.StopFound -= _splineCar.OnStopFound;
         _passengerCar.PassengerReleased -= _splineCar.OnPassengerReleased;
-        _passengerCar.FinishedSorting -= _splineCar.OnFinishedSorting;
+        _passengerCar.FinishedSorting -= _splineCar.OnFinishedPassengers;
     }
 
     private void ActivateCar()
     {
-        _car.Initialize(_parkingRegistrator, _mover, _orientation, _signDirection, _length);
+        _parkingCar.Initialize(_parkingRegistrator, _mover, _orientation, _signDirection, _length);
 
-        _clickDetector.Clicked += _car.OnClick;
-        _mover.FinishedMoving += _car.OnFinishedMoving;
-        _car.IsOnBorder += OnBorderArrival;
+        _clickDetector.Clicked += _parkingCar.OnClick;
+        _mover.FinishedMoving += _parkingCar.OnFinishedMoving;
+        _parkingCar.IsOnBorder += OnBorderArrival;
     }
 
     private void DeactivateCar()
     {
-        _clickDetector.Clicked -= _car.OnClick;
-        _mover.FinishedMoving -= _car.OnFinishedMoving;
-        _car.IsOnBorder -= OnBorderArrival;
+        _clickDetector.Clicked -= _parkingCar.OnClick;
+        _mover.FinishedMoving -= _parkingCar.OnFinishedMoving;
+        _parkingCar.IsOnBorder -= OnBorderArrival;
 
-        _car.Deactivate();
-        _car.enabled = false;
+        _parkingCar.Deactivate();
+        _parkingCar.enabled = false;
     }
 
     private void OnLiquidationFound()
     {
         Debug.Log("Subscriber starting liquidation");
-        _bumpDetector.LiquidationFound -= OnLiquidationFound;
+        _scanner.LiquidationFound -= OnLiquidationFound;
         DeactivateSplineCar();
-        _bumpDetector.Deactivate();
+        _scanner.Deactivate();
     }
 }

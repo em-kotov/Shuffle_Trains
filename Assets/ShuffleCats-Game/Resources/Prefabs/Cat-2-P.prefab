@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 907069080326019111}
   - component: {fileID: 3317639115707316861}
   m_Layer: 6
-  m_Name: BumpDetector
+  m_Name: Scanner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -254,6 +254,7 @@ Transform:
   - {fileID: 3057290676367200488}
   - {fileID: 637760703992913797}
   - {fileID: 7259846428952598211}
+  - {fileID: 1986465118928566711}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4903853139547112680
@@ -271,19 +272,60 @@ MonoBehaviour:
   _orientation: 0
   _signDirection: 1
   _length: 2
-  _car: {fileID: 1420782088659658804}
+  _parkingCar: {fileID: 1420782088659658804}
   _mover: {fileID: 3911854181696882068}
   _splineCar: {fileID: 6443444232799090446}
   _passengerCar: {fileID: 6476638932394100054}
   _trackSwitcher: {fileID: 920604102250071739}
   _splineAnimate: {fileID: 8279809572554868432}
   _bumpHandler: {fileID: 8152044447660097066}
-  _clickDetectors:
-  - {fileID: 1063004317116569943}
-  _bumpDetectors:
-  - {fileID: 3317639115707316861}
   _clickDetector: {fileID: 1063004317116569943}
-  _bumpDetector: {fileID: 3317639115707316861}
+  _scanner: {fileID: 3317639115707316861}
+  _splineOperator: {fileID: 499396865151173877}
+--- !u!1 &2431504654412068400
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1986465118928566711}
+  - component: {fileID: 499396865151173877}
+  m_Layer: 0
+  m_Name: SplineOperator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1986465118928566711
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2431504654412068400}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6439151042556543893}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &499396865151173877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2431504654412068400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76d0c806ee762074aacf9467a3221858, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3111017036188647274
 GameObject:
   m_ObjectHideFlags: 0

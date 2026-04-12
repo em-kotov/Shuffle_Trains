@@ -33,7 +33,7 @@ public class GridCalculator : MonoBehaviour
         _gridOrigin = new Vector3(_startX, _axisYLevel, _startY);
     }
 
-    public Vector3 GetFurthestCellToMove(Car car, Vector3 current, CarOrientation orientation,
+    public Vector3 GetFurthestCellToMove(ParkingCar car, Vector3 current, CarOrientation orientation,
                                          float sign, out CellOccupancy cellOccupancy)
     {
         cellOccupancy = CellOccupancy.Free;
@@ -49,7 +49,7 @@ public class GridCalculator : MonoBehaviour
         for (int i = firstIndex; i < visitedCells.Count; i++)
         {
             furthestCell = visitedCells[i];
-            Car occupyingCar = _registrator.GetCar(furthestCell.x, furthestCell.y);
+            ParkingCar occupyingCar = _registrator.GetCar(furthestCell.x, furthestCell.y);
 
             if (occupyingCar != null && occupyingCar != car)
             {
@@ -156,9 +156,9 @@ public class GridCalculator : MonoBehaviour
         return new Vector3(worldX, _axisYLevel, worldZ);
     }
 
-    public Car[,] InitializeGrid()
+    public ParkingCar[,] InitializeGrid()
     {
-        Car[,] cells = new Car[_width, _height];
+        ParkingCar[,] cells = new ParkingCar[_width, _height];
         // int firstIndex = 0;
         // int indexStep = 1;
 

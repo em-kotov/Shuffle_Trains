@@ -4,7 +4,7 @@ using UnityEngine;
 public class ParkingRegistrator : MonoBehaviour
 {
     private GridCalculator _gridCalculator;
-    private Car[,] _gridCells;
+    private ParkingCar[,] _gridCells;
 
     public void Initialize(int width, int height, float cellSize,
                     int startX, int startY, float axisYLevel,
@@ -16,7 +16,7 @@ public class ParkingRegistrator : MonoBehaviour
         _gridCells = _gridCalculator.InitializeGrid();
     }
 
-    public void RegisterCar(Vector3 newPosition, Car car)
+    public void RegisterCar(Vector3 newPosition, ParkingCar car)
     {
         Vector2Int newCell = _gridCalculator.WorldToGrid(newPosition);
         newCell = _gridCalculator.ClampToGrid(newCell);
@@ -28,7 +28,7 @@ public class ParkingRegistrator : MonoBehaviour
         }
     }
 
-    public void UnregisterCar(Vector3 oldPosition, Car car,
+    public void UnregisterCar(Vector3 oldPosition, ParkingCar car,
                         CarOrientation orientation, float sign, float length)
     {
         Vector2Int oldCell = _gridCalculator.WorldToGrid(oldPosition);
@@ -40,7 +40,7 @@ public class ParkingRegistrator : MonoBehaviour
         UnregisterTail(car, oldPosition, orientation, sign, length);
     }
 
-    public void UnregisterTail(Car car, Vector3 current,
+    public void UnregisterTail(ParkingCar car, Vector3 current,
                         CarOrientation orientation, float sign, float length)
     {
         float oppositeDirection = -1f;
@@ -68,7 +68,7 @@ public class ParkingRegistrator : MonoBehaviour
         }
     }
 
-    public void RegisterTail(Car car, Vector3 current,
+    public void RegisterTail(ParkingCar car, Vector3 current,
                         CarOrientation orientation, float sign, float length)
     {
         float oppositeDirection = -1f;
@@ -96,13 +96,13 @@ public class ParkingRegistrator : MonoBehaviour
         }
     }
 
-    public Vector3 GetFurthestCellToMove(Car car, Vector3 currentPosition,
+    public Vector3 GetFurthestCellToMove(ParkingCar car, Vector3 currentPosition,
                     CarOrientation orientation, float sign, out CellOccupancy cellOccupancy)
     {
         return _gridCalculator.GetFurthestCellToMove(car, currentPosition, orientation, sign, out cellOccupancy);
     }
 
-    public Car GetCar(int gridX, int gridY)
+    public ParkingCar GetCar(int gridX, int gridY)
     {
         return _gridCells[gridX, gridY];
     }

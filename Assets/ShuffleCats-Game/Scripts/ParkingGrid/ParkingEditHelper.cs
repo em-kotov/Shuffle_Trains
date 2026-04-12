@@ -19,7 +19,7 @@ public class ParkingEditHelper : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
+        Gizmos.color = Color.green;
         float ySize = 0.1f;
         float sideMultiplier = 0.7f;
 

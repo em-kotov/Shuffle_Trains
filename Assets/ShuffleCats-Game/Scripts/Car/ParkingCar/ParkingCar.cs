@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class Car : MonoBehaviour
+public class ParkingCar : MonoBehaviour
 {
     private ParkingRegistrator _parkingRegistrator;
     private Mover _mover;

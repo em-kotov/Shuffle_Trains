@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class BumpHandler : MonoBehaviour
 {
-    private Car _car;
+    private ParkingCar _parkingCar;
 
-    public void Initialize(Car car)
+    public void Initialize(ParkingCar car)
     {
         // _car = car;
     }
