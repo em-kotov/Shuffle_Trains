@@ -11,12 +11,12 @@ public class Subscriber : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private ParkingCar _parkingCar;
+    [SerializeField] private Transform _carHead;
     [SerializeField] private Mover _mover;
     [SerializeField] private SplineCar _splineCar;
     [SerializeField] private PassengerCar _passengerCar;
     [SerializeField] private TrackSwitcher _trackSwitcher;
     [SerializeField] private SplineAnimate _splineAnimate;
-    [SerializeField] private BumpHandler _bumpHandler;
     [SerializeField] private ClickDetector _clickDetector;
     [SerializeField] private Scanner _scanner;
     [SerializeField] private SplineOperator _splineOperator;
@@ -38,23 +38,6 @@ public class Subscriber : MonoBehaviour
         _clickDetector.Initialize(_raycaster);
     }
 
-    // private void OnDisable()
-    // {
-    //     //_bumpDetector.Bumped -= _splineCar.OnBumped;
-    //     _bumpDetector.StationFound -= _passengerCar.StopAtStation;
-    //     _bumpDetector.ResetFound -= _passengerCar.OnResetFound;
-
-    //     if (_splineCar.enabled)
-    //     {
-    //         _passengerCar.StopFound -= _splineCar.OnStopFound;
-    //         _passengerCar.PassengerReleased -= _splineCar.OnPassengerReleased;
-    //         _passengerCar.FinishedSorting -= _splineCar.OnFinishedSorting;
-
-    //         //_splineCar.SplineAnimatePaused -= _bumpDetector.OnSplinePaused;
-    //         //_splineCar.SplineAnimateResumed -= _bumpDetector.OnSplineResumed;
-    //     }
-    // }
-
     public void Initialize(ParkingRegistrator parkingRegistrator, SplineContainer trackSpline,
                         PhysicsRaycaster raycaster, TrackRegistrator trackRegistrator,
                         float trackSpeed, float slideDuration, float waitTime,
@@ -71,9 +54,8 @@ public class Subscriber : MonoBehaviour
         _searchMin = searchMin;
         _searchMax = searchMax;
 
-        ActivateCar();
-        _mover.Initialize(_parkingCar.transform, _slideDuration);
-        _bumpHandler.Initialize(_parkingCar);
+        ActivateParkingCar();
+        _mover.Initialize(_carHead, _slideDuration);
         _passengerCar.Initialize();
     }
 
@@ -90,7 +72,7 @@ public class Subscriber : MonoBehaviour
                 canEnterTrack = _trackRegistrator.IsCountAllows();
             }
 
-            DeactivateCar();
+            DeactivateParkingCar();
             ActivateSplineCar();
         }
     }
@@ -106,24 +88,17 @@ public class Subscriber : MonoBehaviour
     private void ActivateSplineCar()
     {
         _splineCar.enabled = true;
-        _splineCar.Initialize(_mover, _parkingCar.transform, _trackSwitcher,
+        _splineCar.Initialize(_mover, _carHead, _trackSwitcher,
                             _splineAnimate, _trackSpline, _trackSpeed,
                             _searchMin, _searchMax, _trackRegistrator,
                             _waitTime, _exitSpline, _splineOperator, _length);
 
-        _splineCar.SplineAnimatePaused += _scanner.OnSplinePaused;
-        _splineCar.SplineAnimateResumed += _scanner.OnSplineResumed;
+        _scanner.BumpFound += OnBumpFound;
 
-        _scanner.Bumped += _splineCar.OnBumped;
-
-        _scanner.StationFound += _passengerCar.StopAtStation;
-        _scanner.ResetFound += _passengerCar.OnResetFound;
+        _scanner.StationFound += OnStationFound;
+        _scanner.ResetFound += OnResetFound;
 
         _scanner.LiquidationFound += OnLiquidationFound;
-
-        _passengerCar.StopFound += _splineCar.OnStopFound;
-        _passengerCar.PassengerReleased += _splineCar.OnPassengerReleased;
-        _passengerCar.FinishedSorting += _splineCar.OnFinishedPassengers;
 
         _scanner.Initialize();
 
@@ -132,22 +107,16 @@ public class Subscriber : MonoBehaviour
 
     private void DeactivateSplineCar()
     {
-        _splineCar.Deactivate();
+        _splineCar.Stop();
+        _splineCar.SetNormalizedTime(1f);
 
-        _splineCar.SplineAnimatePaused -= _scanner.OnSplinePaused;
-        _splineCar.SplineAnimateResumed -= _scanner.OnSplineResumed;
+        _scanner.BumpFound -= OnBumpFound;
 
-        _scanner.Bumped -= _splineCar.OnBumped;
-
-        _scanner.StationFound -= _passengerCar.StopAtStation;
-        _scanner.ResetFound -= _passengerCar.OnResetFound;
-
-        _passengerCar.StopFound -= _splineCar.OnStopFound;
-        _passengerCar.PassengerReleased -= _splineCar.OnPassengerReleased;
-        _passengerCar.FinishedSorting -= _splineCar.OnFinishedPassengers;
+        _scanner.StationFound -= OnStationFound;
+        _scanner.ResetFound -= OnResetFound;
     }
 
-    private void ActivateCar()
+    private void ActivateParkingCar()
     {
         _parkingCar.Initialize(_parkingRegistrator, _mover, _orientation, _signDirection, _length);
 
@@ -156,7 +125,7 @@ public class Subscriber : MonoBehaviour
         _parkingCar.IsOnBorder += OnBorderArrival;
     }
 
-    private void DeactivateCar()
+    private void DeactivateParkingCar()
     {
         _clickDetector.Clicked -= _parkingCar.OnClick;
         _mover.FinishedMoving -= _parkingCar.OnFinishedMoving;
@@ -170,7 +139,49 @@ public class Subscriber : MonoBehaviour
     {
         Debug.Log("Subscriber starting liquidation");
         _scanner.LiquidationFound -= OnLiquidationFound;
+        _scanner.StopScanning();
         DeactivateSplineCar();
-        _scanner.Deactivate();
+        _carHead.gameObject.GetComponent<Collider>().enabled = false;
+    }
+
+    private void OnBumpFound()
+    {
+        _splineCar.Jump();
+    }
+
+    private void OnStationFound(Station station)
+    {
+        if (_passengerCar.IsFinished)
+            return;
+
+        _passengerCar.TryStopAtStation(station);
+
+        if (_passengerCar.IsStopping)
+        {
+            _splineCar.Stop();
+            _scanner.StopScanning();
+            StartCoroutine(WaitFinishSorting());
+        }
+    }
+
+    private IEnumerator WaitFinishSorting()
+    {
+        yield return new WaitUntil(() => _passengerCar.IsSorting == false);
+
+        if (_passengerCar.IsFinished)
+        {
+            _splineCar.Exit();
+        }
+
+        _splineCar.Play();
+        _scanner.StartScanning();
+    }
+
+    private void OnResetFound()
+    {
+        if (_passengerCar.IsFinished)
+            return;
+
+        _passengerCar.TryResetStationProgress();
     }
 }

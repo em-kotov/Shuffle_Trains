@@ -21,7 +21,7 @@ public class SplineOperator : MonoBehaviour
         _splineAnimate.Play();
     }
 
-    public void JumpForward(float distance)
+    public void JumpForward()
     {
         float stepSize = 0.01f;
         _splineAnimate.NormalizedTime = Mathf.Min(1f, _splineAnimate.NormalizedTime + stepSize);
@@ -37,12 +37,10 @@ public class SplineOperator : MonoBehaviour
 
         SplineUtilityExtension.GetNearestPoint(newSplineContainer.Spline, localPosition,
                                         out float3 nearest, out float t);
-        //_splineAnimate.StartOffset = 0.25f; //t of exit spline to enter
         _splineAnimate.NormalizedTime = t; //t of exit spline to enter
 
         _splineAnimate.Duration = CalculateDuration(newSplineContainer.Spline, speed);
-        //_splineAnimate.Loop = SplineAnimate.LoopMode.Once;
-        _splineAnimate.Play();
+        //_splineAnimate.Play();
     }
 
     public void Pause()
@@ -55,30 +53,9 @@ public class SplineOperator : MonoBehaviour
         _splineAnimate.Play();
     }
 
-    public void PauseForTime(float time)
+    public void SetNormalizedTime(float time)
     {
-        StartCoroutine(PauseSplineAnimateForTime(time));
-    }
-
-    public bool IsActive()
-    {
-        return _splineAnimate.IsPlaying;
-    }
-
-    public float GetNormalizedTime()
-    {
-        return _splineAnimate.NormalizedTime;
-    }
-
-    private IEnumerator PauseSplineAnimateForTime(float timeA)
-    {
-        float time = 0.8f;
-        //SplineAnimatePaused?.Invoke();
-        _splineAnimate.Pause();
-        yield return new WaitForSeconds(time);
-        _splineAnimate.Play();
-        //SplineAnimateResumed?.Invoke();
-        Debug.Log("Spline Car resumed spline animate");
+        _splineAnimate.NormalizedTime = time;
     }
 
     private float CalculateDuration(ISpline spline, float speed)

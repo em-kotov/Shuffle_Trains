@@ -18,7 +18,7 @@ public class Scanner : MonoBehaviour
     private bool _isLiquidationFound = false;
     private Coroutine _scanRoutine;
 
-    public event Action<float> Bumped;
+    public event Action BumpFound;
     public event Action<Station> StationFound;
     public event Action ResetFound;
     public event Action LiquidationFound;
@@ -31,15 +31,34 @@ public class Scanner : MonoBehaviour
         StartScanning();
     }
 
+    public void StartScanning()
+    {
+        StopScanning();
+
+        Debug.Log("Scanner is resuming");
+        _isScanning = true;
+        _scanRoutine = StartCoroutine(RaycastWithInterval());
+    }
+
+    public void StopScanning()
+    {
+        Debug.Log("Scanner is stopping");
+        _isScanning = false;
+
+        if (_scanRoutine != null)
+        {
+            StopCoroutine(RaycastWithInterval());
+            _scanRoutine = null;
+        }
+    }
+
     private IEnumerator RaycastWithInterval()
     {
-        WaitForSeconds wait = new WaitForSeconds(0.05f);
+        WaitForSeconds wait = new WaitForSeconds(0.1f);
 
         while (_isScanning)
         {
             Physics.SyncTransforms();
-
-            //Debug.Log("Bump Detector scan routine 1 cycle");
             Scan(_backwardOrigin.position, _backwardOrigin.forward);
 
             yield return wait;
@@ -56,7 +75,7 @@ public class Scanner : MonoBehaviour
             if (hitLayer == LayerMask.NameToLayer(_carsLayerName))
             {
                 Debug.Log("Bump Detector Bumped at car");
-                Bump(hit.distance);
+                InvokeBump(hit.distance);
             }
             else if (hitLayer == LayerMask.NameToLayer(_stationLayerName))
             {
@@ -67,86 +86,47 @@ public class Scanner : MonoBehaviour
 
                 if (hasStation)
                 {
-                    WhenStationFound(foundStation);
+                    InvokeStation(foundStation);
                 }
             }
             else if (hitLayer == LayerMask.NameToLayer(_stationResetLayerName))
             {
                 Debug.Log("Bump Detector found a station Reset");
-                OnResetFound();
+                InvokeReset();
             }
             else if (hitLayer == LayerMask.NameToLayer(_liquidationAreaName))
             {
                 Debug.Log("Bump Detector found a liquidation Area");
-                OnLiquidationFound();
+                InvokeLiquidation();
             }
         }
     }
 
-    private void StartScanning()
-    {
-        StopScanning();
-
-        Debug.Log("Bump Detector starts scanning");
-        _isScanning = true;
-        _scanRoutine = StartCoroutine(RaycastWithInterval());
-    }
-
-    private void StopScanning()
-    {
-        Debug.Log("Bump Detector stops scan routine");
-        _isScanning = false;
-
-        if (_scanRoutine != null)
-        {
-            StopCoroutine(RaycastWithInterval());
-            _scanRoutine = null;
-        }
-    }
-
-    private void Bump(float distanceToObject)
+    private void InvokeBump(float distanceToObject)
     {
         if (distanceToObject <= _bumpedDistance)
         {
-            Bumped?.Invoke(distanceToObject);
+            BumpFound?.Invoke();
         }
     }
 
-    private void WhenStationFound(Station foundStation)
+    private void InvokeStation(Station foundStation)
     {
         StationFound?.Invoke(foundStation);
     }
 
-    private void OnResetFound()
+    private void InvokeReset()
     {
         ResetFound?.Invoke();
     }
 
-    private void OnLiquidationFound()
+    private void InvokeLiquidation()
     {
         if (_isLiquidationFound)
             return;
 
         _isLiquidationFound = true;
         LiquidationFound?.Invoke();
-    }
-
-    public void Deactivate()
-    {
-        Debug.Log("Bump Detector Received inquiry for deactivate");
-        StopScanning();
-    }
-
-    public void OnSplinePaused()
-    {
-        Debug.Log("Bump Detector Received inquiry for scan stop");
-        StopScanning();
-    }
-
-    public void OnSplineResumed()
-    {
-        Debug.Log("Bump Detetor Received inquiry for scan resume");
-        StartScanning();
     }
 
     private void OnDrawGizmos()
