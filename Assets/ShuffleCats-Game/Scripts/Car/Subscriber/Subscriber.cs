@@ -108,7 +108,7 @@ public class Subscriber : MonoBehaviour
     private void DeactivateSplineCar()
     {
         _splineCar.Stop();
-        _splineCar.SetNormalizedTime(1f);
+        _splineCar.SetNormalizedTime(0.999f);
 
         _scanner.BumpFound -= OnBumpFound;
 
@@ -170,7 +170,7 @@ public class Subscriber : MonoBehaviour
 
         if (_passengerCar.IsFinished)
         {
-            _splineCar.Exit();
+            _splineCar.SwitchSplineToExit();
         }
 
         _splineCar.Play();

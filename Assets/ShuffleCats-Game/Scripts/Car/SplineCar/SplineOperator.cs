@@ -29,17 +29,18 @@ public class SplineOperator : MonoBehaviour
 
     public void SwitchSpline(SplineContainer newSplineContainer, Transform car, float speed)
     {
-        _splineAnimate.Pause();
-        _splineAnimate.Container = newSplineContainer;
+        //_splineAnimate.Pause();
 
         Vector3 localPosition = newSplineContainer.transform.InverseTransformPoint(
                                                     car.position);
-
         SplineUtilityExtension.GetNearestPoint(newSplineContainer.Spline, localPosition,
                                         out float3 nearest, out float t);
-        _splineAnimate.NormalizedTime = t; //t of exit spline to enter
 
+       Debug.Log("Spline Operator switching spline - currnet t: "+ _splineAnimate.NormalizedTime+". closest t: " + t);
+        _splineAnimate.Container = newSplineContainer;
+        _splineAnimate.NormalizedTime = t; //t of exit spline to enter
         _splineAnimate.Duration = CalculateDuration(newSplineContainer.Spline, speed);
+
         //_splineAnimate.Play();
     }
 

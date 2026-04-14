@@ -72,7 +72,7 @@ public class SplineCar : MonoBehaviour
         _splineOperator.Play();
     }
 
-    public void Exit()
+    public void SwitchSplineToExit()
     {
         Debug.Log("Spline Car received exit, changing track");
         _splineOperator.SwitchSpline(_exitTrack, _carHead, _speed);
