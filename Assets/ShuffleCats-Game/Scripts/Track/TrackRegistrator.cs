@@ -10,7 +10,6 @@ public class TrackRegistrator : MonoBehaviour
     private CounterUI _counter;
     private List<(float start, float end, Transform car)> _segments;
     private List<(float length, Transform car)> _newSegments;
-    private List<SplineAnimate> _cars;
     private List<Transform> _carHeads;
     private int _segmentsCount = 10;
     // private int _minSegmentsCount = 10;
@@ -36,7 +35,6 @@ public class TrackRegistrator : MonoBehaviour
         _counter.Initialize(_maxCarsCount);
 
         InitializeSegments();
-        _cars = new();
         _carHeads = new();
     }
 
@@ -78,18 +76,16 @@ public class TrackRegistrator : MonoBehaviour
         return true;
     }
 
-    public void Register(SplineAnimate car, Transform carHead)
+    public void Register(Transform carHead)
     {
-        _cars.Add(car);
         _carHeads.Add(carHead);
 
         _currentCarsCount++;
         _counter.UpdateCurrent(_currentCarsCount);
     }
 
-    public void Unregister(SplineAnimate car)
+    public void Unregister()
     {
-        _cars.Remove(car);
         _currentCarsCount--;
         _counter.UpdateCurrent(_currentCarsCount);
     }

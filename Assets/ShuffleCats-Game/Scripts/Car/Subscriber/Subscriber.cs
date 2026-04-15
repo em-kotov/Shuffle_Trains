@@ -20,6 +20,8 @@ public class Subscriber : MonoBehaviour
     [SerializeField] private ClickDetector _clickDetector;
     [SerializeField] private Scanner _scanner;
     [SerializeField] private SplineOperator _splineOperator;
+    [SerializeField] private StationOperator _stationOperator;
+    [SerializeField] private Sorter _sorter;
 
     private ParkingRegistrator _parkingRegistrator;
     private TrackRegistrator _trackRegistrator;
@@ -56,7 +58,7 @@ public class Subscriber : MonoBehaviour
 
         ActivateParkingCar();
         _mover.Initialize(_carHead, _slideDuration);
-        _passengerCar.Initialize();
+        _passengerCar.Initialize(_stationOperator, _sorter);
     }
 
     private IEnumerator OnBorderArrivalRoutine()
@@ -139,10 +141,10 @@ public class Subscriber : MonoBehaviour
 
         _passengerCar.Sort(station);
 
-        StartCoroutine(WaitFinishSorting(station.StopNumberExit()));
+        StartCoroutine(WaitFinishSorting());
     }
 
-    private IEnumerator WaitFinishSorting(float t)
+    private IEnumerator WaitFinishSorting()
     {
         yield return new WaitUntil(() => _passengerCar.IsSorting == false);
 
@@ -166,6 +168,7 @@ public class Subscriber : MonoBehaviour
         _scanner.StationFound -= OnStationFound;
         _scanner.ResetFound -= OnResetFound;
 
+        _splineCar.Unregister();
         _splineCar.Stop();
         _carHead.gameObject.GetComponent<Collider>().enabled = false;
     }

@@ -84,6 +84,11 @@ public class SplineCar : MonoBehaviour
         IsOnExit = true;
     }
 
+    public void Unregister()
+    {
+        _trackRegistrator.Unregister();
+    }
+
     private IEnumerator EnterTrackWithPause()
     {
         _currentPosition = _carHead.position;
@@ -108,7 +113,7 @@ public class SplineCar : MonoBehaviour
 
         yield return new WaitUntil(() => _isMoving == false);
 
-        _trackRegistrator.Register(_splineAnimate, _carHead);
+        _trackRegistrator.Register(_carHead);
         _splineOperator.EnableSplineAnimate(_track, _interpolatedSplinePosition, _speed);
     }
 
@@ -118,12 +123,12 @@ public class SplineCar : MonoBehaviour
         _mover.FinishedMoving -= OnMoverFinishedMove;
     }
 
-    private void OnDrawGizmos()
-    {
-        SplineUtility.Evaluate(_exitTrack.Spline, 1.0f, out float3 splineEndPos, out _, out _);
-        Vector3 endPosition = _exitTrack.transform.TransformPoint(splineEndPos);
+    // private void OnDrawGizmos()
+    // {
+    //     SplineUtility.Evaluate(_exitTrack.Spline, 1.0f, out float3 splineEndPos, out _, out _);
+    //     Vector3 endPosition = _exitTrack.transform.TransformPoint(splineEndPos);
 
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawSphere(endPosition, 1f);
-    }
+    //     Gizmos.color = Color.magenta;
+    //     Gizmos.DrawSphere(endPosition, 1f);
+    // }
 }

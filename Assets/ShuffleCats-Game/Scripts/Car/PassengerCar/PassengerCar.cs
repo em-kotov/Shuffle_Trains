@@ -4,20 +4,21 @@ using UnityEngine;
 
 public class PassengerCar : MonoBehaviour
 {
-    private List<(Station station, bool isVisited)> _stationsProgress;
-    private List<Station> _stations;
     private List<int> _passengersToSort;
-
     private bool _isReset = true;
     private bool _isNeedToSort = true;
+    private StationOperator _stationOperator;
+    private Sorter _sorter;
 
     public bool IsFinished { get; private set; }
     public bool IsSorting { get; private set; }
 
-    public void Initialize()
+    public void Initialize(StationOperator stationOperator, Sorter sorter)
     {
-        _stationsProgress = new();
-        _stations = new();
+        _stationOperator = stationOperator;
+        _sorter = sorter;
+
+        _stationOperator.Initialize();
 
         _passengersToSort = new(1);
         IsFinished = false;
@@ -27,9 +28,12 @@ public class PassengerCar : MonoBehaviour
     {
         bool isNeed = false;
         Debug.Log("Passenger Car checking station status");
-        TryAddStationToProgress(foundStation);
+        Debug.Log("Passenger Car try add station to progress");
 
-        if (IsVisited(foundStation))
+        if (_stationOperator.TryAddStationToProgress(foundStation))
+            Debug.Log("Passenger Car adding new station success");
+
+        if (_stationOperator.IsVisited(foundStation))
         {
             Debug.Log("Passenger Car already visited this station");
             return isNeed;
@@ -42,7 +46,7 @@ public class PassengerCar : MonoBehaviour
 
     public void Sort(Station station)
     {
-        MarkVisited(station);
+        _stationOperator.MarkVisited(station);
         IsSorting = true;
         StartCoroutine(ImitateSorting());
     }
@@ -55,7 +59,8 @@ public class PassengerCar : MonoBehaviour
         {
             if (_isReset == false)
             {
-                ResetProgress();
+                Debug.Log("Passenger Car reseting progress");
+                _stationOperator.ResetProgress();
                 _isReset = true;
             }
         }
@@ -68,42 +73,6 @@ public class PassengerCar : MonoBehaviour
         if (_isNeedToSort == false)
         {
             IsFinished = true;
-        }
-    }
-
-    private void TryAddStationToProgress(Station station)
-    {
-        Debug.Log("Passenger Car try add station to progress");
-
-        if (_stations.Contains(station) == false)
-        {
-            Debug.Log("Passenger Car adding new station success");
-            _stations.Add(station);
-            _stationsProgress.Add((station, false));
-        }
-    }
-
-    private bool IsVisited(Station station)
-    {
-        Debug.Log("Passenger Car checking status of station");
-        int stationIndex = _stationsProgress.FindIndex(progress => progress.station == station);
-
-        return _stationsProgress[stationIndex].isVisited;
-    }
-
-    private void MarkVisited(Station station)
-    {
-        int stationIndex = _stationsProgress.FindIndex(progress => progress.station == station);
-        _stationsProgress[stationIndex] = (_stationsProgress[stationIndex].station, true);
-    }
-
-    private void ResetProgress()
-    {
-        Debug.Log("Passenger Car reseting progress");
-
-        for (int i = 0; i < _stationsProgress.Count; i++)
-        {
-            _stationsProgress[i] = (_stationsProgress[i].station, false);
         }
     }
 
