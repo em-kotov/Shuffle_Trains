@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Properties;
 using UnityEngine;
 
 public class PassengerCar : MonoBehaviour
@@ -13,7 +11,6 @@ public class PassengerCar : MonoBehaviour
     private bool _isReset = true;
     private bool _isNeedToSort = true;
 
-    public bool IsStopping { get; private set; }
     public bool IsFinished { get; private set; }
     public bool IsSorting { get; private set; }
 
@@ -26,21 +23,26 @@ public class PassengerCar : MonoBehaviour
         IsFinished = false;
     }
 
-    public void TryStopAtStation(Station foundStation)
+    public bool IsNeedToSort(Station foundStation)
     {
-        IsStopping = false;
-        Debug.Log("Passenger Car try stop at station");
+        bool isNeed = false;
+        Debug.Log("Passenger Car checking station status");
         TryAddStationToProgress(foundStation);
 
-        if (IsVisited(foundStation, out int stationIndex))
+        if (IsVisited(foundStation))
         {
-            Debug.Log("Passenger Car checking found station already visited");
-            return;
+            Debug.Log("Passenger Car already visited this station");
+            return isNeed;
         }
 
-        IsStopping = true;
-        Debug.Log("Passenger Car found station still not visited, is stopping");
-        MarkVisited(stationIndex);
+        Debug.Log("Passenger Car still not visited this station");
+        isNeed = true;
+        return isNeed;
+    }
+
+    public void Sort(Station station)
+    {
+        MarkVisited(station);
         IsSorting = true;
         StartCoroutine(ImitateSorting());
     }
@@ -59,7 +61,7 @@ public class PassengerCar : MonoBehaviour
         }
     }
 
-    public void TryFinishSorting()
+    private void TryFinishSorting()
     {
         Debug.Log("Passenger Car try finish sorting");
 
@@ -81,16 +83,17 @@ public class PassengerCar : MonoBehaviour
         }
     }
 
-    private bool IsVisited(Station station, out int stationIndex)
+    private bool IsVisited(Station station)
     {
         Debug.Log("Passenger Car checking status of station");
-        stationIndex = _stationsProgress.FindIndex(progress => progress.station == station);
+        int stationIndex = _stationsProgress.FindIndex(progress => progress.station == station);
 
         return _stationsProgress[stationIndex].isVisited;
     }
 
-    private void MarkVisited(int stationIndex)
+    private void MarkVisited(Station station)
     {
+        int stationIndex = _stationsProgress.FindIndex(progress => progress.station == station);
         _stationsProgress[stationIndex] = (_stationsProgress[stationIndex].station, true);
     }
 

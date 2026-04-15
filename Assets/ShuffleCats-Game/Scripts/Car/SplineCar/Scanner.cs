@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Scanner : MonoBehaviour
 {
-    [SerializeField] private Transform _forwardOrigin;
     [SerializeField] private Transform _backwardOrigin;
 
     private float _maxRayDistance = 2f;
@@ -13,20 +12,17 @@ public class Scanner : MonoBehaviour
     private string _carsLayerName = "Cars";
     private string _stationLayerName = "Station";
     private string _stationResetLayerName = "StationReset";
-    private string _liquidationAreaName = "LiquidationArea";
     private bool _isScanning = true;
-    private bool _isLiquidationFound = false;
     private Coroutine _scanRoutine;
 
     public event Action BumpFound;
     public event Action<Station> StationFound;
     public event Action ResetFound;
-    public event Action LiquidationFound;
 
     public void Initialize()
     {
         _detectLayer = LayerMask.GetMask(_carsLayerName, _stationLayerName,
-                                _stationResetLayerName, _liquidationAreaName);
+                                _stationResetLayerName);
         Debug.Log("Bump Detector initialized");
         StartScanning();
     }
@@ -94,11 +90,6 @@ public class Scanner : MonoBehaviour
                 Debug.Log("Bump Detector found a station Reset");
                 InvokeReset();
             }
-            else if (hitLayer == LayerMask.NameToLayer(_liquidationAreaName))
-            {
-                Debug.Log("Bump Detector found a liquidation Area");
-                InvokeLiquidation();
-            }
         }
     }
 
@@ -118,15 +109,6 @@ public class Scanner : MonoBehaviour
     private void InvokeReset()
     {
         ResetFound?.Invoke();
-    }
-
-    private void InvokeLiquidation()
-    {
-        if (_isLiquidationFound)
-            return;
-
-        _isLiquidationFound = true;
-        LiquidationFound?.Invoke();
     }
 
     private void OnDrawGizmos()

@@ -91,29 +91,15 @@ public class Subscriber : MonoBehaviour
         _splineCar.Initialize(_mover, _carHead, _trackSwitcher,
                             _splineAnimate, _trackSpline, _trackSpeed,
                             _searchMin, _searchMax, _trackRegistrator,
-                            _waitTime, _exitSpline, _splineOperator, _length);
+                            _exitSpline, _splineOperator);
 
         _scanner.BumpFound += OnBumpFound;
-
         _scanner.StationFound += OnStationFound;
         _scanner.ResetFound += OnResetFound;
-
-        _scanner.LiquidationFound += OnLiquidationFound;
 
         _scanner.Initialize();
 
         _splineCar.GoToTrack();
-    }
-
-    private void DeactivateSplineCar()
-    {
-        _splineCar.Stop();
-        _splineCar.SetNormalizedTime(0.999f);
-
-        _scanner.BumpFound -= OnBumpFound;
-
-        _scanner.StationFound -= OnStationFound;
-        _scanner.ResetFound -= OnResetFound;
     }
 
     private void ActivateParkingCar()
@@ -135,15 +121,6 @@ public class Subscriber : MonoBehaviour
         _parkingCar.enabled = false;
     }
 
-    private void OnLiquidationFound()
-    {
-        Debug.Log("Subscriber starting liquidation");
-        _scanner.LiquidationFound -= OnLiquidationFound;
-        _scanner.StopScanning();
-        DeactivateSplineCar();
-        _carHead.gameObject.GetComponent<Collider>().enabled = false;
-    }
-
     private void OnBumpFound()
     {
         _splineCar.Jump();
@@ -154,27 +131,43 @@ public class Subscriber : MonoBehaviour
         if (_passengerCar.IsFinished)
             return;
 
-        _passengerCar.TryStopAtStation(station);
+        if (_passengerCar.IsNeedToSort(station) == false)
+            return;
 
-        if (_passengerCar.IsStopping)
-        {
-            _splineCar.Stop();
-            _scanner.StopScanning();
-            StartCoroutine(WaitFinishSorting());
-        }
+        _splineCar.Stop();
+        _scanner.StopScanning();
+
+        _passengerCar.Sort(station);
+
+        StartCoroutine(WaitFinishSorting(station.StopNumberExit()));
     }
 
-    private IEnumerator WaitFinishSorting()
+    private IEnumerator WaitFinishSorting(float t)
     {
         yield return new WaitUntil(() => _passengerCar.IsSorting == false);
 
         if (_passengerCar.IsFinished)
         {
-            _splineCar.SwitchSplineToExit();
+            _splineCar.SwitchSplineToNearest();
+            yield return new WaitUntil(() => _splineCar.IsOnExit == true);
+            StartCoroutine(WaitCompletedExit());
         }
 
         _splineCar.Play();
         _scanner.StartScanning();
+    }
+
+    private IEnumerator WaitCompletedExit()
+    {
+        yield return new WaitUntil(() => _splineCar.IsReachedEnd() == true);
+
+        _scanner.StopScanning();
+        _scanner.BumpFound -= OnBumpFound;
+        _scanner.StationFound -= OnStationFound;
+        _scanner.ResetFound -= OnResetFound;
+
+        _splineCar.Stop();
+        _carHead.gameObject.GetComponent<Collider>().enabled = false;
     }
 
     private void OnResetFound()

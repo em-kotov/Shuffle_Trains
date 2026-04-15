@@ -1,5 +1,5 @@
-using System;
 using System.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
 
@@ -20,11 +20,12 @@ public class SplineCar : MonoBehaviour
     private float _searchMin;
     private float _searchMax;
 
+    public bool IsOnExit { get; private set; }
+
     public void Initialize(Mover mover, Transform carHead, TrackSwitcher trackSwitcher,
                         SplineAnimate splineAnimate, SplineContainer track, float speed,
                         float searchMin, float searchMax, TrackRegistrator trackRegistrator,
-                        float waitTime, SplineContainer exitTrack, SplineOperator splineOperator,
-                        int wagonCount = 1)
+                        SplineContainer exitTrack, SplineOperator splineOperator)
     {
         _mover = mover;
         _carHead = carHead;
@@ -38,6 +39,7 @@ public class SplineCar : MonoBehaviour
         _searchMax = searchMax;
 
         _splineOperator.Initialize(splineAnimate);
+        IsOnExit = false;
 
         Debug.Log("Spline Car initialized");
     }
@@ -45,16 +47,7 @@ public class SplineCar : MonoBehaviour
     public void GoToTrack()
     {
         Debug.Log("Spline Car goes to track");
-
-        _currentPosition = _carHead.position;
-        _enterPoint = _trackRegistrator.GetEntryPoint(_currentPosition, _searchMin,
-                                               _searchMax, out _interpolatedSplinePosition);
         StartCoroutine(EnterTrackWithPause());
-    }
-
-    public Vector3 GetPosition()
-    {
-        return _carHead.position;
     }
 
     public void Jump()
@@ -72,15 +65,23 @@ public class SplineCar : MonoBehaviour
         _splineOperator.Play();
     }
 
-    public void SwitchSplineToExit()
+    public Vector3 GetPosition()
     {
-        Debug.Log("Spline Car received exit, changing track");
-        _splineOperator.SwitchSpline(_exitTrack, _carHead, _speed);
+        return _carHead.position;
     }
 
-    public void SetNormalizedTime(float t)
+    public bool IsReachedEnd()
     {
-        _splineOperator.SetNormalizedTime(t);
+        SplineUtility.Evaluate(_exitTrack.Spline, 1.0f, out float3 splineEndPos, out _, out _);
+        Vector3 endPosition = _exitTrack.transform.TransformPoint(splineEndPos);
+        return Vector3.Distance(_carHead.position, endPosition) <= 1f;
+    }
+
+    public void SwitchSplineToNearest()
+    {
+        Debug.Log("Spline Car received exit, changing track");
+        _splineOperator.SwitchSplineToNearest(_exitTrack, _carHead, _speed);
+        IsOnExit = true;
     }
 
     private IEnumerator EnterTrackWithPause()
@@ -115,5 +116,14 @@ public class SplineCar : MonoBehaviour
     {
         _isMoving = false;
         _mover.FinishedMoving -= OnMoverFinishedMove;
+    }
+
+    private void OnDrawGizmos()
+    {
+        SplineUtility.Evaluate(_exitTrack.Spline, 1.0f, out float3 splineEndPos, out _, out _);
+        Vector3 endPosition = _exitTrack.transform.TransformPoint(splineEndPos);
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawSphere(endPosition, 1f);
     }
 }

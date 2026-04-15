@@ -1,4 +1,3 @@
-using System.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -21,29 +20,6 @@ public class SplineOperator : MonoBehaviour
         _splineAnimate.Play();
     }
 
-    public void JumpForward()
-    {
-        float stepSize = 0.01f;
-        _splineAnimate.NormalizedTime = Mathf.Min(1f, _splineAnimate.NormalizedTime + stepSize);
-    }
-
-    public void SwitchSpline(SplineContainer newSplineContainer, Transform car, float speed)
-    {
-        //_splineAnimate.Pause();
-
-        Vector3 localPosition = newSplineContainer.transform.InverseTransformPoint(
-                                                    car.position);
-        SplineUtilityExtension.GetNearestPoint(newSplineContainer.Spline, localPosition,
-                                        out float3 nearest, out float t);
-
-       Debug.Log("Spline Operator switching spline - currnet t: "+ _splineAnimate.NormalizedTime+". closest t: " + t);
-        _splineAnimate.Container = newSplineContainer;
-        _splineAnimate.NormalizedTime = t; //t of exit spline to enter
-        _splineAnimate.Duration = CalculateDuration(newSplineContainer.Spline, speed);
-
-        //_splineAnimate.Play();
-    }
-
     public void Pause()
     {
         _splineAnimate.Pause();
@@ -54,9 +30,23 @@ public class SplineOperator : MonoBehaviour
         _splineAnimate.Play();
     }
 
-    public void SetNormalizedTime(float time)
+    public void JumpForward()
     {
-        _splineAnimate.NormalizedTime = time;
+        float stepSize = 0.01f;
+        _splineAnimate.NormalizedTime = Mathf.Min(1f, _splineAnimate.NormalizedTime + stepSize);
+    }
+
+    public void SwitchSplineToNearest(SplineContainer newSplineContainer, Transform car, float speed)
+    {
+        Vector3 worldPosition = car.position;
+        _splineAnimate.Container = newSplineContainer;
+        _splineAnimate.StartOffset = 0f;
+        Vector3 localPosition = newSplineContainer.transform.InverseTransformPoint(worldPosition);
+        SplineUtilityExtension.GetNearestPoint(newSplineContainer.Spline, localPosition,
+                                        out float3 nearest, out float t, resolution: 32, iterations: 8);
+        _splineAnimate.NormalizedTime = t;
+        car.position = newSplineContainer.transform.TransformPoint(nearest);
+        _splineAnimate.Duration = CalculateDuration(newSplineContainer.Spline, speed);
     }
 
     private float CalculateDuration(ISpline spline, float speed)
