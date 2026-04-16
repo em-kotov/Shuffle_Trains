@@ -13,12 +13,17 @@ public class PassengerCar : MonoBehaviour
     public bool IsFinished { get; private set; }
     public bool IsSorting { get; private set; }
 
-    public void Initialize(StationOperator stationOperator, Sorter sorter)
+    public void Initialize(StationOperator stationOperator,
+            Sorter sorter, List<Passenger> passengers, List<Transform> holdPoints)
     {
         _stationOperator = stationOperator;
         _sorter = sorter;
 
         _stationOperator.Initialize();
+
+        //
+        _sorter.Initialize(2, passengers, holdPoints);
+        //
 
         _passengersToSort = new(1);
         IsFinished = false;
@@ -48,7 +53,7 @@ public class PassengerCar : MonoBehaviour
     {
         _stationOperator.MarkVisited(station);
         IsSorting = true;
-        StartCoroutine(ImitateSorting());
+        StartCoroutine(ImitateSorting(station));
     }
 
     public void TryResetStationProgress()
@@ -76,12 +81,15 @@ public class PassengerCar : MonoBehaviour
         }
     }
 
-    private IEnumerator ImitateSorting()
+    private IEnumerator ImitateSorting(Station station)
     {
         Debug.Log("Passenger Car is sorting");
         float time = 0.8f;
         yield return new WaitForSeconds(time);
+
         //sorting logic here
+        _sorter.DropOff(station);
+        //
 
         _isNeedToSort = false; // for now only 1 station visit
 

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Splines;
@@ -22,6 +23,11 @@ public class Subscriber : MonoBehaviour
     [SerializeField] private SplineOperator _splineOperator;
     [SerializeField] private StationOperator _stationOperator;
     [SerializeField] private Sorter _sorter;
+
+    [Header("Passengers Setup")]
+    [SerializeField] private int _totalPassengersCount;
+    [SerializeField] private List<Passenger> _passengers = new();
+    [SerializeField] private List<Transform> _holdPoints;
 
     private ParkingRegistrator _parkingRegistrator;
     private TrackRegistrator _trackRegistrator;
@@ -58,7 +64,7 @@ public class Subscriber : MonoBehaviour
 
         ActivateParkingCar();
         _mover.Initialize(_carHead, _slideDuration);
-        _passengerCar.Initialize(_stationOperator, _sorter);
+        _passengerCar.Initialize(_stationOperator, _sorter, _passengers, _holdPoints);
     }
 
     private IEnumerator OnBorderArrivalRoutine()
