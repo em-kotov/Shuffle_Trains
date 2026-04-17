@@ -26,7 +26,7 @@ public class Subscriber : MonoBehaviour
 
     [Header("Passengers Setup")]
     [SerializeField] private int _totalPassengersCount;
-    [SerializeField] private List<Passenger> _passengers = new();
+    [SerializeField] private List<CatColor> _colors;
     [SerializeField] private List<Transform> _holdPoints;
 
     private ParkingRegistrator _parkingRegistrator;
@@ -40,6 +40,7 @@ public class Subscriber : MonoBehaviour
     private float _searchMax;
     private float _waitTime;
     private bool _isCarOnBorder = false;
+    private List<Passenger> _passengers;
 
     private void OnEnable()
     {
@@ -49,7 +50,8 @@ public class Subscriber : MonoBehaviour
     public void Initialize(ParkingRegistrator parkingRegistrator, SplineContainer trackSpline,
                         PhysicsRaycaster raycaster, TrackRegistrator trackRegistrator,
                         float trackSpeed, float slideDuration, float waitTime,
-                        SplineContainer exitSpline, float searchMin = 0f, float searchMax = 1f)
+                        SplineContainer exitSpline, Passenger passengerPrefab,
+                        float searchMin = 0f, float searchMax = 1f)
     {
         _parkingRegistrator = parkingRegistrator;
         _trackRegistrator = trackRegistrator;
@@ -64,7 +66,9 @@ public class Subscriber : MonoBehaviour
 
         ActivateParkingCar();
         _mover.Initialize(_carHead, _slideDuration);
-        _passengerCar.Initialize(_stationOperator, _sorter, _passengers, _holdPoints);
+        List<Passenger> pass = CreatePassengers(passengerPrefab);
+        Debug.Log("Subscriber - created passengers of count: " + pass.Count);
+        _passengerCar.Initialize(_stationOperator, _sorter, pass, _holdPoints);
     }
 
     private IEnumerator OnBorderArrivalRoutine()
@@ -185,5 +189,24 @@ public class Subscriber : MonoBehaviour
             return;
 
         _passengerCar.TryResetStationProgress();
+    }
+
+    private List<Passenger> CreatePassengers(Passenger passengerPrefab)
+    {
+        _passengers = new();
+
+        if (_colors.Count < _totalPassengersCount)
+        {
+            Debug.Log("Subscriber - missing colors for passengers");
+        }
+
+        for (int i = 0; i < _totalPassengersCount; i++)
+        {
+            Passenger passenger = Instantiate(passengerPrefab, transform.position, Quaternion.identity);
+            passenger.AssignColor(_colors[i]);
+            _passengers.Add(passenger);
+        }
+
+        return _passengers;
     }
 }

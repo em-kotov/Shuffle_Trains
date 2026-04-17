@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Sorter : MonoBehaviour
@@ -50,6 +51,7 @@ public class Sorter : MonoBehaviour
         }
 
         // deassign passengers from cat
+        RemovePassengers(dropPassengers);
         AssignPassengers(dropPassengers, seats);
     }
 
@@ -78,7 +80,8 @@ public class Sorter : MonoBehaviour
 
     private CatColor GetFirstColorOfPassengers()
     {
-        return _passengers[0].CatColor;
+        int firstIndex = 0;
+        return _passengers[firstIndex].CatColor;
     }
 
     private void AssignPassengers(List<Passenger> passengers, List<Transform> holdPoints)
@@ -86,6 +89,29 @@ public class Sorter : MonoBehaviour
         for (int i = 0; i < passengers.Count; i++)
         {
             passengers[i].transform.SetParent(holdPoints[i]);
+            passengers[i].transform.localPosition = Vector3.zero;
+            passengers[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
         }
     }
+
+    private void RemovePassengers(List<Passenger> passengersToRemove)
+    {
+        for (int i = 0; i < passengersToRemove.Count; i++)
+        {
+            _passengers.Remove(passengersToRemove[i]);
+        }
+    }
+
+    // private void OnDrawGizmos()
+    // {
+    //     Gizmos.color = Color.magenta;
+
+    //     if (_holdPoints.Count != 0)
+    //     {
+    //         for (int i = 0; i < _holdPoints.Count; i++)
+    //         {
+    //             Gizmos.DrawWireSphere(_holdPoints[i].position, 0.15f);
+    //         }
+    //     }
+    // }
 }
