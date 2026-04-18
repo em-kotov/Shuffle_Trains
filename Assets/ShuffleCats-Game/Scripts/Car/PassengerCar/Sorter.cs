@@ -1,58 +1,71 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class Sorter : MonoBehaviour
 {
-    private int _totalPassengersCount;
-    private Transform _passengersAssignParent;
-    private List<Passenger> _passengers;
+    private List<Passenger> _wrongPassengers;
     private List<Transform> _holdPoints;
     private int _passengersToSort;
 
     public void Initialize(int totalCount, List<Passenger> passengers, List<Transform> holdPoints)
     {
-        _totalPassengersCount = totalCount;
-        _passengers = passengers;
+        _wrongPassengers = passengers;
         _holdPoints = holdPoints;
 
-        AssignPassengers(_passengers, _holdPoints);
-        _passengersToSort = _passengers.Count;
+        AssignPassengers(_wrongPassengers, _holdPoints);
+        _passengersToSort = _wrongPassengers.Count;
     }
 
-    public void DropOff(Station station)
+    public bool HasPassengersToSort()
     {
-        List<Transform> seats = station.GetFreeSeats();
-        int seatsCount = seats.Count;
+        return _wrongPassengers.Count > 0;
+    }
+
+    public void DropPassenger(Passenger passenger, Transform seat)
+    {
+        _wrongPassengers.Remove(passenger);
+        passenger.transform.SetParent(seat);
+        passenger.transform.SetLocalPositionAndRotation(Vector3.zero,
+                                            Quaternion.Euler(Vector3.zero));
+    }
+
+    private void AssignPassengers(List<Passenger> passengers, List<Transform> holdPoints)
+    {
+        for (int i = 0; i < passengers.Count; i++)
+        {
+            passengers[i].transform.SetParent(holdPoints[i]);
+            passengers[i].transform.SetLocalPositionAndRotation(Vector3.zero,
+                                            Quaternion.Euler(Vector3.zero));
+        }
+    }
+
+    public List<Passenger> GetDropOffPassengers(CatColor catColor, int seatsCount)
+    {
+        List<Passenger> dropPassengers = new();
 
         if (_passengersToSort == 0 || seatsCount == 0)
         {
-            return;
+            return dropPassengers;
         }
 
         bool isStationColored = true;
 
-        if (station._catColor == CatColor.Uncolored)
+        if (catColor == CatColor.Uncolored)
         {
             isStationColored = false;
         }
 
-        List<Passenger> dropPassengers;
-
         if (isStationColored)
         {
-            dropPassengers = GetPassengersByColor(station._catColor, seatsCount);
+            dropPassengers = GetPassengersByColor(catColor, seatsCount);
         }
         else
         {
             dropPassengers = GetPassengersOfFirstColor(seatsCount);
         }
 
-        // deassign passengers from cat
-        RemovePassengers(dropPassengers);
-        AssignPassengers(dropPassengers, seats);
+        return dropPassengers;
     }
 
     private List<Passenger> GetPassengersOfFirstColor(int count)
@@ -64,7 +77,7 @@ public class Sorter : MonoBehaviour
     {
         List<Passenger> dropPassengers = new();
 
-        List<Passenger> temporary = _passengers.FindAll(
+        List<Passenger> temporary = _wrongPassengers.FindAll(
             passenger => passenger.CatColor == catColor).ToList();
 
         if (temporary.Count <= count)
@@ -81,37 +94,6 @@ public class Sorter : MonoBehaviour
     private CatColor GetFirstColorOfPassengers()
     {
         int firstIndex = 0;
-        return _passengers[firstIndex].CatColor;
+        return _wrongPassengers[firstIndex].CatColor;
     }
-
-    private void AssignPassengers(List<Passenger> passengers, List<Transform> holdPoints)
-    {
-        for (int i = 0; i < passengers.Count; i++)
-        {
-            passengers[i].transform.SetParent(holdPoints[i]);
-            passengers[i].transform.localPosition = Vector3.zero;
-            passengers[i].transform.localRotation = Quaternion.Euler(Vector3.zero);
-        }
-    }
-
-    private void RemovePassengers(List<Passenger> passengersToRemove)
-    {
-        for (int i = 0; i < passengersToRemove.Count; i++)
-        {
-            _passengers.Remove(passengersToRemove[i]);
-        }
-    }
-
-    // private void OnDrawGizmos()
-    // {
-    //     Gizmos.color = Color.magenta;
-
-    //     if (_holdPoints.Count != 0)
-    //     {
-    //         for (int i = 0; i < _holdPoints.Count; i++)
-    //         {
-    //             Gizmos.DrawWireSphere(_holdPoints[i].position, 0.15f);
-    //         }
-    //     }
-    // }
 }

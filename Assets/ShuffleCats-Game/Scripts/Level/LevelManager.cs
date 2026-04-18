@@ -33,6 +33,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private SplineContainer _exitSpline;
     [SerializeField] private PhysicsRaycaster _raycaster;
     [SerializeField] private Passenger _passengerPrefab;
+    [SerializeField] private List<Station> _stations;
     [SerializeField] private List<Subscriber> _carSubscribers;
 
     private void Awake()
@@ -49,6 +50,11 @@ public class LevelManager : MonoBehaviour
             subscriber.Initialize(_parkingRegistrator, _trackSpline, _raycaster,
                                     _trackRegistrator, _trackSpeed, _slideDuration,
                                     _waitTime, _exitSpline, _passengerPrefab, _searchMin, _searchMax);
+        }
+
+        foreach (Station station in _stations)
+        {
+            station.Initialize();
         }
     }
 }

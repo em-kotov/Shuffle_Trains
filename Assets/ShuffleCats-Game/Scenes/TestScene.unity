@@ -305,6 +305,9 @@ MonoBehaviour:
   _exitSpline: {fileID: 2046046272}
   _raycaster: {fileID: 963194229}
   _passengerPrefab: {fileID: 5638810976796634233, guid: 334853503dd589d4c92e20e2cfa9ad75, type: 3}
+  _stations:
+  - {fileID: 1783944126779803228}
+  - {fileID: 2096084758}
   _carSubscribers:
   - {fileID: 1490317495}
   - {fileID: 68367832}
@@ -4035,6 +4038,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 70c098bd670841c45a42e2030d070136, type: 3}
+--- !u!114 &2096084758 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 977921181799266515, guid: 70c098bd670841c45a42e2030d070136, type: 3}
+  m_PrefabInstance: {fileID: 2096084757}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62b72dd14c94061419061b5fbd9ee8de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2108588326
 GameObject:
   m_ObjectHideFlags: 0
@@ -4138,6 +4152,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 70c098bd670841c45a42e2030d070136, type: 3}
+--- !u!114 &1783944126779803228 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 977921181799266515, guid: 70c098bd670841c45a42e2030d070136, type: 3}
+  m_PrefabInstance: {fileID: 1783944126779803227}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62b72dd14c94061419061b5fbd9ee8de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &3490052325204215083
 PrefabInstance:
   m_ObjectHideFlags: 0

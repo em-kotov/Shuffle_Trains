@@ -67,7 +67,6 @@ public class Subscriber : MonoBehaviour
         ActivateParkingCar();
         _mover.Initialize(_carHead, _slideDuration);
         List<Passenger> pass = CreatePassengers(passengerPrefab);
-        Debug.Log("Subscriber - created passengers of count: " + pass.Count);
         _passengerCar.Initialize(_stationOperator, _sorter, pass, _holdPoints);
     }
 
@@ -91,7 +90,6 @@ public class Subscriber : MonoBehaviour
 
     private void OnBorderArrival()
     {
-        Debug.Log("Subscriber - starting On border arrival coroutine");
         _isCarOnBorder = true;
         StartCoroutine(OnBorderArrivalRoutine());
         _isCarOnBorder = false;
@@ -197,7 +195,7 @@ public class Subscriber : MonoBehaviour
 
         if (_colors.Count < _totalPassengersCount)
         {
-            Debug.Log("Subscriber - missing colors for passengers");
+            Debug.LogWarning("Subscriber - missing colors for passengers");
         }
 
         for (int i = 0; i < _totalPassengersCount; i++)
@@ -208,5 +206,17 @@ public class Subscriber : MonoBehaviour
         }
 
         return _passengers;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (_holdPoints.Count != 0)
+        {
+            for (int i = 0; i < _holdPoints.Count; i++)
+            {
+                Gizmos.color = ColorHelper.GetGizmoColor(_colors[i]);
+                Gizmos.DrawWireSphere(_holdPoints[i].position, 0.15f);
+            }
+        }
     }
 }

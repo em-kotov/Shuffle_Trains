@@ -4,9 +4,8 @@ using UnityEngine;
 
 public class PassengerCar : MonoBehaviour
 {
-    private List<int> _passengersToSort;
     private bool _isReset = true;
-    private bool _isNeedToSort = true;
+    private bool _isNeedToSort;
     private StationOperator _stationOperator;
     private Sorter _sorter;
 
@@ -21,30 +20,23 @@ public class PassengerCar : MonoBehaviour
 
         _stationOperator.Initialize();
 
-        //
         _sorter.Initialize(2, passengers, holdPoints);
-        //
 
-        _passengersToSort = new(1);
+        _isNeedToSort = IsNeedToSort();
         IsFinished = false;
     }
 
     public bool IsNeedToSort(Station foundStation)
     {
         bool isNeed = false;
-        Debug.Log("Passenger Car checking station status");
-        Debug.Log("Passenger Car try add station to progress");
 
-        if (_stationOperator.TryAddStationToProgress(foundStation))
-            Debug.Log("Passenger Car adding new station success");
+        _stationOperator.TryAddStationToProgress(foundStation);
 
         if (_stationOperator.IsVisited(foundStation))
         {
-            Debug.Log("Passenger Car already visited this station");
             return isNeed;
         }
 
-        Debug.Log("Passenger Car still not visited this station");
         isNeed = true;
         return isNeed;
     }
@@ -58,13 +50,10 @@ public class PassengerCar : MonoBehaviour
 
     public void TryResetStationProgress()
     {
-        Debug.Log("Passenger Car try reset progress");
-
         if (_isNeedToSort)
         {
             if (_isReset == false)
             {
-                Debug.Log("Passenger Car reseting progress");
                 _stationOperator.ResetProgress();
                 _isReset = true;
             }
@@ -73,8 +62,6 @@ public class PassengerCar : MonoBehaviour
 
     private void TryFinishSorting()
     {
-        Debug.Log("Passenger Car try finish sorting");
-
         if (_isNeedToSort == false)
         {
             IsFinished = true;
@@ -84,17 +71,31 @@ public class PassengerCar : MonoBehaviour
     private IEnumerator ImitateSorting(Station station)
     {
         Debug.Log("Passenger Car is sorting");
-        float time = 0.8f;
-        yield return new WaitForSeconds(time);
 
-        //sorting logic here
-        _sorter.DropOff(station);
-        //
+        List<Transform> seats = station.GetFreeSeats();
+        List<Passenger> dropPassengers = _sorter.GetDropOffPassengers(station.CatColor, seats.Count);
 
-        _isNeedToSort = false; // for now only 1 station visit
+        float timeForPassenger = 0.25f;
+        WaitForSeconds wait = new WaitForSeconds(timeForPassenger);
+
+        for (int i = 0; i < dropPassengers.Count; i++)
+        {
+            _sorter.DropPassenger(dropPassengers[i], seats[i]);
+            yield return wait;
+        }
+
+        station.UpdatePassengers(dropPassengers);
+
+        // here should determine _isNeedToSort
+        _isNeedToSort = IsNeedToSort();
 
         TryFinishSorting();
         IsSorting = false;
         Debug.Log("Passenger Car is sorted");
+    }
+
+    private bool IsNeedToSort()
+    {
+        return _sorter.HasPassengersToSort();
     }
 }
