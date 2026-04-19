@@ -44,4 +44,22 @@ public class StationOperator : MonoBehaviour
             _stationsProgress[i] = (_stationsProgress[i].station, false);
         }
     }
+
+    public bool IsNeedToReset()
+    {
+        if (_stations.Count < _totalStationCount)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < _stationsProgress.Count; i++)
+        {
+            if (_stationsProgress[i].isVisited == false)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

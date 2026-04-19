@@ -78,6 +78,11 @@ public class Station : MonoBehaviour
         _seats[seatIndex] = new(_seats[seatIndex].holdPoint, null);
 
         _passengers.Remove(passenger);
+
+        if (_passengers.Count == 0)
+        {
+            SetColor(CatColor.Uncolored);
+        }
     }
 
     private List<Passenger> GetPassengersByColor(CatColor catColor, int count)

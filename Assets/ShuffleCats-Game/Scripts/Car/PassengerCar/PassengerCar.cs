@@ -84,7 +84,7 @@ public class PassengerCar : MonoBehaviour
         float timeForPassenger = 0.25f;
         WaitForSeconds wait = new WaitForSeconds(timeForPassenger);
 
-        Debug.Log($"PassengerCar - drop passengers: {dropPassengers.Count}, station seats: {seats.Count}");
+        Debug.Log($"PassengerCar - drop passengers: {dropPassengers.Count}, station seats: {seats.Count}, car color: {_catColor}");
 
         for (int i = 0; i < dropPassengers.Count; i++)
         {
@@ -110,6 +110,12 @@ public class PassengerCar : MonoBehaviour
 
         _isNeedToSort = IsNeedToSort();
         Debug.Log($"Passenger Car - is need to sort: {_isNeedToSort}");
+
+        //reset check here
+        if (_stationOperator.IsNeedToReset())
+        {
+            _isReset = false;
+        }
 
         TryFinishSorting();
         IsSorting = false;

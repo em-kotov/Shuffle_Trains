@@ -309,6 +309,7 @@ MonoBehaviour:
   _segmentsCount: 30
   _maxCarsOnTrackCount: 6
   _waitTime: 0.3
+  _stationCount: 2
   _trackSpeed: 12
   _slideDuration: 0.3
   _searchMin: 0
