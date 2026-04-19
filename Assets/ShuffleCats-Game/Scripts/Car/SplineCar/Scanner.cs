@@ -23,7 +23,6 @@ public class Scanner : MonoBehaviour
     {
         _detectLayer = LayerMask.GetMask(_carsLayerName, _stationLayerName,
                                 _stationResetLayerName);
-        Debug.Log("Bump Detector initialized");
         StartScanning();
     }
 
@@ -31,14 +30,12 @@ public class Scanner : MonoBehaviour
     {
         StopScanning();
 
-        Debug.Log("Scanner is resuming");
         _isScanning = true;
         _scanRoutine = StartCoroutine(RaycastWithInterval());
     }
 
     public void StopScanning()
     {
-        Debug.Log("Scanner is stopping");
         _isScanning = false;
 
         if (_scanRoutine != null)
@@ -66,19 +63,19 @@ public class Scanner : MonoBehaviour
         if (Physics.Raycast(origin, direction, out RaycastHit hit, _maxRayDistance, _detectLayer))
         {
             int hitLayer = hit.transform.gameObject.layer;
-            Debug.Log("Bump Detector detected object on a layer: " + hitLayer + ", name: " + hit.transform.gameObject.name);
+            //Debug.Log("Bump Detector detected object on a layer: " + hitLayer + ", name: " + hit.transform.gameObject.name);
 
             if (hitLayer == LayerMask.NameToLayer(_carsLayerName))
             {
-                Debug.Log("Bump Detector Bumped at car");
+                //Debug.Log("Bump Detector Bumped at car");
                 InvokeBump(hit.distance);
             }
             else if (hitLayer == LayerMask.NameToLayer(_stationLayerName))
             {
-                Debug.Log("Bump Detector Found a station");
+                //Debug.Log("Bump Detector Found a station");
                 bool hasStation = hit.transform.gameObject.TryGetComponent(out Station foundStation);
 
-                Debug.Log("Bump Detector station: " + foundStation);
+                //Debug.Log("Bump Detector station: " + foundStation);
 
                 if (hasStation)
                 {
@@ -87,7 +84,7 @@ public class Scanner : MonoBehaviour
             }
             else if (hitLayer == LayerMask.NameToLayer(_stationResetLayerName))
             {
-                Debug.Log("Bump Detector found a station Reset");
+                //Debug.Log("Bump Detector found a station Reset");
                 InvokeReset();
             }
         }

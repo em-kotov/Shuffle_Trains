@@ -23,9 +23,12 @@ public class Subscriber : MonoBehaviour
     [SerializeField] private SplineOperator _splineOperator;
     [SerializeField] private StationOperator _stationOperator;
     [SerializeField] private Sorter _sorter;
+    [SerializeField] private SpriteRenderer _catTexture;
+    [SerializeField] private ScaleAnimation _scaleAnimation;
 
     [Header("Passengers Setup")]
     [SerializeField] private int _totalPassengersCount;
+    [SerializeField] private CatColor _carColor;
     [SerializeField] private List<CatColor> _colors;
     [SerializeField] private List<Transform> _holdPoints;
 
@@ -51,7 +54,7 @@ public class Subscriber : MonoBehaviour
                         PhysicsRaycaster raycaster, TrackRegistrator trackRegistrator,
                         float trackSpeed, float slideDuration, float waitTime,
                         SplineContainer exitSpline, Passenger passengerPrefab,
-                        float searchMin = 0f, float searchMax = 1f)
+                        int stationCount, float searchMin = 0f, float searchMax = 1f)
     {
         _parkingRegistrator = parkingRegistrator;
         _trackRegistrator = trackRegistrator;
@@ -67,7 +70,9 @@ public class Subscriber : MonoBehaviour
         ActivateParkingCar();
         _mover.Initialize(_carHead, _slideDuration);
         List<Passenger> pass = CreatePassengers(passengerPrefab);
-        _passengerCar.Initialize(_stationOperator, _sorter, pass, _holdPoints);
+        _passengerCar.Initialize(_stationOperator, _sorter, pass, _holdPoints, _carColor, stationCount);
+
+        _scaleAnimation.Activate(_catTexture.transform);
     }
 
     private IEnumerator OnBorderArrivalRoutine()
@@ -179,6 +184,8 @@ public class Subscriber : MonoBehaviour
         _splineCar.Unregister();
         _splineCar.Stop();
         _carHead.gameObject.GetComponent<Collider>().enabled = false;
+
+        _scaleAnimation.Deactivate();
     }
 
     private void OnResetFound()
@@ -186,6 +193,7 @@ public class Subscriber : MonoBehaviour
         if (_passengerCar.IsFinished)
             return;
 
+        Debug.Log("Subscriber - on reset found");
         _passengerCar.TryResetStationProgress();
     }
 
@@ -210,11 +218,11 @@ public class Subscriber : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (_holdPoints.Count != 0)
+        if (_holdPoints.Count > 0)
         {
             for (int i = 0; i < _holdPoints.Count; i++)
             {
-                Gizmos.color = ColorHelper.GetGizmoColor(_colors[i]);
+                Gizmos.color = ColorHelper.GetGizmoColor(_carColor);
                 Gizmos.DrawWireSphere(_holdPoints[i].position, 0.15f);
             }
         }

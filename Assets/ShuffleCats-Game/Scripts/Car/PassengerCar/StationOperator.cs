@@ -5,9 +5,12 @@ public class StationOperator : MonoBehaviour
 {
     private List<(Station station, bool isVisited)> _stationsProgress;
     private List<Station> _stations;
+    private int _totalStationCount;
 
-    public void Initialize()
+    public void Initialize(int stationCount)
     {
+        _totalStationCount = stationCount;
+
         _stationsProgress = new();
         _stations = new();
     }

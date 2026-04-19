@@ -130,6 +130,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2013733967647569754, guid: 160ed0eaa4cd54a4ab1e227577ab3156, type: 3}
+      propertyPath: _duration
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2013733967647569754, guid: 160ed0eaa4cd54a4ab1e227577ab3156, type: 3}
+      propertyPath: _minScale
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2013733967647569754, guid: 160ed0eaa4cd54a4ab1e227577ab3156, type: 3}
+      propertyPath: _minScaleX
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2013733967647569754, guid: 160ed0eaa4cd54a4ab1e227577ab3156, type: 3}
+      propertyPath: _minScaleY
+      value: 0.9
+      objectReference: {fileID: 0}
     - target: {fileID: 2021630113312413390, guid: 160ed0eaa4cd54a4ab1e227577ab3156, type: 3}
       propertyPath: m_Name
       value: Cat-2-P
@@ -391,6 +407,18 @@ PrefabInstance:
     - target: {fileID: 6439151042556543893, guid: 83492692cf125da45a4c24b03c785055, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7006717723440589801, guid: 83492692cf125da45a4c24b03c785055, type: 3}
+      propertyPath: _duration
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7006717723440589801, guid: 83492692cf125da45a4c24b03c785055, type: 3}
+      propertyPath: _minScaleX
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7006717723440589801, guid: 83492692cf125da45a4c24b03c785055, type: 3}
+      propertyPath: _minScaleY
+      value: 0.9
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1404,6 +1432,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2013733967647569754, guid: 160ed0eaa4cd54a4ab1e227577ab3156, type: 3}
+      propertyPath: _duration
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2013733967647569754, guid: 160ed0eaa4cd54a4ab1e227577ab3156, type: 3}
+      propertyPath: _minScaleX
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2013733967647569754, guid: 160ed0eaa4cd54a4ab1e227577ab3156, type: 3}
+      propertyPath: _minScaleY
+      value: 0.9
+      objectReference: {fileID: 0}
     - target: {fileID: 2021630113312413390, guid: 160ed0eaa4cd54a4ab1e227577ab3156, type: 3}
       propertyPath: m_Name
       value: Cat-2-P (1)
@@ -1765,6 +1805,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1631380817543011650, guid: 5d57827b0573bf347abebf89df962ab3, type: 3}
+      propertyPath: _duration
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1631380817543011650, guid: 5d57827b0573bf347abebf89df962ab3, type: 3}
+      propertyPath: _minScale
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 1631380817543011650, guid: 5d57827b0573bf347abebf89df962ab3, type: 3}
+      propertyPath: _minScaleX
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1631380817543011650, guid: 5d57827b0573bf347abebf89df962ab3, type: 3}
+      propertyPath: _minScaleY
+      value: 0.9
+      objectReference: {fileID: 0}
     - target: {fileID: 2021630113312413390, guid: 5d57827b0573bf347abebf89df962ab3, type: 3}
       propertyPath: m_Name
       value: Cat-2-B (1)

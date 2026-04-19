@@ -41,12 +41,10 @@ public class SplineCar : MonoBehaviour
         _splineOperator.Initialize(splineAnimate);
         IsOnExit = false;
 
-        Debug.Log("Spline Car initialized");
     }
 
     public void GoToTrack()
     {
-        Debug.Log("Spline Car goes to track");
         StartCoroutine(EnterTrackWithPause());
     }
 
@@ -79,7 +77,6 @@ public class SplineCar : MonoBehaviour
 
     public void SwitchSplineToNearest()
     {
-        Debug.Log("Spline Car received exit, changing track");
         _splineOperator.SwitchSplineToNearest(_exitTrack, _carHead, _speed);
         IsOnExit = true;
     }

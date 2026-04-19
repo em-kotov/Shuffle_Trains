@@ -17,6 +17,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int _segmentsCount = 10;
     [SerializeField] private int _maxCarsOnTrackCount = 6;
     [SerializeField] private float _waitTime = 0.3f;
+    [SerializeField] private int _stationCount;
 
     [Header("Cars")]
     [SerializeField] private float _trackSpeed = 16f;
@@ -49,7 +50,8 @@ public class LevelManager : MonoBehaviour
         {
             subscriber.Initialize(_parkingRegistrator, _trackSpline, _raycaster,
                                     _trackRegistrator, _trackSpeed, _slideDuration,
-                                    _waitTime, _exitSpline, _passengerPrefab, _searchMin, _searchMax);
+                                    _waitTime, _exitSpline, _passengerPrefab,
+                                    _stationCount, _searchMin, _searchMax);
         }
 
         foreach (Station station in _stations)
