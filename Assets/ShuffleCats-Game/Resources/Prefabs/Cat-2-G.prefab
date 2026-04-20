@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5126303010245870072}
   - component: {fileID: 4449607128675847821}
   m_Layer: 0
-  m_Name: Sorter
+  m_Name: PassengerTracker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -210,7 +210,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _minScaleX: 0.8
   _minScaleY: 0.8
-  _maxScale: 1.2
   _duration: 1
 --- !u!1 &1766227014738638488
 GameObject:
@@ -317,14 +316,14 @@ MonoBehaviour:
   _carHead: {fileID: 2556304729057334673}
   _mover: {fileID: 3911854181696882068}
   _splineCar: {fileID: 6443444232799090446}
-  _passengerCar: {fileID: 3736770815315720122}
+  _sorterCar: {fileID: 3736770815315720122}
   _trackSwitcher: {fileID: 920604102250071739}
   _splineAnimate: {fileID: 8279809572554868432}
   _clickDetector: {fileID: 1063004317116569943}
   _scanner: {fileID: 3317639115707316861}
   _splineOperator: {fileID: 6179837744744911255}
   _stationOperator: {fileID: 8267635441630055910}
-  _sorter: {fileID: 4449607128675847821}
+  _passengerTracker: {fileID: 4449607128675847821}
   _catTexture: {fileID: 7115594434768739088}
   _scaleAnimation: {fileID: 7006717723440589801}
   _totalPassengersCount: 2
@@ -344,7 +343,7 @@ GameObject:
   - component: {fileID: 3761102059942068360}
   - component: {fileID: 3736770815315720122}
   m_Layer: 0
-  m_Name: PassengerCar
+  m_Name: SorterCar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

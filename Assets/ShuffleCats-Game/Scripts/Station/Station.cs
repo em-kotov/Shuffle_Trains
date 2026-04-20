@@ -2,26 +2,21 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Station : MonoBehaviour
+public class Station : SeatTracker
 {
     [SerializeField] private List<Transform> _holdPoints;
 
-    private List<(Transform holdPoint, Passenger passenger)> _seats;
     private List<Passenger> _passengers;
+    private SorterCar _currentSorterCar;
 
     public CatColor CatColor { get; private set; }
 
     public void Initialize()
     {
         _passengers = new();
-        _seats = new();
-
-        for (int i = 0; i < _holdPoints.Count; i++)
-        {
-            _seats.Add((_holdPoints[i], null));
-        }
-
+        base.Initialize(null, _holdPoints);
         SetColor(CatColor.Uncolored);
+        ClearCurrentCar();
     }
 
     public void UpdatePassengers(List<Passenger> passengers)
@@ -34,49 +29,14 @@ public class Station : MonoBehaviour
         for (int i = 0; i < passengers.Count; i++)
         {
             Transform holdPoint = passengers[i].transform.parent;
-            int seatIndex = _seats.FindIndex(seat => seat.holdPoint == holdPoint);
-
-            _seats[seatIndex] = new(_seats[seatIndex].holdPoint, passengers[i]);
+            base.AddPassenger(passengers[i], holdPoint);
             _passengers.Add(passengers[i]);
-            Debug.Log("Station - update passengers count: " + _passengers.Count);
         }
     }
 
-    public List<Transform> GetFreeSeats()
+    override public void RemovePassenger(Passenger passenger)
     {
-        List<Transform> seats = new();
-
-        for (int i = 0; i < _seats.Count; i++)
-        {
-            if (_seats[i].passenger == null)
-            {
-                seats.Add(_seats[i].holdPoint);
-            }
-        }
-
-        return seats;
-    }
-
-    public List<Passenger> GetPickupPassengers(CatColor catColor, int seatsCount)
-    {
-        List<Passenger> pickPassengers = new();
-
-        if (_passengers.Count == 0 || seatsCount == 0)
-        {
-            return pickPassengers;
-        }
-
-        pickPassengers = GetPassengersByColor(catColor, seatsCount);
-        Debug.Log($"Station - on get pickup passengers count: {_passengers.Count}");
-
-        return pickPassengers;
-    }
-
-    public void RemovePassenger(Passenger passenger)
-    {
-        int seatIndex = _seats.FindIndex(seat => seat.passenger == passenger);
-        _seats[seatIndex] = new(_seats[seatIndex].holdPoint, null);
-
+        base.RemovePassenger(passenger);
         _passengers.Remove(passenger);
 
         if (_passengers.Count == 0)
@@ -85,13 +45,45 @@ public class Station : MonoBehaviour
         }
     }
 
+    public List<Passenger> GetPickupPassengers(CatColor catColor, int seatsCount)
+    {
+        List<Passenger> pickPassengers = new();
+
+        if (_passengers.Count == 0 || seatsCount == 0)
+            return pickPassengers;
+
+        pickPassengers = GetPassengersByColor(catColor, seatsCount);
+
+        return pickPassengers;
+    }
+
+    public bool TrySetCurrentCar(SorterCar sorterCar)
+    {
+        if (_currentSorterCar == null)
+        {
+            _currentSorterCar = sorterCar;
+            return true;
+        }
+
+        return false;
+    }
+
+    public void ClearCurrentCar()
+    {
+        _currentSorterCar = null;
+    }
+
+    private void SetColor(CatColor catColor)
+    {
+        CatColor = catColor;
+    }
+
     private List<Passenger> GetPassengersByColor(CatColor catColor, int count)
     {
         List<Passenger> passengers = new();
 
         List<Passenger> temporary = _passengers.FindAll(
             passenger => passenger.CatColor == catColor).ToList();
-        Debug.Log($"Station - get passenger by color count: {temporary.Count}");
 
         if (temporary.Count <= count)
             return temporary;
@@ -104,11 +96,6 @@ public class Station : MonoBehaviour
         return passengers;
     }
 
-    private void SetColor(CatColor catColor)
-    {
-        CatColor = catColor;
-    }
-
     private void OnDrawGizmos()
     {
         List<(Transform holdPoint, Passenger passenger)> gizmoSeats = new();
@@ -116,9 +103,7 @@ public class Station : MonoBehaviour
         if (gizmoSeats.Count == 0)
         {
             foreach (Transform holdPoint in _holdPoints)
-            {
                 gizmoSeats.Add((holdPoint, null));
-            }
         }
 
         for (int i = 0; i < gizmoSeats.Count; i++)

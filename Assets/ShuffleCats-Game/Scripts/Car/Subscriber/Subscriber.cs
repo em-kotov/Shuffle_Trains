@@ -15,14 +15,14 @@ public class Subscriber : MonoBehaviour
     [SerializeField] private Transform _carHead;
     [SerializeField] private Mover _mover;
     [SerializeField] private SplineCar _splineCar;
-    [SerializeField] private PassengerCar _passengerCar;
+    [SerializeField] private SorterCar _sorterCar;
     [SerializeField] private TrackSwitcher _trackSwitcher;
     [SerializeField] private SplineAnimate _splineAnimate;
     [SerializeField] private ClickDetector _clickDetector;
     [SerializeField] private Scanner _scanner;
     [SerializeField] private SplineOperator _splineOperator;
     [SerializeField] private StationOperator _stationOperator;
-    [SerializeField] private Sorter _sorter;
+    [SerializeField] private PassengerTracker _passengerTracker;
     [SerializeField] private SpriteRenderer _catTexture;
     [SerializeField] private ScaleAnimation _scaleAnimation;
 
@@ -70,7 +70,7 @@ public class Subscriber : MonoBehaviour
         ActivateParkingCar();
         _mover.Initialize(_carHead, _slideDuration);
         List<Passenger> pass = CreatePassengers(passengerPrefab);
-        _passengerCar.Initialize(_stationOperator, _sorter, pass, _holdPoints, _carColor, stationCount);
+        _sorterCar.Initialize(_stationOperator, _passengerTracker, pass, _holdPoints, _carColor, stationCount);
 
         _scaleAnimation.Activate(_catTexture.transform);
     }
@@ -143,25 +143,25 @@ public class Subscriber : MonoBehaviour
 
     private void OnStationFound(Station station)
     {
-        if (_passengerCar.IsFinished)
+        if (_sorterCar.IsFinished)
             return;
 
-        if (_passengerCar.IsNeedToSort(station) == false)
+        if (_sorterCar.IsNeedToSort(station) == false)
             return;
 
         _splineCar.Stop();
         _scanner.StopScanning();
 
-        _passengerCar.Sort(station);
+        _sorterCar.Sort(station);
 
         StartCoroutine(WaitFinishSorting());
     }
 
     private IEnumerator WaitFinishSorting()
     {
-        yield return new WaitUntil(() => _passengerCar.IsSorting == false);
+        yield return new WaitUntil(() => _sorterCar.IsSorting == false);
 
-        if (_passengerCar.IsFinished)
+        if (_sorterCar.IsFinished)
         {
             _splineCar.SwitchSplineToNearest();
             yield return new WaitUntil(() => _splineCar.IsOnExit == true);
@@ -190,11 +190,11 @@ public class Subscriber : MonoBehaviour
 
     private void OnResetFound()
     {
-        if (_passengerCar.IsFinished)
+        if (_sorterCar.IsFinished)
             return;
 
         Debug.Log("Subscriber - on reset found");
-        _passengerCar.TryResetStationProgress();
+        _sorterCar.TryResetStationProgress();
     }
 
     private List<Passenger> CreatePassengers(Passenger passengerPrefab)

@@ -5,7 +5,7 @@ public class ScaleAnimation : MonoBehaviour
 {
     [SerializeField] private float _minScaleX = 0.8f; // Minimum scale (e.g., 80%)
     [SerializeField] private float _minScaleY = 0.8f; // Minimum scale (e.g., 80%)
-    [SerializeField] private float _maxScale = 1.2f; // Maximum scale (e.g., 120%)
+    //[SerializeField] private float _maxScale = 1.2f; // Maximum scale (e.g., 120%)
     [SerializeField] private float _duration = 1.0f; // Time to go from-to min to max
 
     private Vector3 originalScale;

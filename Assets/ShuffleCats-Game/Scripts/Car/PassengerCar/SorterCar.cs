@@ -2,30 +2,36 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PassengerCar : MonoBehaviour
+public class SorterCar : MonoBehaviour
 {
     private bool _isReset = true;
     private bool _isNeedToSort;
     private StationOperator _stationOperator;
-    private Sorter _sorter;
+    private PassengerTracker _passengerTracker;
     private int _totalCount;
     private CatColor _catColor;
 
     public bool IsFinished { get; private set; }
     public bool IsSorting { get; private set; }
 
-    public void Initialize(StationOperator stationOperator, Sorter sorter,
+    public void Initialize(StationOperator stationOperator, PassengerTracker passengerTracker,
                         List<Passenger> passengers, List<Transform> holdPoints,
                         CatColor catColor, int stationCount)
     {
         _stationOperator = stationOperator;
-        _sorter = sorter;
+        _passengerTracker = passengerTracker;
         _catColor = catColor;
 
         _stationOperator.Initialize(stationCount);
 
         _totalCount = holdPoints.Count;
-        _sorter.Initialize(_totalCount, passengers, holdPoints);
+
+        _passengerTracker.Initialize(_totalCount, passengers, holdPoints);
+
+        for (int i = 0; i < holdPoints.Count; i++)
+        {
+            AssignPassenger(passengers[i], holdPoints[i]);
+        }
 
         _isNeedToSort = IsNeedToSort();
         IsFinished = false;
@@ -49,10 +55,12 @@ public class PassengerCar : MonoBehaviour
 
     public void Sort(Station station)
     {
-        _stationOperator.MarkVisited(station);
-        IsSorting = true;
-        StartCoroutine(ImitateSorting(station));
-        Debug.Log("Passenger Car - sort is in progress");
+        if (station.TrySetCurrentCar(this))
+        {
+            _stationOperator.MarkVisited(station);
+            IsSorting = true;
+            StartCoroutine(ImitateSorting(station));
+        }
     }
 
     public void TryResetStationProgress() //station operator method
@@ -63,7 +71,6 @@ public class PassengerCar : MonoBehaviour
             {
                 _stationOperator.ResetProgress();
                 _isReset = true;
-                Debug.Log("Passenger Car - station progress reseted");
             }
         }
     }
@@ -79,7 +86,7 @@ public class PassengerCar : MonoBehaviour
     private IEnumerator ImitateSorting(Station station)
     {
         List<Transform> seats = station.GetFreeSeats();
-        List<Passenger> dropPassengers = _sorter.GetDropOffPassengers(station.CatColor, seats.Count);
+        List<Passenger> dropPassengers = _passengerTracker.GetDropOffPassengers(station.CatColor, seats.Count);
 
         float timeForPassenger = 0.25f;
         WaitForSeconds wait = new WaitForSeconds(timeForPassenger);
@@ -88,14 +95,14 @@ public class PassengerCar : MonoBehaviour
 
         for (int i = 0; i < dropPassengers.Count; i++)
         {
-            _sorter.DropPassenger(dropPassengers[i], seats[i]);
+            _passengerTracker.RemovePassenger(dropPassengers[i]);
+            AssignPassenger(dropPassengers[i], seats[i]);
             yield return wait;
         }
 
         station.UpdatePassengers(dropPassengers);
 
-        //pickup passengers logic here
-        List<Transform> pickupSeats = _sorter.GetFreeSeats();
+        List<Transform> pickupSeats = _passengerTracker.GetFreeSeats();
         List<Passenger> pickPassengers = station.GetPickupPassengers(_catColor, pickupSeats.Count);
 
         Debug.Log($"PassengerCar - pickup passengers: {pickPassengers.Count}, sorter seats: {pickupSeats.Count}, car color: {_catColor}");
@@ -103,15 +110,15 @@ public class PassengerCar : MonoBehaviour
         for (int i = 0; i < pickPassengers.Count; i++)
         {
             station.RemovePassenger(pickPassengers[i]);
-            _sorter.AcceptPassenger(pickPassengers[i], pickupSeats[i]);
+            _passengerTracker.AddPassenger(pickPassengers[i], pickupSeats[i]);
+            AssignPassenger(pickPassengers[i], pickupSeats[i]);
             yield return wait;
         }
-        //
 
-        _isNeedToSort = IsNeedToSort();
-        Debug.Log($"Passenger Car - is need to sort: {_isNeedToSort}");
+        station.ClearCurrentCar();
 
-        //reset check here
+        _isNeedToSort = IsNeedToSort(); //from this and below are for reset and exit
+
         if (_stationOperator.IsNeedToReset())
         {
             _isReset = false;
@@ -123,6 +130,13 @@ public class PassengerCar : MonoBehaviour
 
     private bool IsNeedToSort()
     {
-        return _sorter.HasPassengersToSort();
+        return _passengerTracker.HasPassengersToSort();
+    }
+
+    private void AssignPassenger(Passenger passenger, Transform parent)
+    {
+        passenger.transform.SetParent(parent);
+        passenger.transform.SetLocalPositionAndRotation(Vector3.zero,
+                                            Quaternion.Euler(Vector3.zero));
     }
 }
