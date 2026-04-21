@@ -9,7 +9,7 @@ public class ParkingRegistrator : MonoBehaviour
 
     public void Initialize(int width, int height, float cellSize,
                     int startX, int startY, float axisYLevel,
-                    GridCalculator gridCalculator)
+                    GridCalculator gridCalculator, int totalCount)
     {
         _gridCalculator = gridCalculator;
         _gridCalculator.Initialize(width, height, cellSize, startX,
@@ -70,7 +70,6 @@ public class ParkingRegistrator : MonoBehaviour
         {
             if (_gridCells[tailCells[i].x, tailCells[i].y] == car)
             {
-                //Debug.Log("tail 1 cell Unregistered");
                 _gridCells[tailCells[i].x, tailCells[i].y] = null;
             }
         }
@@ -98,7 +97,6 @@ public class ParkingRegistrator : MonoBehaviour
         {
             if (_gridCells[tailCells[i].x, tailCells[i].y] == null)
             {
-                //Debug.Log("tail 1 cell registered");
                 _gridCells[tailCells[i].x, tailCells[i].y] = car;
             }
         }
@@ -118,6 +116,9 @@ public class ParkingRegistrator : MonoBehaviour
     public bool IsPossibleToMove(out ParkingCar car)
     {
         car = null;
+
+        if (_parkingCars.Count == 0)
+            return true;
 
         for (int i = 0; i < _parkingCars.Count; i++)
         {

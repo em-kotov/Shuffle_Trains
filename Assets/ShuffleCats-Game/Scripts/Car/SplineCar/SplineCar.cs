@@ -40,7 +40,6 @@ public class SplineCar : MonoBehaviour
 
         _splineOperator.Initialize(splineAnimate);
         IsOnExit = false;
-
     }
 
     public void GoToTrack()
@@ -119,13 +118,4 @@ public class SplineCar : MonoBehaviour
         _isMoving = false;
         _mover.FinishedMoving -= OnMoverFinishedMove;
     }
-
-    // private void OnDrawGizmos()
-    // {
-    //     SplineUtility.Evaluate(_exitTrack.Spline, 1.0f, out float3 splineEndPos, out _, out _);
-    //     Vector3 endPosition = _exitTrack.transform.TransformPoint(splineEndPos);
-
-    //     Gizmos.color = Color.magenta;
-    //     Gizmos.DrawSphere(endPosition, 1f);
-    // }
 }

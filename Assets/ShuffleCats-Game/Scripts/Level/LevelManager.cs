@@ -42,7 +42,7 @@ public class LevelManager : MonoBehaviour
     {
         _parkingRegistrator.Initialize(_parkingGridWidth, _parkingGridHeight,
                                         _cellSize, _startX, _startY, _axisYLevel,
-                                        _gridCalculator);
+                                        _gridCalculator, _carSubscribers.Count);
         _trackRegistrator.Initialize(_trackSpline, _counterUI, _maxCarsOnTrackCount);
         _sorterRegistrator.Initialize(_stations);
 

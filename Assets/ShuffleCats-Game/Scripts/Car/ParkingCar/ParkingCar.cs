@@ -36,11 +36,6 @@ public class ParkingCar : MonoBehaviour
         if (_isMoving)
             return;
 
-        // _carPosition = transform.position;
-
-        // Vector3 furthestSlotToMoveIn = _parkingRegistrator.GetFurthestCellToMove(
-        //                             this, _carPosition, _orientation,
-        //                             _signDirection, out CellOccupancy cellOccupancy);
         Vector3 furthestSlotToMoveIn = DetermineNextSlot(out CellOccupancy cellOccupancy);
 
         if (cellOccupancy == CellOccupancy.Car)
@@ -66,7 +61,7 @@ public class ParkingCar : MonoBehaviour
 
     public void OnFinishedMoving()
     {
-        Debug.Log("Car on finished moving");
+        //Debug.Log("Car on finished moving");
         _isMoving = false;
 
         if (_isAtBorderCell)
