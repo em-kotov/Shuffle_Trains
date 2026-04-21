@@ -30,8 +30,8 @@ public class TrackEditHelper : MonoBehaviour
         {
             _carLength = _segmentLength;
             _size = new(_carLength, _carLength, _carLength);
-            Debug.Log($"car length: {_carLength}. track length: {_trackLength}. " +
-                        $"segment count: {(int)_segmentsCount}");
+            //Debug.Log($"car length: {_carLength}. track length: {_trackLength}. " +
+            //            $"segment count: {(int)_segmentsCount}");
         }
     }
 }

@@ -52,6 +52,12 @@ public class PassengerTracker : SeatTracker
         return _wrongPassengers.Count > 0 || _rightPassengers.Count < _holdPoints.Count;
     }
 
+    public bool HaveFreeSeats(out int seatsCount)
+    {
+        seatsCount = _holdPoints.Count - _rightPassengers.Count - _wrongPassengers.Count;
+        return seatsCount > 0;
+    }
+
     private CatColor GetFirstColorOfPassengers()
     {
         int firstIndex = 0;

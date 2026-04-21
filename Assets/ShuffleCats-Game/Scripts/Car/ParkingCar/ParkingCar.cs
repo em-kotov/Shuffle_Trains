@@ -9,7 +9,7 @@ public class ParkingCar : MonoBehaviour
     private CarOrientation _orientation = CarOrientation.Horizontal;
     private float _signDirection = 1;
     private int _length;
-    private Vector3 _carStartPosition;
+    private Vector3 _carPosition;
     private bool _isMoving = false;
     private bool _isAtBorderCell = false;
 
@@ -25,9 +25,9 @@ public class ParkingCar : MonoBehaviour
         _signDirection = sign;
         _length = length;
 
-        _carStartPosition = transform.position;
-        _parkingRegistrator.RegisterCar(_carStartPosition, this);
-        _parkingRegistrator.RegisterTail(this, _carStartPosition,
+        _carPosition = transform.position;
+        _parkingRegistrator.RegisterCar(_carPosition, this);
+        _parkingRegistrator.RegisterTail(this, _carPosition,
                             _orientation, _signDirection, _length);
     }
 
@@ -36,16 +36,12 @@ public class ParkingCar : MonoBehaviour
         if (_isMoving)
             return;
 
-        _carStartPosition = transform.position;
+        // _carPosition = transform.position;
 
-        Vector3 furthestSlotToMoveIn = _parkingRegistrator.GetFurthestCellToMove(
-                                    this, _carStartPosition, _orientation, 
-                                    _signDirection, out CellOccupancy cellOccupancy);
-
-        // if (transform.position != furthestSlotToMoveIn)
-        // {
-        StartCoroutine(SmoothMoveTo(furthestSlotToMoveIn));
-        // }
+        // Vector3 furthestSlotToMoveIn = _parkingRegistrator.GetFurthestCellToMove(
+        //                             this, _carPosition, _orientation,
+        //                             _signDirection, out CellOccupancy cellOccupancy);
+        Vector3 furthestSlotToMoveIn = DetermineNextSlot(out CellOccupancy cellOccupancy);
 
         if (cellOccupancy == CellOccupancy.Car)
         {
@@ -56,6 +52,16 @@ public class ParkingCar : MonoBehaviour
         {
             _isAtBorderCell = true;
         }
+
+        StartCoroutine(SmoothMoveTo(furthestSlotToMoveIn));
+    }
+
+    public Vector3 DetermineNextSlot(out CellOccupancy cellOccupancy)
+    {
+        _carPosition = transform.position;
+
+        return _parkingRegistrator.GetFurthestCellToMove(this, _carPosition,
+                            _orientation, _signDirection, out cellOccupancy);
     }
 
     public void OnFinishedMoving()

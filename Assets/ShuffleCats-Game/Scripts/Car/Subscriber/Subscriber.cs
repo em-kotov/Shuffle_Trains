@@ -54,7 +54,8 @@ public class Subscriber : MonoBehaviour
                         PhysicsRaycaster raycaster, TrackRegistrator trackRegistrator,
                         float trackSpeed, float slideDuration, float waitTime,
                         SplineContainer exitSpline, Passenger passengerPrefab,
-                        int stationCount, float searchMin = 0f, float searchMax = 1f)
+                        int stationCount, SorterRegistrator sorterRegistrator, 
+                        float searchMin = 0f, float searchMax = 1f)
     {
         _parkingRegistrator = parkingRegistrator;
         _trackRegistrator = trackRegistrator;
@@ -70,7 +71,7 @@ public class Subscriber : MonoBehaviour
         ActivateParkingCar();
         _mover.Initialize(_carHead, _slideDuration);
         List<Passenger> pass = CreatePassengers(passengerPrefab);
-        _sorterCar.Initialize(_stationOperator, _passengerTracker, pass, _holdPoints, _carColor, stationCount);
+        _sorterCar.Initialize(_stationOperator, _passengerTracker, pass, _holdPoints, _carColor, stationCount, sorterRegistrator);
 
         _scaleAnimation.Activate(_catTexture.transform);
     }
@@ -193,7 +194,7 @@ public class Subscriber : MonoBehaviour
         if (_sorterCar.IsFinished)
             return;
 
-        Debug.Log("Subscriber - on reset found");
+        //Debug.Log("Subscriber - on reset found");
         _sorterCar.TryResetStationProgress();
     }
 

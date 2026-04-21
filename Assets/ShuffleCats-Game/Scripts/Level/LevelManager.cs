@@ -14,7 +14,6 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private float _axisYLevel = 0f;
 
     [Header("Track")]
-    [SerializeField] private int _segmentsCount = 10;
     [SerializeField] private int _maxCarsOnTrackCount = 6;
     [SerializeField] private float _waitTime = 0.3f;
     [SerializeField] private int _stationCount;
@@ -29,11 +28,13 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private ParkingRegistrator _parkingRegistrator;
     [SerializeField] private GridCalculator _gridCalculator;
     [SerializeField] private TrackRegistrator _trackRegistrator;
+    [SerializeField] private SorterRegistrator _sorterRegistrator;
     [SerializeField] private CounterUI _counterUI;
     [SerializeField] private SplineContainer _trackSpline;
     [SerializeField] private SplineContainer _exitSpline;
     [SerializeField] private PhysicsRaycaster _raycaster;
     [SerializeField] private Passenger _passengerPrefab;
+    [SerializeField] private AutoLoose _autoLoose;
     [SerializeField] private List<Station> _stations;
     [SerializeField] private List<Subscriber> _carSubscribers;
 
@@ -42,21 +43,22 @@ public class LevelManager : MonoBehaviour
         _parkingRegistrator.Initialize(_parkingGridWidth, _parkingGridHeight,
                                         _cellSize, _startX, _startY, _axisYLevel,
                                         _gridCalculator);
-
-        _trackRegistrator.Initialize(_trackSpline, _counterUI, _segmentsCount,
-                                    _maxCarsOnTrackCount);
+        _trackRegistrator.Initialize(_trackSpline, _counterUI, _maxCarsOnTrackCount);
+        _sorterRegistrator.Initialize(_stations);
 
         foreach (Subscriber subscriber in _carSubscribers)
         {
             subscriber.Initialize(_parkingRegistrator, _trackSpline, _raycaster,
                                     _trackRegistrator, _trackSpeed, _slideDuration,
                                     _waitTime, _exitSpline, _passengerPrefab,
-                                    _stationCount, _searchMin, _searchMax);
+                                    _stationCount, _sorterRegistrator, _searchMin, _searchMax);
         }
 
         foreach (Station station in _stations)
         {
             station.Initialize();
         }
+
+        _autoLoose.Initialize(_parkingRegistrator, _sorterRegistrator);
     }
 }

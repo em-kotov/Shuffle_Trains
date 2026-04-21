@@ -73,6 +73,13 @@ public class Station : SeatTracker
         _currentSorterCar = null;
     }
 
+    public bool HavePassengers(out int passengerCount, out CatColor catColor)
+    {
+        passengerCount = _passengers.Count;
+        catColor = CatColor;
+        return _passengers.Count > 0;
+    }
+
     private void SetColor(CatColor catColor)
     {
         CatColor = catColor;

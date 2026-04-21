@@ -10,22 +10,23 @@ public class SorterCar : MonoBehaviour
     private PassengerTracker _passengerTracker;
     private int _totalCount;
     private CatColor _catColor;
+    private SorterRegistrator _sorterRegistrator;
 
     public bool IsFinished { get; private set; }
     public bool IsSorting { get; private set; }
 
     public void Initialize(StationOperator stationOperator, PassengerTracker passengerTracker,
                         List<Passenger> passengers, List<Transform> holdPoints,
-                        CatColor catColor, int stationCount)
+                        CatColor catColor, int stationCount, SorterRegistrator sorterRegistrator)
     {
         _stationOperator = stationOperator;
         _passengerTracker = passengerTracker;
         _catColor = catColor;
+        _sorterRegistrator = sorterRegistrator;
 
+        _sorterRegistrator.Register(this);
         _stationOperator.Initialize(stationCount);
-
         _totalCount = holdPoints.Count;
-
         _passengerTracker.Initialize(_totalCount, passengers, holdPoints);
 
         for (int i = 0; i < holdPoints.Count; i++)
@@ -75,11 +76,18 @@ public class SorterCar : MonoBehaviour
         }
     }
 
+    public bool HaveSeats(out int count, out CatColor catColor)
+    {
+        catColor = _catColor;
+        return _passengerTracker.HaveFreeSeats(out count);
+    }
+
     private void TryFinishSorting()
     {
         if (_isNeedToSort == false)
         {
             IsFinished = true;
+            _sorterRegistrator.Unregister(this);
         }
     }
 
@@ -91,7 +99,7 @@ public class SorterCar : MonoBehaviour
         float timeForPassenger = 0.25f;
         WaitForSeconds wait = new WaitForSeconds(timeForPassenger);
 
-        Debug.Log($"PassengerCar - drop passengers: {dropPassengers.Count}, station seats: {seats.Count}, car color: {_catColor}");
+        //Debug.Log($"PassengerCar - drop passengers: {dropPassengers.Count}, station seats: {seats.Count}, car color: {_catColor}");
 
         for (int i = 0; i < dropPassengers.Count; i++)
         {
@@ -105,7 +113,7 @@ public class SorterCar : MonoBehaviour
         List<Transform> pickupSeats = _passengerTracker.GetFreeSeats();
         List<Passenger> pickPassengers = station.GetPickupPassengers(_catColor, pickupSeats.Count);
 
-        Debug.Log($"PassengerCar - pickup passengers: {pickPassengers.Count}, sorter seats: {pickupSeats.Count}, car color: {_catColor}");
+        //Debug.Log($"PassengerCar - pickup passengers: {pickPassengers.Count}, sorter seats: {pickupSeats.Count}, car color: {_catColor}");
 
         for (int i = 0; i < pickPassengers.Count; i++)
         {

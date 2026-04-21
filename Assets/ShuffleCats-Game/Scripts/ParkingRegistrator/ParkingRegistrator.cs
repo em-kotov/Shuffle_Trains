@@ -5,6 +5,7 @@ public class ParkingRegistrator : MonoBehaviour
 {
     private GridCalculator _gridCalculator;
     private ParkingCar[,] _gridCells;
+    private List<ParkingCar> _parkingCars;
 
     public void Initialize(int width, int height, float cellSize,
                     int startX, int startY, float axisYLevel,
@@ -14,6 +15,7 @@ public class ParkingRegistrator : MonoBehaviour
         _gridCalculator.Initialize(width, height, cellSize, startX,
                                 startY, axisYLevel, this);
         _gridCells = _gridCalculator.InitializeGrid();
+        _parkingCars = new();
     }
 
     public void RegisterCar(Vector3 newPosition, ParkingCar car)
@@ -26,6 +28,9 @@ public class ParkingRegistrator : MonoBehaviour
             _gridCells[newCell.x, newCell.y] = car;
             car.transform.position = _gridCalculator.GridToWorld(newCell);
         }
+
+        if (_parkingCars.Contains(car) == false)
+            _parkingCars.Add(car);
     }
 
     public void UnregisterCar(Vector3 oldPosition, ParkingCar car,
@@ -38,6 +43,9 @@ public class ParkingRegistrator : MonoBehaviour
             _gridCells[oldCell.x, oldCell.y] = null;
 
         UnregisterTail(car, oldPosition, orientation, sign, length);
+
+        if (_parkingCars.Contains(car))
+            _parkingCars.Remove(car);
     }
 
     public void UnregisterTail(ParkingCar car, Vector3 current,
@@ -105,5 +113,23 @@ public class ParkingRegistrator : MonoBehaviour
     public ParkingCar GetCar(int gridX, int gridY)
     {
         return _gridCells[gridX, gridY];
+    }
+
+    public bool IsPossibleToMove(out ParkingCar car)
+    {
+        car = null;
+
+        for (int i = 0; i < _parkingCars.Count; i++)
+        {
+            car = _parkingCars[i];
+            Vector3 nextSlot = car.DetermineNextSlot(out CellOccupancy cellOccupancy);
+
+            if (cellOccupancy == CellOccupancy.Border)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
