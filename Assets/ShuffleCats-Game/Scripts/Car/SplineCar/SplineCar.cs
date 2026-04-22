@@ -8,7 +8,6 @@ public class SplineCar : MonoBehaviour
     private Mover _mover;
     private Transform _carHead;
     private TrackRegistrator _trackRegistrator;
-    private SplineAnimate _splineAnimate;
     private SplineContainer _track;
     private SplineContainer _exitTrack;
     private SplineOperator _splineOperator;
@@ -30,7 +29,6 @@ public class SplineCar : MonoBehaviour
         _mover = mover;
         _carHead = carHead;
         _trackRegistrator = trackRegistrator;
-        _splineAnimate = splineAnimate;
         _track = track;
         _exitTrack = exitTrack;
         _splineOperator = splineOperator;

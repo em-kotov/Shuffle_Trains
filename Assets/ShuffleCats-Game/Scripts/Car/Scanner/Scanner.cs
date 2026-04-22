@@ -111,6 +111,7 @@ public class Scanner : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawRay(_backwardOrigin.position, _backwardOrigin.forward * _maxRayDistance);
+        Gizmos.DrawRay(_backwardOrigin.position, _backwardOrigin.forward *
+                     _maxRayDistance);
     }
 }

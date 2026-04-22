@@ -142,6 +142,15 @@ public class Subscriber : MonoBehaviour
         _splineCar.Jump();
     }
 
+    private void OnResetFound()
+    {
+        if (_sorterCar.IsFinished)
+            return;
+
+        //Debug.Log("Subscriber - on reset found");
+        _sorterCar.TryResetStationProgress();
+    }
+
     private void OnStationFound(Station station)
     {
         if (_sorterCar.IsFinished)
@@ -187,15 +196,6 @@ public class Subscriber : MonoBehaviour
         _carHead.gameObject.GetComponent<Collider>().enabled = false;
 
         _scaleAnimation.Deactivate();
-    }
-
-    private void OnResetFound()
-    {
-        if (_sorterCar.IsFinished)
-            return;
-
-        //Debug.Log("Subscriber - on reset found");
-        _sorterCar.TryResetStationProgress();
     }
 
     private List<Passenger> CreatePassengers(Passenger passengerPrefab)

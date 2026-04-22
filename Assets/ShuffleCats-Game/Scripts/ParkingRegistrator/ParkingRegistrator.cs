@@ -48,6 +48,33 @@ public class ParkingRegistrator : MonoBehaviour
             _parkingCars.Remove(car);
     }
 
+    public void RegisterTail(ParkingCar car, Vector3 current,
+                            CarOrientation orientation, float sign, float length)
+    {
+        float oppositeDirection = -1f;
+        float exclusiveDistance = 1f;
+        Vector3 target = _gridCalculator.CalculateTargetPosition(current,
+                        orientation, sign * oppositeDirection, length - exclusiveDistance);
+        List<Vector2Int> tailCells = _gridCalculator.GetVisitedCells(target, current);
+
+        int minCountForRegisterTail = 2;
+
+        if (tailCells.Count < minCountForRegisterTail)
+        {
+            return;
+        }
+
+        int tailStartIndex = 1;
+
+        for (int i = tailStartIndex; i < tailCells.Count; i++)
+        {
+            if (_gridCells[tailCells[i].x, tailCells[i].y] == null)
+            {
+                _gridCells[tailCells[i].x, tailCells[i].y] = car;
+            }
+        }
+    }
+
     public void UnregisterTail(ParkingCar car, Vector3 current,
                         CarOrientation orientation, float sign, float length)
     {
@@ -71,33 +98,6 @@ public class ParkingRegistrator : MonoBehaviour
             if (_gridCells[tailCells[i].x, tailCells[i].y] == car)
             {
                 _gridCells[tailCells[i].x, tailCells[i].y] = null;
-            }
-        }
-    }
-
-    public void RegisterTail(ParkingCar car, Vector3 current,
-                        CarOrientation orientation, float sign, float length)
-    {
-        float oppositeDirection = -1f;
-        float exclusiveDistance = 1f;
-        Vector3 target = _gridCalculator.CalculateTargetPosition(current,
-                        orientation, sign * oppositeDirection, length - exclusiveDistance);
-        List<Vector2Int> tailCells = _gridCalculator.GetVisitedCells(target, current);
-
-        int minCountForRegisterTail = 2;
-
-        if (tailCells.Count < minCountForRegisterTail)
-        {
-            return;
-        }
-
-        int tailStartIndex = 1;
-
-        for (int i = tailStartIndex; i < tailCells.Count; i++)
-        {
-            if (_gridCells[tailCells[i].x, tailCells[i].y] == null)
-            {
-                _gridCells[tailCells[i].x, tailCells[i].y] = car;
             }
         }
     }

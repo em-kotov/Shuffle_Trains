@@ -70,7 +70,6 @@ public class GridCalculator : MonoBehaviour
 
         if (cellOccupancy == CellOccupancy.Free && furthestCell == visitedCells[visitedCells.Count - indexStep])
         {
-            // Debug.Log("can go to border. visited cells count " + visitedCells.Count + ". furthest cell " + furthestCell);
             cellOccupancy = CellOccupancy.Border;
         }
 
@@ -158,24 +157,7 @@ public class GridCalculator : MonoBehaviour
 
     public ParkingCar[,] InitializeGrid()
     {
-        ParkingCar[,] cells = new ParkingCar[_width, _height];
-        // int firstIndex = 0;
-        // int indexStep = 1;
-
-        // for (int x = firstIndex; x < _width-indexStep; x++)
-        // {
-        //     for (int y = _startY; y < _endY; y++)
-        //     {
-        //         cells[x, y] = null;
-        //     }
-        // }
-
-        //1 2 - 4 5
-        //x - 1 2 3 4 
-        //y - 2 3 4 5 6
-        //new car[4, 6]
-        //indexes and axis values
-        return cells;
+        return new ParkingCar[_width, _height];
     }
 
     private void OnDrawGizmos()

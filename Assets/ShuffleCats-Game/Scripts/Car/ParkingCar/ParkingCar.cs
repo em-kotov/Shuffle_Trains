@@ -61,7 +61,6 @@ public class ParkingCar : MonoBehaviour
 
     public void OnFinishedMoving()
     {
-        //Debug.Log("Car on finished moving");
         _isMoving = false;
 
         if (_isAtBorderCell)
