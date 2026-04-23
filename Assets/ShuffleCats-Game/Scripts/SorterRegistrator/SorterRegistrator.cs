@@ -32,17 +32,17 @@ public class SorterRegistrator : MonoBehaviour
     {
         Station station = null;
         CatColor stationColor = CatColor.Uncolored;
-        int stationCount = 0;
+        int passengersCount = 0;
 
         SorterCar car = null;
-        int carCount = 0;
+        int seatsCount = 0;
         CatColor carColor;
 
         for (int i = 0; i < _stations.Count; i++)
         {
             station = _stations[i];
 
-            if (station.HavePassengers(out stationCount, out stationColor) == false)
+            if (station.HavePassengers(out passengersCount, out stationColor) == false)
             {
                 return true;
             }
@@ -53,9 +53,9 @@ public class SorterRegistrator : MonoBehaviour
 
                 if (car != null)
                 {
-                    if (car.HaveSeats(out carCount, out carColor))
+                    if (car.HaveSeats(out seatsCount, out carColor))
                     {
-                        if (carColor == stationColor && carCount <= stationCount)
+                        if (carColor == stationColor && seatsCount <= passengersCount)
                         {
                             return true;
                         }

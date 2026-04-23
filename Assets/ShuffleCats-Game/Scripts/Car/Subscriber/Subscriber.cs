@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -45,6 +46,8 @@ public class Subscriber : MonoBehaviour
     private bool _isCarOnBorder = false;
     private List<Passenger> _passengers;
 
+    public event Action<Subscriber> ReachedEnd;
+
     private void OnEnable()
     {
         _clickDetector.Initialize(_raycaster);
@@ -54,7 +57,7 @@ public class Subscriber : MonoBehaviour
                         PhysicsRaycaster raycaster, TrackRegistrator trackRegistrator,
                         float trackSpeed, float slideDuration, float waitTime,
                         SplineContainer exitSpline, Passenger passengerPrefab,
-                        int stationCount, SorterRegistrator sorterRegistrator, 
+                        int stationCount, SorterRegistrator sorterRegistrator,
                         float searchMin = 0f, float searchMax = 1f)
     {
         _parkingRegistrator = parkingRegistrator;
@@ -196,6 +199,8 @@ public class Subscriber : MonoBehaviour
         _carHead.gameObject.GetComponent<Collider>().enabled = false;
 
         _scaleAnimation.Deactivate();
+
+        ReachedEnd?.Invoke(this);
     }
 
     private List<Passenger> CreatePassengers(Passenger passengerPrefab)

@@ -35,6 +35,8 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private PhysicsRaycaster _raycaster;
     [SerializeField] private Passenger _passengerPrefab;
     [SerializeField] private AutoLoose _autoLoose;
+    [SerializeField] private AutoWin _autoWin;
+    [SerializeField] private Wallet _wallet;
     [SerializeField] private List<Station> _stations;
     [SerializeField] private List<Subscriber> _carSubscribers;
 
@@ -52,6 +54,7 @@ public class LevelManager : MonoBehaviour
                                     _trackRegistrator, _trackSpeed, _slideDuration,
                                     _waitTime, _exitSpline, _passengerPrefab,
                                     _stationCount, _sorterRegistrator, _searchMin, _searchMax);
+            subscriber.ReachedEnd += OnCarReachedEnd;
         }
 
         foreach (Station station in _stations)
@@ -60,5 +63,14 @@ public class LevelManager : MonoBehaviour
         }
 
         _autoLoose.Initialize(_parkingRegistrator, _sorterRegistrator);
+        _autoWin.Initialize(_carSubscribers.Count);
+        _wallet.Initialize();
+    }
+
+    private void OnCarReachedEnd(Subscriber carSubscriber)
+    {
+        carSubscriber.ReachedEnd -= OnCarReachedEnd;
+        _autoWin.AddCar();
+        _wallet.ReceiveCarBonus();
     }
 }

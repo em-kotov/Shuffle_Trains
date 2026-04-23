@@ -33,7 +33,7 @@ public class AutoLoose : MonoBehaviour
             {
                 author = "sorter";
 
-                if (CanMoveOnTrack())
+                if (CanSortOnTrack())
                     continue;
             }
 
@@ -46,30 +46,14 @@ public class AutoLoose : MonoBehaviour
         return _parkingRegistrator.IsPossibleToMove(out ParkingCar car);
     }
 
-    private bool CanMoveOnTrack()
+    private bool CanSortOnTrack()
     {
         return _sorterRegistrator.HaveMoves();
-
-        // if (isPossible)
-        // {
-        //     ShowNextMove("sorter");
-        // }
-        // else
-        // {
-        //     ShowText("sorter");
-        // }
     }
-
-    // private void ShowNextMove(string author)
-    // {
-    //     Debug.Log($"Auto loose - Still have possible moves - {author}");
-    // }
 
     private void ShowText(string author)
     {
         _currentText.text = $"Auto loose - Seems you're stuck. " +
-                            "Click to restart - {author}";
-        //Debug.Log($"Auto loose - Seems you're stuck. 
-        // Click to restart - {author}");
+                            $"Click to restart - {author}";
     }
 }
