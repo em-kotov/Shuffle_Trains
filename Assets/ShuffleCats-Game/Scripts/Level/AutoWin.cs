@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -7,6 +8,8 @@ public class AutoWin : MonoBehaviour
 
     private int _totalCarsCount;
     private int _currentCarsCount;
+
+    // public event Action WinLevel;
 
     public void Initialize(int totalCarsCount)
     {
@@ -27,6 +30,7 @@ public class AutoWin : MonoBehaviour
     public void ShootWin()
     {
         ShowText();
+        //WinLevel?.Invoke();
     }
 
     private void ShowText()

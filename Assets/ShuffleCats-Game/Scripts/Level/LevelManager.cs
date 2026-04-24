@@ -65,6 +65,8 @@ public class LevelManager : MonoBehaviour
         _autoLoose.Initialize(_parkingRegistrator, _sorterRegistrator);
         _autoWin.Initialize(_carSubscribers.Count);
         _wallet.Initialize();
+
+        //_autoWin.WinLevel += OnWinLevel;
     }
 
     private void OnCarReachedEnd(Subscriber carSubscriber)
@@ -73,4 +75,9 @@ public class LevelManager : MonoBehaviour
         _autoWin.AddCar();
         _wallet.ReceiveCarBonus();
     }
+
+    // private void OnWinLevel()
+    // {
+    //     LevelLoader.Instance.LoadNextLevel();
+    // }
 }
