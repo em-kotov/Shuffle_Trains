@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -36,7 +37,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Passenger _passengerPrefab;
     [SerializeField] private AutoLoose _autoLoose;
     [SerializeField] private AutoWin _autoWin;
-    [SerializeField] private Wallet _wallet;
+    //[SerializeField] private Wallet _wallet;
     [SerializeField] private List<Station> _stations;
     [SerializeField] private List<Subscriber> _carSubscribers;
 
@@ -64,20 +65,32 @@ public class LevelManager : MonoBehaviour
 
         _autoLoose.Initialize(_parkingRegistrator, _sorterRegistrator);
         _autoWin.Initialize(_carSubscribers.Count);
-        _wallet.Initialize();
+        //_wallet.Initialize();
+        Wallet.Instance.Initialize(0, 4);
 
-        //_autoWin.WinLevel += OnWinLevel;
+        _autoWin.WinLevel += OnWinLevel;
     }
 
     private void OnCarReachedEnd(Subscriber carSubscriber)
     {
         carSubscriber.ReachedEnd -= OnCarReachedEnd;
         _autoWin.AddCar();
-        _wallet.ReceiveCarBonus();
+        //_wallet.ReceiveCarBonus();
+        Wallet.Instance.ReceiveCarBonus();
     }
 
-    // private void OnWinLevel()
-    // {
-    //     LevelLoader.Instance.LoadNextLevel();
-    // }
+    private void OnWinLevel()
+    {
+        _autoWin.WinLevel -= OnWinLevel;
+        StartCoroutine(ShowWin());
+    }
+
+    private IEnumerator ShowWin()
+    {
+        WaitForSeconds wait = new WaitForSeconds(2f);
+
+        yield return wait;
+
+        // LevelLoader.Instance.LoadNextLevel();
+    }
 }

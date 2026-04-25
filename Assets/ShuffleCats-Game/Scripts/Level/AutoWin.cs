@@ -1,20 +1,20 @@
 using System;
-using TMPro;
 using UnityEngine;
 
 public class AutoWin : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _currentText;
+    [SerializeField] private WinScreen _winScreen;
 
     private int _totalCarsCount;
     private int _currentCarsCount;
 
-    // public event Action WinLevel;
+    public event Action WinLevel;
 
     public void Initialize(int totalCarsCount)
     {
         _totalCarsCount = totalCarsCount;
         _currentCarsCount = 0;
+        _winScreen.Hide();
     }
 
     public void AddCar()
@@ -29,12 +29,7 @@ public class AutoWin : MonoBehaviour
 
     public void ShootWin()
     {
-        ShowText();
-        //WinLevel?.Invoke();
-    }
-
-    private void ShowText()
-    {
-        _currentText.text = $"Auto win - You win!";
+        WinLevel?.Invoke();
+        _winScreen.Show();
     }
 }

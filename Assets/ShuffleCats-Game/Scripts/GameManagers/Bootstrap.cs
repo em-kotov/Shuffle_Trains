@@ -3,9 +3,12 @@ using UnityEngine.SceneManagement;
 
 public class Bootstrap : MonoBehaviour
 {
-    void Start()
+    [SerializeField] private int _firstLevelIndex = 1;
+
+    private void Awake()
     {
-        SceneManager.LoadScene("PersistentManagers", LoadSceneMode.Additive);
-        SceneManager.LoadScene("Level-1", LoadSceneMode.Additive);
+        DontDestroyOnLoad(gameObject);
+
+        SceneManager.LoadSceneAsync(_firstLevelIndex, LoadSceneMode.Single);
     }
 }
