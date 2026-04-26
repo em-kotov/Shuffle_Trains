@@ -1,10 +1,9 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
 
 public class AutoLoose : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _currentText;
+    [SerializeField] private LooseUI _looseUI;
 
     private ParkingRegistrator _parkingRegistrator;
     private SorterRegistrator _sorterRegistrator;
@@ -12,6 +11,7 @@ public class AutoLoose : MonoBehaviour
     public void Initialize(ParkingRegistrator parkingRegistrator,
                         SorterRegistrator sorterRegistrator)
     {
+        HideWindow();
         _parkingRegistrator = parkingRegistrator;
         _sorterRegistrator = sorterRegistrator;
 
@@ -21,23 +21,18 @@ public class AutoLoose : MonoBehaviour
     private IEnumerator StartCheck()
     {
         WaitForSeconds wait = new WaitForSeconds(6f);
-        string author = "";
 
         while (true)
         {
             yield return wait;
 
-            author = "parking";
-
             if (CanMoveOnParking())
             {
-                author = "sorter";
-
                 if (CanSortOnTrack())
                     continue;
             }
 
-            ShowText(author);
+            ShowWindow();
         }
     }
 
@@ -51,9 +46,13 @@ public class AutoLoose : MonoBehaviour
         return _sorterRegistrator.HaveMoves();
     }
 
-    private void ShowText(string author)
+    private void ShowWindow()
     {
-        _currentText.text = $"Auto loose - Seems you're stuck. " +
-                            $"Click to restart - {author}";
+        _looseUI.ShowWindow();
+    }
+
+    private void HideWindow()
+    {
+        _looseUI.HideWindow();
     }
 }

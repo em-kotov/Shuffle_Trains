@@ -6,6 +6,12 @@ using UnityEngine.Splines;
 
 public class LevelManager : MonoBehaviour
 {
+    [Header("Level")]
+    [SerializeField] private int _levelNumber;
+    [SerializeField] private int _levelWinBonus;
+    [SerializeField] private int _levelCarBonus;
+    [SerializeField] private WalletUI _walletUI;
+
     [Header("Parking")]
     [SerializeField] private int _parkingGridWidth = 6;
     [SerializeField] private int _parkingGridHeight = 8;
@@ -30,7 +36,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private GridCalculator _gridCalculator;
     [SerializeField] private TrackRegistrator _trackRegistrator;
     [SerializeField] private SorterRegistrator _sorterRegistrator;
-    [SerializeField] private CounterUI _counterUI;
+    [SerializeField] private Counter _counterUI;
     [SerializeField] private SplineContainer _trackSpline;
     [SerializeField] private SplineContainer _exitSpline;
     [SerializeField] private PhysicsRaycaster _raycaster;
@@ -40,6 +46,8 @@ public class LevelManager : MonoBehaviour
     //[SerializeField] private Wallet _wallet;
     [SerializeField] private List<Station> _stations;
     [SerializeField] private List<Subscriber> _carSubscribers;
+
+    private Wallet _wallet;
 
     private void Awake()
     {
@@ -64,33 +72,41 @@ public class LevelManager : MonoBehaviour
         }
 
         _autoLoose.Initialize(_parkingRegistrator, _sorterRegistrator);
-        _autoWin.Initialize(_carSubscribers.Count);
-        //_wallet.Initialize();
-        Wallet.Instance.Initialize(0, 4);
+        _autoWin.Initialize(_carSubscribers.Count, _levelNumber);
 
-        _autoWin.WinLevel += OnWinLevel;
+        _wallet = FindObjectOfType<Wallet>();
+
+        if (_wallet != null)
+        {
+            _wallet.Initialize(_levelWinBonus, _levelCarBonus, _walletUI);
+        }
+
+        //_autoWin.WinLevel += OnWinLevel;
     }
 
     private void OnCarReachedEnd(Subscriber carSubscriber)
     {
         carSubscriber.ReachedEnd -= OnCarReachedEnd;
         _autoWin.AddCar();
-        //_wallet.ReceiveCarBonus();
-        Wallet.Instance.ReceiveCarBonus();
+
+        if (_wallet != null)
+        {
+            _wallet.ReceiveCarBonus();
+        }
     }
 
-    private void OnWinLevel()
-    {
-        _autoWin.WinLevel -= OnWinLevel;
-        StartCoroutine(ShowWin());
-    }
+    // private void OnWinLevel()
+    // {
+    //     _autoWin.WinLevel -= OnWinLevel;
+    //     StartCoroutine(ShowWin());
+    // }
 
-    private IEnumerator ShowWin()
-    {
-        WaitForSeconds wait = new WaitForSeconds(2f);
+    // private IEnumerator ShowWin()
+    // {
+    //     WaitForSeconds wait = new WaitForSeconds(2f);
 
-        yield return wait;
+    //     yield return wait;
 
-        // LevelLoader.Instance.LoadNextLevel();
-    }
+    //     // LevelLoader.Instance.LoadNextLevel();
+    // }
 }

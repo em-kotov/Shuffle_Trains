@@ -1,22 +1,12 @@
 using TMPro;
 using UnityEngine;
 
-public class WalletUI : MonoBehaviour
+public class WalletUI : UIPanel
 {
-    [SerializeField] private TextMeshProUGUI _currentText;
+    [SerializeField] private TextMeshProUGUI _currentMoneyText;
 
-    private void OnEnable()
+    public void ShowAmount(int current)
     {
-        // Wallet.Instance.Updated += UpdateText;
-    }
-
-    private void OnDisable()
-    {
-        // Wallet.Instance.Updated -= UpdateText;
-    }
-
-    private void UpdateText(int count)
-    {
-        _currentText.text = $"{count}";
+        _currentMoneyText.text = $"{current}";
     }
 }

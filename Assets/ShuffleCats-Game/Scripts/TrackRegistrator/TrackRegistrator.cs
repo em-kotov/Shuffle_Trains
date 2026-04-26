@@ -8,39 +8,36 @@ public class TrackRegistrator : MonoBehaviour
     [SerializeField] private SplineContainer _gizmoTrack;
 
     private SplineContainer _track;
-    private CounterUI _counter;
+    private Counter _counter;
     private List<Transform> _carHeads;
-    private int _currentCarsCount;
-    private int _maxCarsCount;
 
-    public void Initialize(SplineContainer track, CounterUI counter,
+    public void Initialize(SplineContainer track, Counter counter,
                         int maxCarsCount)
     {
         _track = track;
         _counter = counter;
-        _currentCarsCount = 0;
-        _maxCarsCount = maxCarsCount;
         _carHeads = new();
 
-        _counter.Initialize(_maxCarsCount);
+        _counter.Initialize(maxCarsCount);
+        _counter.ShowCurrent();
     }
 
     public bool IsCountAllows()
     {
-        return _currentCarsCount < _maxCarsCount;
+        return _counter.CurrentCount < _counter.MaxCount;
     }
 
     public void Register(Transform carHead)
     {
         _carHeads.Add(carHead);
-        _currentCarsCount++;
-        _counter.UpdateCurrent(_currentCarsCount);
+        _counter.Add();
+        _counter.ShowCurrent();
     }
 
     public void Unregister()
     {
-        _currentCarsCount--;
-        _counter.UpdateCurrent(_currentCarsCount);
+        _counter.Remove();
+        _counter.ShowCurrent();
     }
 
     public Vector3 GetEntryPoint(Vector3 position, float searchMin, float searchMax,
