@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/ShuffleCats-Game/Scenes/Level-2.unity
     guid: 942eff630f788834ebb8198a288d4e84
+  - enabled: 1
+    path: Assets/ShuffleCats-Game/Scenes/Level-3.unity
+    guid: 2f6b1744e1c21fc4d9b113686a912a8e
   m_configObjects: {}

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class SorterRegistrator : MonoBehaviour
@@ -26,6 +27,11 @@ public class SorterRegistrator : MonoBehaviour
         {
             _cars.Remove(sorterCar);
         }
+    }
+
+    public bool HaveStationInColor(CatColor catColor)
+    {
+        return _stations.Any(station => station.CatColor == catColor);
     }
 
     public bool HaveMoves()

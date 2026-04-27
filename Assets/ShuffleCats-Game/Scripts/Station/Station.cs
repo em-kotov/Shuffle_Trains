@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Station : SeatTracker
 {
+    [SerializeField] private SpriteRenderer _model;
     [SerializeField] private List<Transform> _holdPoints;
 
     private List<Passenger> _passengers;
@@ -83,6 +84,8 @@ public class Station : SeatTracker
     private void SetColor(CatColor catColor)
     {
         CatColor = catColor;
+        Color color = ColorHelper.GetColor(CatColor);
+        _model.color = color;
     }
 
     private List<Passenger> GetPassengersByColor(CatColor catColor, int count)

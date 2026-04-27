@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class AutoWin : MonoBehaviour
@@ -9,7 +10,7 @@ public class AutoWin : MonoBehaviour
     private int _levelNumber;
     private int _startCarsCount = 0;
 
-    //public event Action WinLevel;
+    public event Action WinLevel;
 
     public void Initialize(int totalCarsCount, int levelNumber)
     {
@@ -32,7 +33,7 @@ public class AutoWin : MonoBehaviour
 
     public void ShootWin()
     {
-        //WinLevel?.Invoke();
+        WinLevel?.Invoke();
         _winUI.ShowWindow(_levelNumber);
     }
 }

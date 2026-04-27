@@ -81,32 +81,28 @@ public class LevelManager : MonoBehaviour
             _wallet.Initialize(_levelWinBonus, _levelCarBonus, _walletUI);
         }
 
-        //_autoWin.WinLevel += OnWinLevel;
+        _autoWin.WinLevel += OnWinLevel;
     }
 
     private void OnCarReachedEnd(Subscriber carSubscriber)
     {
         carSubscriber.ReachedEnd -= OnCarReachedEnd;
-        _autoWin.AddCar();
 
         if (_wallet != null)
         {
             _wallet.ReceiveCarBonus();
         }
+
+        _autoWin.AddCar();
     }
 
-    // private void OnWinLevel()
-    // {
-    //     _autoWin.WinLevel -= OnWinLevel;
-    //     StartCoroutine(ShowWin());
-    // }
+    private void OnWinLevel()
+    {
+        _autoWin.WinLevel -= OnWinLevel;
 
-    // private IEnumerator ShowWin()
-    // {
-    //     WaitForSeconds wait = new WaitForSeconds(2f);
-
-    //     yield return wait;
-
-    //     // LevelLoader.Instance.LoadNextLevel();
-    // }
+        if (_wallet != null)
+        {
+            _wallet.ReceiveWinBonus();
+        }
+    }
 }

@@ -91,24 +91,101 @@ public class SorterCar : MonoBehaviour
         }
     }
 
+    private CatColor DetermineColorToDrop(Station station, out bool haveColorsForDrop)
+    {
+        haveColorsForDrop = true;
+
+        if (station.CatColor != CatColor.Uncolored)
+        {
+            return station.CatColor;
+        }
+
+        CatColor colorToDrop = CatColor.Uncolored;
+        List<CatColor> canDropColors = new List<CatColor>();
+
+        List<CatColor> wrongColors = new List<CatColor>();
+        wrongColors = _passengerTracker.GetWrongPassengersColors();
+
+        for (int i = 0; i < wrongColors.Count; i++)
+        {
+            if (_sorterRegistrator.HaveStationInColor(wrongColors[i]))
+            {
+                continue;
+            }
+
+            colorToDrop = wrongColors[i];
+            canDropColors.Add(colorToDrop);
+            break;
+        }
+
+        if (canDropColors.Count == 0)
+        {
+            haveColorsForDrop = false;
+        }
+
+        return colorToDrop;
+    }
+
     private IEnumerator ImitateSorting(Station station)
     {
-        List<Transform> seats = station.GetFreeSeats();
-        List<Passenger> dropPassengers = _passengerTracker.GetDropOffPassengers(station.CatColor, seats.Count);
+        //start determine which color to drop
+        // bool stationIsColored = false;
+
+        // if (station.CatColor != CatColor.Uncolored)
+        // {
+        //     stationIsColored = true;
+        // }
+
+        // CatColor colorToDrop = station.CatColor;
+
+        // List<CatColor> wrongColors = new List<CatColor>();
+        // wrongColors = _passengerTracker.GetWrongPassengersColors();
+
+
+        // Station coloredStation = null;
+
+        // if (stationIsColored == false)
+        // {
+        //     for (int i = 0; i < wrongColors.Count; i++)
+        //     {
+        //         if (_sorterRegistrator.HaveStationInColor(wrongColors[i], out coloredStation))
+        //         {
+        //             continue;
+        //         }
+
+        //         colorToDrop = wrongColors[i];
+        //         break;
+        //     }
+        // }
+
+        //end determine which color to drop
 
         float timeForPassenger = 0.25f;
         WaitForSeconds wait = new WaitForSeconds(timeForPassenger);
 
-        //Debug.Log($"PassengerCar - drop passengers: {dropPassengers.Count}, station seats: {seats.Count}, car color: {_catColor}");
+        bool haveColorsForDrop;
+        CatColor colorToDrop = DetermineColorToDrop(station, out haveColorsForDrop);
 
-        for (int i = 0; i < dropPassengers.Count; i++)
+        //drop-off
+        if (haveColorsForDrop)
         {
-            _passengerTracker.RemovePassenger(dropPassengers[i]);
-            AssignPassenger(dropPassengers[i], seats[i]);
-            yield return wait;
+
+            List<Transform> seats = station.GetFreeSeats();
+            List<Passenger> dropPassengers = _passengerTracker.GetDropOffPassengers(station.CatColor, seats.Count);
+
+            //Debug.Log($"PassengerCar - drop passengers: {dropPassengers.Count}, station seats: {seats.Count}, car color: {_catColor}");
+
+            for (int i = 0; i < dropPassengers.Count; i++)
+            {
+                _passengerTracker.RemovePassenger(dropPassengers[i]);
+                AssignPassenger(dropPassengers[i], seats[i]);
+                yield return wait;
+            }
+
+            station.UpdatePassengers(dropPassengers);
         }
 
-        station.UpdatePassengers(dropPassengers);
+        //pickup
 
         List<Transform> pickupSeats = _passengerTracker.GetFreeSeats();
         List<Passenger> pickPassengers = station.GetPickupPassengers(_catColor, pickupSeats.Count);

@@ -6,26 +6,14 @@ public class Wallet : MonoBehaviour
     private int _levelCarBonus;
     private int _levelWinBonus;
     private int _currentMoney;
+    private int _levelBalance;
+    private int _defaultBalance = 0;
+
+    private readonly string _playerMoneyName = "PlayerMoney";
 
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
-    }
-
-    private void Start()
-    {
-        _currentMoney = PlayerPrefs.GetInt("PlayerMoney", 0);
-    }
-
-    private void OnApplicationPause(bool pause)
-    {
-        if (pause)
-            SaveMoney();
-    }
-
-    private void OnDisable()
-    {
-        SaveMoney();
     }
 
     public void Initialize(int levelWinBonus, int levelCarBonus, WalletUI walletUI)
@@ -34,34 +22,54 @@ public class Wallet : MonoBehaviour
         _levelWinBonus = levelWinBonus;
         _walletUI = walletUI;
 
+        _currentMoney = PlayerPrefs.GetInt(_playerMoneyName, _defaultBalance);
+        _levelBalance = _defaultBalance;
+
         ShowCurrent();
+        ShowLevelBalance();
     }
 
     public void ReceiveCarBonus()
     {
-        AddMoney(_levelCarBonus);
+        AddToLevelBalance(_levelCarBonus);
     }
 
     public void ReceiveWinBonus()
     {
-        AddMoney(_levelWinBonus);
+        AddToLevelBalance(_levelWinBonus);
+        AddToCurrent();
+        ShowCurrent();
     }
 
-    private void AddMoney(int amount)
+    private void AddToLevelBalance(int amount)
     {
-        _currentMoney += amount;
-        ShowCurrent();
+        _levelBalance += amount;
+        ShowLevelBalance();
+    }
+
+    private void ShowLevelBalance()
+    {
+        _walletUI.ShowLevelBalance(_levelBalance);
     }
 
     private void ShowCurrent()
     {
         _walletUI.ShowAmount(_currentMoney);
-        Debug.Log("Wallet - current: " + _currentMoney);
+    }
+
+    private void AddToCurrent()
+    {
+        if (_levelBalance > _defaultBalance)
+        {
+            _currentMoney += _levelBalance;
+            SaveMoney();
+            _levelBalance = _defaultBalance;
+        }
     }
 
     private void SaveMoney()
     {
-        PlayerPrefs.GetInt("PlayerMoney", _currentMoney);
+        PlayerPrefs.SetInt(_playerMoneyName, _currentMoney);
         PlayerPrefs.Save();
     }
 }

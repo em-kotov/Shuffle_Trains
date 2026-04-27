@@ -7,10 +7,15 @@ public class PassengerTracker : SeatTracker
     private List<Passenger> _wrongPassengers;
     private List<Passenger> _rightPassengers;
     private List<Transform> _holdPoints;
+    private List<CatColor> _wrongPassengersColors;
 
     public void Initialize(int totalCount, List<Passenger> passengers, List<Transform> holdPoints)
     {
-        _wrongPassengers = passengers;
+        //_wrongPassengers = passengers;
+        _wrongPassengers = new();
+        _wrongPassengersColors = new();
+        InitializeWrongPassengers(passengers);
+
         _holdPoints = holdPoints;
         _rightPassengers = new();
         base.Initialize(_wrongPassengers, _holdPoints);
@@ -26,6 +31,7 @@ public class PassengerTracker : SeatTracker
     {
         base.RemovePassenger(passenger);
         _wrongPassengers.Remove(passenger);
+        TryRemoveColor(passenger.CatColor);
     }
 
     public List<Passenger> GetDropOffPassengers(CatColor catColor, int count)
@@ -58,6 +64,24 @@ public class PassengerTracker : SeatTracker
         return seatsCount > 0;
     }
 
+    public bool HavePassengerInColor(CatColor catColor)
+    {
+        return _wrongPassengers.Any(passenger => passenger.CatColor == catColor);
+    }
+
+    public List<CatColor> GetWrongPassengersColors()
+    {
+        List<CatColor> colors = new List<CatColor>();
+
+        for (int i = 0; i < _wrongPassengersColors.Count; i++)
+        {
+            CatColor color = _wrongPassengersColors[i];
+            colors.Add(color);
+        }
+
+        return colors;
+    }
+
     private CatColor GetFirstColorOfPassengers()
     {
         int firstIndex = 0;
@@ -80,5 +104,32 @@ public class PassengerTracker : SeatTracker
         }
 
         return passengers;
+    }
+
+    private void InitializeWrongPassengers(List<Passenger> passengers)
+    {
+        for (int i = 0; i < passengers.Count; i++)
+        {
+            _wrongPassengers.Add(passengers[i]);
+            TryAddColor(passengers[i].CatColor);
+        }
+    }
+
+    private void TryAddColor(CatColor passengerColor)
+    {
+        if (_wrongPassengersColors.Contains(passengerColor))
+            return;
+
+        _wrongPassengersColors.Add(passengerColor);
+    }
+
+    private void TryRemoveColor(CatColor passengerColor)
+    {
+        if (HavePassengerInColor(passengerColor))
+        {
+            return;
+        }
+
+        _wrongPassengersColors.Remove(passengerColor);
     }
 }
