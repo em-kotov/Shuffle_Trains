@@ -1,6 +1,7 @@
+using System;
 using UnityEngine;
 
-public class Wallet : MonoBehaviour
+public class Wallet : MonoBehaviour, IWalletSpender
 {
     private WalletUI _walletUI;
     private int _levelCarBonus;
@@ -11,9 +12,28 @@ public class Wallet : MonoBehaviour
 
     private readonly string _playerMoneyName = "PlayerMoney";
 
+    public int Balance => _currentMoney;
+
+    public event Action BalanceChanged;
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+        _currentMoney = PlayerPrefs.GetInt(_playerMoneyName, _defaultBalance);
+    }
+
+    public bool TrySpend(int amount)
+    {
+        if (amount <= 0 || _currentMoney < amount)
+        {
+            return false;
+        }
+
+        _currentMoney -= amount;
+        SaveMoney();
+        ShowCurrent();
+        BalanceChanged?.Invoke();
+        return true;
     }
 
     public void Initialize(int levelWinBonus, int levelCarBonus, WalletUI walletUI)
@@ -49,12 +69,18 @@ public class Wallet : MonoBehaviour
 
     private void ShowLevelBalance()
     {
-        _walletUI.ShowLevelBalance(_levelBalance);
+        if (_walletUI != null)
+        {
+            _walletUI.ShowLevelBalance(_levelBalance);
+        }
     }
 
     private void ShowCurrent()
     {
-        _walletUI.ShowAmount(_currentMoney);
+        if (_walletUI != null)
+        {
+            _walletUI.ShowAmount(_currentMoney);
+        }
     }
 
     private void AddToCurrent()
@@ -64,6 +90,7 @@ public class Wallet : MonoBehaviour
             _currentMoney += _levelBalance;
             SaveMoney();
             _levelBalance = _defaultBalance;
+            BalanceChanged?.Invoke();
         }
     }
 
