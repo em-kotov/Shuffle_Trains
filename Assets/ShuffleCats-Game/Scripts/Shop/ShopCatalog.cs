@@ -1,66 +1,36 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ShopCatalog", menuName = "ShuffleCats/Shop/Catalog")]
 public class ShopCatalog : ScriptableObject
 {
-    [Serializable]
-    public class CategorySection
+    [SerializeField] private string _shopHeader = "Themes";
+    [SerializeField] private List<Theme> _themes = new List<Theme>();
+
+    public string ShopHeader => _shopHeader;
+    public IReadOnlyList<Theme> Themes => _themes;
+
+    public Theme Find(string id)
     {
-        [SerializeField] private SkinCategory _category;
-        [SerializeField] private string _header;
-        [SerializeField] private List<SkinItem> _items = new List<SkinItem>();
-
-        public SkinCategory Category => _category;
-        public string Header => _header;
-        public IReadOnlyList<SkinItem> Items => _items;
-    }
-
-    [SerializeField] private List<CategorySection> _sections = new List<CategorySection>();
-
-    public IReadOnlyList<CategorySection> Sections => _sections;
-
-    public IEnumerable<SkinItem> AllItems()
-    {
-        foreach (CategorySection section in _sections)
+        foreach (Theme theme in _themes)
         {
-            foreach (SkinItem item in section.Items)
+            if (theme != null && theme.Id == id)
             {
-                if (item != null)
-                {
-                    yield return item;
-                }
-            }
-        }
-    }
-
-    public SkinItem Find(string id)
-    {
-        foreach (SkinItem item in AllItems())
-        {
-            if (item.Id == id)
-            {
-                return item;
+                return theme;
             }
         }
         return null;
     }
 
-    public bool TryGetCategoryOf(SkinItem item, out SkinCategory category)
+    public Theme GetDefaultEquipped()
     {
-        foreach (CategorySection section in _sections)
+        foreach (Theme theme in _themes)
         {
-            foreach (SkinItem candidate in section.Items)
+            if (theme != null && theme.EquippedByDefault)
             {
-                if (candidate == item)
-                {
-                    category = section.Category;
-                    return true;
-                }
+                return theme;
             }
         }
-        category = default;
-        return false;
+        return null;
     }
 }

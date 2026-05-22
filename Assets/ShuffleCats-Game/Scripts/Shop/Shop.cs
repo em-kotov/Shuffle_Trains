@@ -19,24 +19,19 @@ public class Shop : MonoBehaviour
         _wallet = FindObjectOfType<Wallet>();
     }
 
-    public SlotStatus GetStatus(SkinItem item)
+    public SlotStatus GetStatus(Theme theme)
     {
-        if (item == null || _catalog == null)
+        if (theme == null)
         {
             return SlotStatus.Locked;
         }
 
-        if (!_catalog.TryGetCategoryOf(item, out SkinCategory category))
-        {
-            return SlotStatus.Locked;
-        }
-
-        if (_repository.GetEquipped(category) == item.Id)
+        if (_repository.GetEquipped() == theme.Id)
         {
             return SlotStatus.Equipped;
         }
 
-        if (_repository.IsOwned(item.Id))
+        if (_repository.IsOwned(theme.Id))
         {
             return SlotStatus.Owned;
         }
@@ -44,46 +39,36 @@ public class Shop : MonoBehaviour
         return SlotStatus.Locked;
     }
 
-    public bool TryBuy(SkinItem item)
+    public bool TryBuy(Theme theme)
     {
-        if (item == null || _wallet == null)
+        if (theme == null || _wallet == null)
         {
             return false;
         }
 
-        if (_repository.IsOwned(item.Id))
+        if (_repository.IsOwned(theme.Id))
         {
             return false;
         }
 
-        if (!_wallet.TrySpend(item.Price))
+        if (!_wallet.TrySpend(theme.Price))
         {
             return false;
         }
 
-        _repository.MarkOwned(item.Id);
+        _repository.MarkOwned(theme.Id);
         Changed?.Invoke();
         return true;
     }
 
-    public void Equip(SkinItem item)
+    public void Equip(Theme theme)
     {
-        if (item == null || _catalog == null)
+        if (theme == null || !_repository.IsOwned(theme.Id))
         {
             return;
         }
 
-        if (!_repository.IsOwned(item.Id))
-        {
-            return;
-        }
-
-        if (!_catalog.TryGetCategoryOf(item, out SkinCategory category))
-        {
-            return;
-        }
-
-        _repository.SetEquipped(category, item.Id);
+        _repository.SetEquipped(theme.Id);
         Changed?.Invoke();
     }
 }

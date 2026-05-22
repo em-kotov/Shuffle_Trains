@@ -45,8 +45,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private AutoWin _autoWin;
     //[SerializeField] private Wallet _wallet;
     [SerializeField] private Shop _shop;
-    [SerializeField] private List<SpriteRendererSkinApplier> _spriteAppliers;
-    [SerializeField] private TrackSkinApplier _trackSkinApplier;
+    [SerializeField] private ThemeApplier _themeApplier;
     [SerializeField] private List<Station> _stations;
     [SerializeField] private List<Subscriber> _carSubscribers;
 
@@ -86,20 +85,9 @@ public class LevelManager : MonoBehaviour
 
         _autoWin.WinLevel += OnWinLevel;
 
-        if (_spriteAppliers != null)
+        if (_themeApplier != null)
         {
-            foreach (SpriteRendererSkinApplier applier in _spriteAppliers)
-            {
-                if (applier != null)
-                {
-                    applier.Initialize(_shop);
-                }
-            }
-        }
-
-        if (_trackSkinApplier != null)
-        {
-            _trackSkinApplier.Initialize(_shop);
+            _themeApplier.Initialize(_shop);
         }
     }
 

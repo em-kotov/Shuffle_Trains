@@ -12,12 +12,12 @@ public class ShopSlotUI : MonoBehaviour
     [SerializeField] private Color _ownedColor = new Color(0.506f, 0.698f, 0.604f);
     [SerializeField] private Color _equippedColor = new Color(0.949f, 0.800f, 0.561f);
 
-    private SkinItem _item;
+    private Theme _theme;
     private Shop _shop;
 
-    public void Bind(SkinItem item, Shop shop)
+    public void Bind(Theme theme, Shop shop)
     {
-        _item = item;
+        _theme = theme;
         _shop = shop;
 
         _actionButton.onClick.RemoveAllListeners();
@@ -28,25 +28,25 @@ public class ShopSlotUI : MonoBehaviour
 
     public void Refresh()
     {
-        if (_item == null)
+        if (_theme == null)
         {
             return;
         }
 
-        if (_item.SlotIcon != null)
+        if (_theme.SlotIcon != null)
         {
-            _icon.sprite = _item.SlotIcon;
+            _icon.sprite = _theme.SlotIcon;
         }
-        _icon.color = _item.Tint;
+        _icon.color = Color.white;
 
-        SlotStatus status = _shop.GetStatus(_item);
+        SlotStatus status = _shop.GetStatus(_theme);
 
         switch (status)
         {
             case SlotStatus.Locked:
                 _status.text = "Buy";
                 _status.color = _lockedColor;
-                _price.text = _item.Price.ToString();
+                _price.text = _theme.Price.ToString();
                 _actionButton.interactable = true;
                 break;
             case SlotStatus.Owned:
@@ -66,20 +66,20 @@ public class ShopSlotUI : MonoBehaviour
 
     private void OnClick()
     {
-        if (_item == null || _shop == null)
+        if (_theme == null || _shop == null)
         {
             return;
         }
 
-        SlotStatus status = _shop.GetStatus(_item);
+        SlotStatus status = _shop.GetStatus(_theme);
 
         if (status == SlotStatus.Locked)
         {
-            _shop.TryBuy(_item);
+            _shop.TryBuy(_theme);
         }
         else if (status == SlotStatus.Owned)
         {
-            _shop.Equip(_item);
+            _shop.Equip(_theme);
         }
     }
 }

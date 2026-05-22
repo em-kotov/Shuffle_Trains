@@ -51,25 +51,22 @@ public class ShopUI : UIPanel
             return;
         }
 
-        foreach (ShopCatalog.CategorySection section in _shop.Catalog.Sections)
+        ShopSectionUI sectionUI = Instantiate(_sectionPrefab, _sectionsParent);
+        sectionUI.SetHeader(_shop.Catalog.ShopHeader);
+
+        foreach (Theme theme in _shop.Catalog.Themes)
         {
-            ShopSectionUI sectionUI = Instantiate(_sectionPrefab, _sectionsParent);
-            sectionUI.SetHeader(section.Header);
-
-            foreach (SkinItem item in section.Items)
+            if (theme == null)
             {
-                if (item == null)
-                {
-                    continue;
-                }
-
-                ShopSlotUI slot = Instantiate(_slotPrefab, sectionUI.SlotsParent);
-                slot.Bind(item, _shop);
-                _slots.Add(slot);
+                continue;
             }
 
-            _sections.Add(sectionUI);
+            ShopSlotUI slot = Instantiate(_slotPrefab, sectionUI.SlotsParent);
+            slot.Bind(theme, _shop);
+            _slots.Add(slot);
         }
+
+        _sections.Add(sectionUI);
     }
 
     private void RefreshAllSlots()

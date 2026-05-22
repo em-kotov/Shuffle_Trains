@@ -4,8 +4,8 @@ using UnityEngine;
 public class ShopRepository : IShopRepository
 {
     private const string OwnedKey = "Shop.Owned";
-    private const string EquippedKeyPrefix = "Shop.Equipped.";
-    private const string SeededKey = "Shop.Seeded.v2";
+    private const string EquippedKey = "Shop.Equipped";
+    private const string SeededKey = "Shop.Seeded.v3";
 
     private readonly HashSet<string> _owned;
 
@@ -32,14 +32,14 @@ public class ShopRepository : IShopRepository
         }
     }
 
-    public string GetEquipped(SkinCategory category)
+    public string GetEquipped()
     {
-        return PlayerPrefs.GetString(EquippedKeyPrefix + category, string.Empty);
+        return PlayerPrefs.GetString(EquippedKey, string.Empty);
     }
 
-    public void SetEquipped(SkinCategory category, string id)
+    public void SetEquipped(string id)
     {
-        PlayerPrefs.SetString(EquippedKeyPrefix + category, id);
+        PlayerPrefs.SetString(EquippedKey, id);
         PlayerPrefs.Save();
     }
 
@@ -47,26 +47,20 @@ public class ShopRepository : IShopRepository
     {
         List<string> ownedIds = new List<string>();
 
-        foreach (SkinItem item in catalog.AllItems())
+        foreach (Theme theme in catalog.Themes)
         {
-            if (item.OwnedByDefault)
+            if (theme != null && theme.OwnedByDefault)
             {
-                ownedIds.Add(item.Id);
+                ownedIds.Add(theme.Id);
             }
         }
 
         PlayerPrefs.SetString(OwnedKey, string.Join(",", ownedIds));
 
-        foreach (ShopCatalog.CategorySection section in catalog.Sections)
+        Theme defaultEquipped = catalog.GetDefaultEquipped();
+        if (defaultEquipped != null)
         {
-            foreach (SkinItem item in section.Items)
-            {
-                if (item != null && item.EquippedByDefault)
-                {
-                    PlayerPrefs.SetString(EquippedKeyPrefix + section.Category, item.Id);
-                    break;
-                }
-            }
+            PlayerPrefs.SetString(EquippedKey, defaultEquipped.Id);
         }
 
         PlayerPrefs.SetInt(SeededKey, 1);

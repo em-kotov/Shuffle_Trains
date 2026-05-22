@@ -29,7 +29,7 @@ public class GridCalculator : MonoBehaviour
 
         _endX = _startX + _width;
         _endY = _startY + _height;
-        _distanceMultiplier = _width + _height;
+        _distanceMultiplier = (_width + _height) * _cellSize;
         _gridOrigin = new Vector3(_startX, _axisYLevel, _startY);
     }
 
@@ -142,8 +142,8 @@ public class GridCalculator : MonoBehaviour
 
     public Vector2Int WorldToGrid(Vector3 worldPosition)
     {
-        int x = Mathf.RoundToInt(worldPosition.x - _gridOrigin.x / _cellSize);
-        int y = Mathf.RoundToInt(worldPosition.z - _gridOrigin.z / _cellSize);
+        int x = Mathf.RoundToInt((worldPosition.x - _gridOrigin.x) / _cellSize);
+        int y = Mathf.RoundToInt((worldPosition.z - _gridOrigin.z) / _cellSize);
 
         return new Vector2Int(x, y);
     }
