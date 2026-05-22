@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22abf37d51054f94782bbcb9d2e812ba, type: 3}
+  m_Name: Cozy
+  m_EditorClassIdentifier: 
+  _id: cozy
+  _displayName: Cozy
+  _price: 200
+  _slotIcon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  _ownedByDefault: 0
+  _equippedByDefault: 0
+  _backgroundSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  _backgroundSize: {x: 1, y: 1, z: 1}
+  _backgroundTileSize: {x: 1, y: 1}
+  _stationSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  _playAreaSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  _playAreaSize: {x: 1, y: 1, z: 1}
+  _gridSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  _gridSize: {x: 1, y: 1, z: 1}
+  _gridTileSize: {x: 1, y: 1}
+  _gridColor: {r: 1, g: 1, b: 1, a: 1}
+  _bgPrimary: {r: 0.72327036, g: 0.37073287, b: 0.5859181, a: 1}
+  _bgSecondary: {r: 1, g: 1, b: 1, a: 1}
+  _bgContour: {r: 0, g: 0, b: 0, a: 1}
+  _bgShadow: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  _textPrimary: {r: 0, g: 0, b: 0, a: 1}
+  _textSecondary: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  _textAdditional: {r: 1, g: 1, b: 1, a: 1}

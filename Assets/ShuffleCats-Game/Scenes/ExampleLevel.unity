@@ -581,6 +581,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca1ed62d69c6ed64baf2403408818007, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _levelNumber: 0
+  _levelWinBonus: 0
+  _levelCarBonus: 0
+  _walletUI: {fileID: 0}
   _parkingGridWidth: 4
   _parkingGridHeight: 5
   _cellSize: 1
@@ -605,8 +609,6 @@ MonoBehaviour:
   _passengerPrefab: {fileID: 5638810976796634233, guid: 334853503dd589d4c92e20e2cfa9ad75, type: 3}
   _autoLoose: {fileID: 892983853}
   _autoWin: {fileID: 784491867}
-  _wallet: {fileID: 1306872037}
-  _levelLoader: {fileID: 1789516250}
   _stations:
   - {fileID: 1783944126779803228}
   - {fileID: 2096084758}
@@ -661,6 +663,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2096084760}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &460550306
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5752967951236026570, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
+      propertyPath: m_Name
+      value: BackgroundSkin
+      objectReference: {fileID: 0}
+    - target: {fileID: 8303850244265058416, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8303850244265058416, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8303850244265058416, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8303850244265058416, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8303850244265058416, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8303850244265058416, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8303850244265058416, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8303850244265058416, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 8303850244265058416, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8303850244265058416, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d5cdca54a5b426048983d2bc7644978d, type: 3}
 --- !u!1001 &472095021
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1053,7 +1112,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96e0f108e7b2d4c4e8f666ef4991b071, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _currentText: {fileID: 991304113}
+  _winUI: {fileID: 0}
 --- !u!4 &784491868
 Transform:
   m_ObjectHideFlags: 0
@@ -1113,7 +1172,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f88132ce8e2115d468ff9c8ae28b6491, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _currentText: {fileID: 2009764044}
+  _looseUI: {fileID: 0}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -1388,7 +1447,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &1042221395
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -4868,8 +4927,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0cce913a7f982845b2931486d54fa89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _currentText: {fileID: 1392549838}
-  _maxText: {fileID: 1646073599}
+  _counterUI: {fileID: 0}
 --- !u!4 &2108588328
 Transform:
   m_ObjectHideFlags: 0
@@ -4961,6 +5019,7 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 1844677664}
   - {fileID: 1042221398}
+  - {fileID: 460550306}
   - {fileID: 338981366}
   - {fileID: 1970357171}
   - {fileID: 892983852}

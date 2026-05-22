@@ -6,11 +6,13 @@ public class ParkingRegistrator : MonoBehaviour
     private GridCalculator _gridCalculator;
     private ParkingCar[,] _gridCells;
     private List<ParkingCar> _parkingCars;
+    float _cellSize;
 
     public void Initialize(int width, int height, float cellSize,
                     int startX, int startY, float axisYLevel,
                     GridCalculator gridCalculator, int totalCount)
     {
+        _cellSize = cellSize;
         _gridCalculator = gridCalculator;
         _gridCalculator.Initialize(width, height, cellSize, startX,
                                 startY, axisYLevel, this);
@@ -52,9 +54,8 @@ public class ParkingRegistrator : MonoBehaviour
                             CarOrientation orientation, float sign, float length)
     {
         float oppositeDirection = -1f;
-        float exclusiveDistance = 1f;
         Vector3 target = _gridCalculator.CalculateTargetPosition(current,
-                        orientation, sign * oppositeDirection, length - exclusiveDistance);
+                        orientation, sign * oppositeDirection, length - _cellSize);
         List<Vector2Int> tailCells = _gridCalculator.GetVisitedCells(target, current);
 
         int minCountForRegisterTail = 2;
