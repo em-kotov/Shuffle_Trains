@@ -35,6 +35,25 @@ public class ParkingRegistrator : MonoBehaviour
             _parkingCars.Add(car);
     }
 
+    // Claims the destination head + tail cells at the START of a move, without
+    // snapping the transform, so a second car can't path into the same cell
+    // while this one is still sliding toward it. The move-end RegisterCar then
+    // finds the cell already owned and is a harmless no-op.
+    public void ReserveCells(Vector3 targetPosition, ParkingCar car,
+                        CarOrientation orientation, float sign, int length)
+    {
+        Vector2Int newCell = _gridCalculator.WorldToGrid(targetPosition);
+        newCell = _gridCalculator.ClampToGrid(newCell);
+
+        if (_gridCells[newCell.x, newCell.y] == null)
+            _gridCells[newCell.x, newCell.y] = car;
+
+        RegisterTail(car, targetPosition, orientation, sign, length);
+
+        if (_parkingCars.Contains(car) == false)
+            _parkingCars.Add(car);
+    }
+
     public void UnregisterCar(Vector3 oldPosition, ParkingCar car,
                         CarOrientation orientation, float sign, float length)
     {
@@ -54,8 +73,9 @@ public class ParkingRegistrator : MonoBehaviour
                             CarOrientation orientation, float sign, float length)
     {
         float oppositeDirection = -1f;
+        float tailDistance = (length - 1f) * _cellSize;
         Vector3 target = _gridCalculator.CalculateTargetPosition(current,
-                        orientation, sign * oppositeDirection, length - _cellSize);
+                        orientation, sign * oppositeDirection, tailDistance);
         List<Vector2Int> tailCells = _gridCalculator.GetVisitedCells(target, current);
 
         int minCountForRegisterTail = 2;
@@ -80,9 +100,9 @@ public class ParkingRegistrator : MonoBehaviour
                         CarOrientation orientation, float sign, float length)
     {
         float oppositeDirection = -1f;
-        float exclusiveDistance = 1f;
+        float tailDistance = (length - 1f) * _cellSize;
         Vector3 target = _gridCalculator.CalculateTargetPosition(current,
-                        orientation, sign * oppositeDirection, length - exclusiveDistance);
+                        orientation, sign * oppositeDirection, tailDistance);
         List<Vector2Int> tailCells = _gridCalculator.GetVisitedCells(target, current);
 
         int minCountForRegisterTail = 2;
@@ -104,9 +124,9 @@ public class ParkingRegistrator : MonoBehaviour
     }
 
     public Vector3 GetFurthestCellToMove(ParkingCar car, Vector3 currentPosition,
-                    CarOrientation orientation, float sign, out CellOccupancy cellOccupancy)
+                    CarOrientation orientation, float sign, out CellOccupancy cellOccupancy, out ParkingCar bumpedCar)
     {
-        return _gridCalculator.GetFurthestCellToMove(car, currentPosition, orientation, sign, out cellOccupancy);
+        return _gridCalculator.GetFurthestCellToMove(car, currentPosition, orientation, sign, out cellOccupancy, out bumpedCar);
     }
 
     public ParkingCar GetCar(int gridX, int gridY)
@@ -124,7 +144,7 @@ public class ParkingRegistrator : MonoBehaviour
         for (int i = 0; i < _parkingCars.Count; i++)
         {
             car = _parkingCars[i];
-            Vector3 nextSlot = car.DetermineNextSlot(out CellOccupancy cellOccupancy);
+            Vector3 nextSlot = car.DetermineNextSlot(out CellOccupancy cellOccupancy, out _);
 
             if (cellOccupancy == CellOccupancy.Border)
             {

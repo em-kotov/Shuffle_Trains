@@ -8,11 +8,13 @@ public class LooseUI : UIPanel
     private void OnEnable()
     {
         _restartButton.onClick.AddListener(Restarter.ReloadScene);
+        _restartButton.onClick.AddListener(AudioManager.PlayUIClickStatic);
     }
 
     private void OnDisable()
     {
         _restartButton.onClick.RemoveListener(Restarter.ReloadScene);
+        _restartButton.onClick.RemoveListener(AudioManager.PlayUIClickStatic);
     }
 
     public void ShowWindow()

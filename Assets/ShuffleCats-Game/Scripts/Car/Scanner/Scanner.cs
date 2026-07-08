@@ -5,24 +5,29 @@ using UnityEngine;
 public class Scanner : MonoBehaviour
 {
     [SerializeField] private Transform _backwardOrigin;
+    [SerializeField] private float _bumpedDistance = 0.5f;
+    [SerializeField] private float _clearedDistance = 0.9f;
 
-    private float _maxRayDistance = 2f;
-    private float _bumpedDistance = 2f;
-    private LayerMask _detectLayer;
+    private float _scanInterval = 0.01f;
+    private float _sphereCastRadius = 0.2f;
+    private LayerMask _carsDetectLayer;
+    private LayerMask _stationsDetectLayer;
     private string _carsLayerName = "Cars";
     private string _stationLayerName = "Station";
     private string _stationResetLayerName = "StationReset";
     private bool _isScanning = true;
+    private bool _isBlockedByCar;
     private Coroutine _scanRoutine;
 
-    public event Action BumpFound;
+    public event Action BlockedAhead;
+    public event Action PathCleared;
     public event Action<Station> StationFound;
     public event Action ResetFound;
 
     public void Initialize()
     {
-        _detectLayer = LayerMask.GetMask(_carsLayerName, _stationLayerName,
-                                _stationResetLayerName);
+        _carsDetectLayer = LayerMask.GetMask(_carsLayerName);
+        _stationsDetectLayer = LayerMask.GetMask(_stationLayerName, _stationResetLayerName);
         StartScanning();
     }
 
@@ -31,6 +36,7 @@ public class Scanner : MonoBehaviour
         StopScanning();
 
         _isScanning = true;
+        _isBlockedByCar = false;
         _scanRoutine = StartCoroutine(RaycastWithInterval());
     }
 
@@ -40,42 +46,57 @@ public class Scanner : MonoBehaviour
 
         if (_scanRoutine != null)
         {
-            StopCoroutine(RaycastWithInterval());
+            StopCoroutine(_scanRoutine);
             _scanRoutine = null;
         }
     }
 
     private IEnumerator RaycastWithInterval()
     {
-        WaitForSeconds wait = new WaitForSeconds(0.1f);
+        WaitForSeconds wait = new WaitForSeconds(_scanInterval);
 
         while (_isScanning)
         {
             Physics.SyncTransforms();
-            Scan(_backwardOrigin.position, _backwardOrigin.forward);
+            ScanForCars(_backwardOrigin.position, -_backwardOrigin.forward);
+            ScanForStations(_backwardOrigin.position, _backwardOrigin.forward);
 
             yield return wait;
         }
     }
 
-    private void Scan(Vector3 origin, Vector3 direction)
+    private void ScanForCars(Vector3 origin, Vector3 direction)
     {
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, _maxRayDistance, _detectLayer))
+        bool carBlocking = false;
+        float threshold = _isBlockedByCar ? _clearedDistance : _bumpedDistance;
+
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, _clearedDistance, _carsDetectLayer))
+        {
+            if (hit.transform.gameObject.layer == LayerMask.NameToLayer(_carsLayerName))
+            {
+                carBlocking = hit.distance <= threshold;
+            }
+        }
+
+        UpdateBlockedState(carBlocking);
+    }
+
+    private void ScanForStations(Vector3 origin, Vector3 direction)
+    {
+        // Start the sweep slightly behind the origin so the sphere never begins
+        // already overlapping a station ahead (SphereCast ignores start-overlap).
+        // Extend the distance by the same offset so forward reach is unchanged.
+        float backOffset = _sphereCastRadius + 0.05f;
+        Vector3 castOrigin = origin - (direction * backOffset);
+        float castDistance = _clearedDistance + backOffset;
+
+        if (Physics.SphereCast(castOrigin, _sphereCastRadius, direction, out RaycastHit hit, castDistance, _stationsDetectLayer))
         {
             int hitLayer = hit.transform.gameObject.layer;
-            //Debug.Log("Bump Detector detected object on a layer: " + hitLayer + ", name: " + hit.transform.gameObject.name);
 
-            if (hitLayer == LayerMask.NameToLayer(_carsLayerName))
+            if (hitLayer == LayerMask.NameToLayer(_stationLayerName))
             {
-                //Debug.Log("Bump Detector Bumped at car");
-                InvokeBump(hit.distance);
-            }
-            else if (hitLayer == LayerMask.NameToLayer(_stationLayerName))
-            {
-                //Debug.Log("Bump Detector Found a station");
                 bool hasStation = hit.transform.gameObject.TryGetComponent(out Station foundStation);
-
-                //Debug.Log("Bump Detector station: " + foundStation);
 
                 if (hasStation)
                 {
@@ -84,17 +105,25 @@ public class Scanner : MonoBehaviour
             }
             else if (hitLayer == LayerMask.NameToLayer(_stationResetLayerName))
             {
-                //Debug.Log("Bump Detector found a station Reset");
                 InvokeReset();
             }
         }
     }
 
-    private void InvokeBump(float distanceToObject)
+    private void UpdateBlockedState(bool carBlocking)
     {
-        if (distanceToObject <= _bumpedDistance)
+        if (carBlocking == _isBlockedByCar)
+            return;
+
+        _isBlockedByCar = carBlocking;
+
+        if (carBlocking)
         {
-            BumpFound?.Invoke();
+            BlockedAhead?.Invoke();
+        }
+        else
+        {
+            PathCleared?.Invoke();
         }
     }
 
@@ -111,7 +140,21 @@ public class Scanner : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
+        Gizmos.DrawRay(_backwardOrigin.position, -_backwardOrigin.forward *
+                     _clearedDistance);
+        Gizmos.color = Color.cyan;
         Gizmos.DrawRay(_backwardOrigin.position, _backwardOrigin.forward *
-                     _maxRayDistance);
+                     _clearedDistance);
+
+        // Visualize the station SphereCast volume: spheres at the swept cast's
+        // start and end, matching the back-offset and distance used in
+        // ScanForStations.
+        float backOffset = _sphereCastRadius + 0.05f;
+        Vector3 sphereStart = _backwardOrigin.position -
+                            (_backwardOrigin.forward * backOffset);
+        Vector3 sphereEnd = sphereStart +
+                            (_backwardOrigin.forward * (_clearedDistance + backOffset));
+        Gizmos.DrawWireSphere(sphereStart, _sphereCastRadius);
+        Gizmos.DrawWireSphere(sphereEnd, _sphereCastRadius);
     }
 }

@@ -52,6 +52,9 @@ public class Wallet : MonoBehaviour, IWalletSpender
     public void ReceiveCarBonus()
     {
         AddToLevelBalance(_levelCarBonus);
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayCoinBonus();
     }
 
     public void ReceiveWinBonus()

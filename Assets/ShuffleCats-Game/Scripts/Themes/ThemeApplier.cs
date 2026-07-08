@@ -6,10 +6,17 @@ using UnityEngine.UI;
 
 public class ThemeApplier : MonoBehaviour
 {
+    public enum StationSpriteVariant
+    {
+        A,
+        B,
+    }
+
     [Serializable]
     public class StationEntry
     {
         public SpriteRenderer Target;
+        public StationSpriteVariant Sprite;
         public bool FlipX;
         public bool FlipY;
     }
@@ -24,10 +31,12 @@ public class ThemeApplier : MonoBehaviour
 
     [Header("Play Area")]
     [SerializeField] private SpriteRenderer _playAreaTarget;
-    [SerializeField] private float _playAreaRotationZ;
 
     [Header("Grid")]
     [SerializeField] private SpriteRenderer _gridTarget;
+
+    [Header("Gradient")]
+    [SerializeField] private SpriteRenderer _gradientTarget;
 
     [Header("UI Background Colors")]
     [SerializeField] private List<Image> _uiBgPrimaryTargets = new List<Image>();
@@ -41,6 +50,28 @@ public class ThemeApplier : MonoBehaviour
     [SerializeField] private List<TMP_Text> _uiTextAdditionalTargets = new List<TMP_Text>();
 
     private Shop _shop;
+    private Quaternion _playAreaBaseRotation;
+    private bool _playAreaBaseCached;
+
+    // Used when stations are spawned at runtime (LevelBuilder) instead of being
+    // hand-placed: the serialized _stations list points at the old scene
+    // stations, so it must be rebuilt to target the freshly spawned ones.
+    public void ClearStations()
+    {
+        _stations.Clear();
+    }
+
+    public void AddStation(SpriteRenderer target, StationSpriteVariant variant,
+                        bool flipX, bool flipY)
+    {
+        _stations.Add(new StationEntry
+        {
+            Target = target,
+            Sprite = variant,
+            FlipX = flipX,
+            FlipY = flipY
+        });
+    }
 
     public void Initialize(Shop shop)
     {
@@ -53,6 +84,16 @@ public class ThemeApplier : MonoBehaviour
         }
 
         Apply();
+    }
+
+    private void Start()
+    {
+        if (_shop != null)
+        {
+            return;
+        }
+
+        Initialize(FindObjectOfType<Shop>());
     }
 
     private void OnDestroy()
@@ -81,7 +122,19 @@ public class ThemeApplier : MonoBehaviour
         ApplyStations(theme);
         ApplyPlayArea(theme);
         ApplyGrid(theme);
+        ApplyGradient(theme);
         ApplyUIColors(theme);
+    }
+
+    private void ApplyGradient(Theme theme)
+    {
+        if (_gradientTarget == null)
+        {
+            return;
+        }
+
+        _gradientTarget.enabled = theme.GradientActive;
+        _gradientTarget.color = theme.GradientColor;
     }
 
     private void ApplyBackground(Theme theme)
@@ -106,9 +159,12 @@ public class ThemeApplier : MonoBehaviour
                 continue;
             }
 
-            entry.Target.sprite = theme.StationSprite;
+            entry.Target.sprite = entry.Sprite == StationSpriteVariant.B
+                ? theme.StationSpriteB
+                : theme.StationSpriteA;
             entry.Target.flipX = entry.FlipX;
             entry.Target.flipY = entry.FlipY;
+            entry.Target.transform.localScale = theme.StationSpriteScale;
         }
     }
 
@@ -119,12 +175,16 @@ public class ThemeApplier : MonoBehaviour
             return;
         }
 
+        if (!_playAreaBaseCached)
+        {
+            _playAreaBaseRotation = _playAreaTarget.transform.localRotation;
+            _playAreaBaseCached = true;
+        }
+
         _playAreaTarget.sprite = theme.PlayAreaSprite;
         _playAreaTarget.transform.localScale = theme.PlayAreaSize;
-
-        Vector3 euler = _playAreaTarget.transform.localEulerAngles;
-        euler.z = _playAreaRotationZ;
-        _playAreaTarget.transform.localEulerAngles = euler;
+        _playAreaTarget.transform.localRotation =
+            _playAreaBaseRotation * Quaternion.Euler(0f, 0f, theme.PlayAreaRotationZ);
     }
 
     private void ApplyGrid(Theme theme)

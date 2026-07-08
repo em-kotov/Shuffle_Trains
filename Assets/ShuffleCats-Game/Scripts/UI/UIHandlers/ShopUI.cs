@@ -18,6 +18,8 @@ public class ShopUI : UIPanel
     {
         _openButton.onClick.AddListener(Open);
         _closeButton.onClick.AddListener(Close);
+        _openButton.onClick.AddListener(AudioManager.PlayUIClickStatic);
+        _closeButton.onClick.AddListener(AudioManager.PlayUIClickStatic);
         _shop.Changed += RefreshAllSlots;
         Close();
     }
@@ -26,6 +28,8 @@ public class ShopUI : UIPanel
     {
         _openButton.onClick.RemoveListener(Open);
         _closeButton.onClick.RemoveListener(Close);
+        _openButton.onClick.RemoveListener(AudioManager.PlayUIClickStatic);
+        _closeButton.onClick.RemoveListener(AudioManager.PlayUIClickStatic);
         _shop.Changed -= RefreshAllSlots;
     }
 

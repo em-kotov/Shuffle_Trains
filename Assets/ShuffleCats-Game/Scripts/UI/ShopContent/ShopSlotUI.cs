@@ -22,6 +22,7 @@ public class ShopSlotUI : MonoBehaviour
 
         _actionButton.onClick.RemoveAllListeners();
         _actionButton.onClick.AddListener(OnClick);
+        _actionButton.onClick.AddListener(AudioManager.PlayUIClickStatic);
 
         Refresh();
     }

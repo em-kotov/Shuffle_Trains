@@ -17,16 +17,23 @@ public class Theme : ScriptableObject
     [SerializeField] private Vector2 _backgroundTileSize = Vector2.one;
 
     [Header("Stations")]
-    [SerializeField] private Sprite _stationSprite;
+    [SerializeField] private Sprite _stationSpriteA;
+    [SerializeField] private Sprite _stationSpriteB;
+    [SerializeField] private Vector3 _stationSpriteScale = Vector3.one;
 
     [Header("Play Area")]
     [SerializeField] private Sprite _playAreaSprite;
     [SerializeField] private Vector3 _playAreaSize = Vector3.one;
+    [SerializeField] private float _playAreaRotationZ;
 
     [Header("Grid")]
     [SerializeField] private Sprite _gridSprite;
     [SerializeField] private Vector2 _gridTileSize = Vector2.one;
     [SerializeField] private Color _gridColor = Color.white;
+
+    [Header("Gradient")]
+    [SerializeField] private bool _gradientActive;
+    [SerializeField] private Color _gradientColor = Color.white;
 
     [Header("UI Background Colors")]
     [SerializeField] private Color _bgPrimary = Color.white;
@@ -50,14 +57,20 @@ public class Theme : ScriptableObject
     public Vector3 BackgroundSize => _backgroundSize;
     public Vector2 BackgroundTileSize => _backgroundTileSize;
 
-    public Sprite StationSprite => _stationSprite;
+    public Sprite StationSpriteA => _stationSpriteA;
+    public Sprite StationSpriteB => _stationSpriteB;
+    public Vector3 StationSpriteScale => _stationSpriteScale;
 
     public Sprite PlayAreaSprite => _playAreaSprite;
     public Vector3 PlayAreaSize => _playAreaSize;
+    public float PlayAreaRotationZ => _playAreaRotationZ;
 
     public Sprite GridSprite => _gridSprite;
     public Vector2 GridTileSize => _gridTileSize;
     public Color GridColor => _gridColor;
+
+    public bool GradientActive => _gradientActive;
+    public Color GradientColor => _gradientColor;
 
     public Color BgPrimary => _bgPrimary;
     public Color BgSecondary => _bgSecondary;

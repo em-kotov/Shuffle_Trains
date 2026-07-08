@@ -15,6 +15,10 @@ public class OptionsUI : UIPanel
         _closeButton.onClick.AddListener(Close);
         _restartButton.onClick.AddListener(Restarter.ReloadScene);
 
+        _optionsButton.onClick.AddListener(AudioManager.PlayUIClickStatic);
+        _closeButton.onClick.AddListener(AudioManager.PlayUIClickStatic);
+        _restartButton.onClick.AddListener(AudioManager.PlayUIClickStatic);
+
         if (_musicToggle != null)
         {
             _musicToggle.onValueChanged.AddListener(OnMusicChanged);
@@ -33,6 +37,10 @@ public class OptionsUI : UIPanel
         _optionsButton.onClick.RemoveListener(Open);
         _closeButton.onClick.RemoveListener(Close);
         _restartButton.onClick.RemoveListener(Restarter.ReloadScene);
+
+        _optionsButton.onClick.RemoveListener(AudioManager.PlayUIClickStatic);
+        _closeButton.onClick.RemoveListener(AudioManager.PlayUIClickStatic);
+        _restartButton.onClick.RemoveListener(AudioManager.PlayUIClickStatic);
 
         if (_musicToggle != null)
         {

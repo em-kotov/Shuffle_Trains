@@ -26,6 +26,10 @@ public class Subscriber : MonoBehaviour
     [SerializeField] private PassengerTracker _passengerTracker;
     [SerializeField] private SpriteRenderer _catTexture;
     [SerializeField] private ScaleAnimation _scaleAnimation;
+    [SerializeField] private BumpAnimation _bumpAnimation;
+    [SerializeField] private NudgeAnimation _nudgeAnimation;
+    [SerializeField] private RotationFixer _rotationFixer;
+    [SerializeField] private SpriteFacingLock _spriteFacingLock;
 
     [Header("Passengers Setup")]
     [SerializeField] private int _totalPassengersCount;
@@ -43,7 +47,7 @@ public class Subscriber : MonoBehaviour
     private float _searchMin;
     private float _searchMax;
     private float _waitTime;
-    private bool _isCarOnBorder = false;
+    private bool _isWaitingForTrack = false;
     private List<Passenger> _passengers;
 
     public event Action<Subscriber> ReachedEnd;
@@ -51,6 +55,34 @@ public class Subscriber : MonoBehaviour
     private void OnEnable()
     {
         _clickDetector.Initialize(_raycaster);
+    }
+
+    // Applies the per-level placement data that varies between instances of the
+    // same cat prefab. Body color and length come from the prefab itself.
+    public void Configure(CarOrientation orientation, float signDirection,
+                        bool invertFlip, bool trackFlipSeparate, bool invertFlipTrack,
+                        bool applyRotationFix, bool rotateFixLeft,
+                        List<CatColor> passengers)
+    {
+        _orientation = orientation;
+        _signDirection = signDirection;
+        _colors = passengers != null ? new List<CatColor>(passengers) : new List<CatColor>();
+        _totalPassengersCount = _colors.Count;
+
+        // Prefer the manually-wired reference (lets the lock live on the root);
+        // fall back to the legacy lookup on the sprite for older prefabs.
+        SpriteFacingLock facingLock = _spriteFacingLock != null
+            ? _spriteFacingLock
+            : (_catTexture != null ? _catTexture.GetComponent<SpriteFacingLock>() : null);
+
+        if (facingLock != null)
+        {
+            facingLock.SetInvertFlip(invertFlip);
+            facingLock.SetTrackFlip(trackFlipSeparate, invertFlipTrack);
+        }
+
+        if (_rotationFixer != null)
+            _rotationFixer.SetConfig(applyRotationFix, rotateFixLeft);
     }
 
     public void Initialize(ParkingRegistrator parkingRegistrator, SplineContainer trackSpline,
@@ -81,27 +113,32 @@ public class Subscriber : MonoBehaviour
 
     private IEnumerator OnBorderArrivalRoutine()
     {
-        if (_isCarOnBorder)
+        WaitForSeconds wait = new(_waitTime);
+        bool canEnterTrack = _trackRegistrator.IsCountAllows();
+
+        while (canEnterTrack == false)
         {
-            WaitForSeconds wait = new(_waitTime);
-            bool canEnterTrack = _trackRegistrator.IsCountAllows();
-
-            while (canEnterTrack == false)
-            {
-                yield return wait;
-                canEnterTrack = _trackRegistrator.IsCountAllows();
-            }
-
-            DeactivateParkingCar();
-            ActivateSplineCar();
+            yield return wait;
+            canEnterTrack = _trackRegistrator.IsCountAllows();
         }
+
+        // Reserve the slot synchronously with the passing check above — there is
+        // no yield between IsCountAllows() and Reserve(), so concurrent border
+        // arrivals can't all slip past a stale count and overflow the limit.
+        _trackRegistrator.Reserve();
+        DeactivateParkingCar();
+        ActivateSplineCar();
     }
 
     private void OnBorderArrival()
     {
-        _isCarOnBorder = true;
+        // Guard re-clicks while already queued for the track: a second routine
+        // would double-reserve the slot and double-activate the spline car.
+        if (_isWaitingForTrack)
+            return;
+
+        _isWaitingForTrack = true;
         StartCoroutine(OnBorderArrivalRoutine());
-        _isCarOnBorder = false;
     }
 
     private void ActivateSplineCar()
@@ -112,41 +149,92 @@ public class Subscriber : MonoBehaviour
                             _searchMin, _searchMax, _trackRegistrator,
                             _exitSpline, _splineOperator);
 
-        _scanner.BumpFound += OnBumpFound;
+        _scanner.BlockedAhead += OnBlockedAhead;
+        _scanner.PathCleared += OnPathCleared;
         _scanner.StationFound += OnStationFound;
         _scanner.ResetFound += OnResetFound;
-
-        _scanner.Initialize();
+        _splineCar.TrackEntered += OnTrackEntered;
 
         _splineCar.GoToTrack();
+    }
+
+    private void OnTrackEntered()
+    {
+        _splineCar.TrackEntered -= OnTrackEntered;
+        _rotationFixer.ApplyFix();
+
+        if (_spriteFacingLock != null)
+            _spriteFacingLock.SwitchToTrackFlip();
+
+        _scanner.Initialize();
     }
 
     private void ActivateParkingCar()
     {
         _parkingCar.Initialize(_parkingRegistrator, _mover, _orientation, _signDirection, _length);
 
+        _clickDetector.Pressed += _parkingCar.OnPress;
         _clickDetector.Clicked += _parkingCar.OnClick;
         _mover.FinishedMoving += _parkingCar.OnFinishedMoving;
         _parkingCar.IsOnBorder += OnBorderArrival;
+        _parkingCar.BumpReceived += OnBumpReceived;
+        _parkingCar.BumpAttempted += OnBumpAttempted;
+        _bumpAnimation.Finished += OnBumpFinished;
+        _nudgeAnimation.Finished += OnNudgeFinished;
     }
 
     private void DeactivateParkingCar()
     {
+        _clickDetector.Pressed -= _parkingCar.OnPress;
         _clickDetector.Clicked -= _parkingCar.OnClick;
         _mover.FinishedMoving -= _parkingCar.OnFinishedMoving;
         _parkingCar.IsOnBorder -= OnBorderArrival;
+        _parkingCar.BumpReceived -= OnBumpReceived;
+        _parkingCar.BumpAttempted -= OnBumpAttempted;
+        _bumpAnimation.Finished -= OnBumpFinished;
+        _nudgeAnimation.Finished -= OnNudgeFinished;
 
         _parkingCar.Deactivate();
         _parkingCar.enabled = false;
     }
 
-    private void OnBumpFound()
+    private void OnBumpReceived(Vector2 impactDir)
     {
-        _splineCar.Jump();
+        _scaleAnimation.Deactivate();
+        _bumpAnimation.Activate(_catTexture.transform, impactDir);
+    }
+
+    private void OnBumpFinished()
+    {
+        _scaleAnimation.Activate(_catTexture.transform);
+    }
+
+    private void OnBumpAttempted(Vector2 impactDir)
+    {
+        _scaleAnimation.Deactivate();
+        _nudgeAnimation.Activate(_catTexture.transform, impactDir);
+    }
+
+    private void OnNudgeFinished()
+    {
+        _scaleAnimation.Activate(_catTexture.transform);
+    }
+
+    private void OnBlockedAhead()
+    {
+        _splineCar.Stop();
+    }
+
+    private void OnPathCleared()
+    {
+        _splineCar.Play();
     }
 
     private void OnResetFound()
     {
+        // TEMP DIAGNOSTIC — remove after debugging station misses.
+        Debug.Log($"[ScanDiag] {name} OnResetFound IsFinished={_sorterCar.IsFinished}", this);
+
         if (_sorterCar.IsFinished)
             return;
 
@@ -156,10 +244,21 @@ public class Subscriber : MonoBehaviour
 
     private void OnStationFound(Station station)
     {
-        if (_sorterCar.IsFinished)
+        // TEMP DIAGNOSTIC — remove after debugging station misses.
+        bool isFinished = _sorterCar.IsFinished;
+        Debug.Log($"[ScanDiag] {name} OnStationFound station={station.name} " +
+                  $"IsFinished={isFinished}", this);
+
+        if (isFinished)
             return;
 
-        if (_sorterCar.IsNeedToSort(station) == false)
+        // IsNeedToSort has a side effect (adds the station to progress), so it is
+        // called exactly once and the result reused — no extra call for logging.
+        bool needToSort = _sorterCar.IsNeedToSort(station);
+        Debug.Log($"[ScanDiag] {name} OnStationFound station={station.name} " +
+                  $"IsNeedToSort={needToSort}", this);
+
+        if (needToSort == false)
             return;
 
         _splineCar.Stop();
@@ -190,7 +289,8 @@ public class Subscriber : MonoBehaviour
         yield return new WaitUntil(() => _splineCar.IsReachedEnd() == true);
 
         _scanner.StopScanning();
-        _scanner.BumpFound -= OnBumpFound;
+        _scanner.BlockedAhead -= OnBlockedAhead;
+        _scanner.PathCleared -= OnPathCleared;
         _scanner.StationFound -= OnStationFound;
         _scanner.ResetFound -= OnResetFound;
 

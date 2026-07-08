@@ -18,18 +18,20 @@ public static class LevelLoader
     //     }
     // }
 
+    // Single-scene progression: advance the level index, then reload the active
+    // gameplay scene. LevelManager reads the new index and builds that layout.
     public static void LoadNextLevel()
     {
-        int currentIndex = SceneManager.GetActiveScene().buildIndex;
-        int nextIndex = currentIndex + 1;
+        LevelProgress.Advance();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
 
-        if (nextIndex < SceneManager.sceneCountInBuildSettings)
-        {
-            SceneManager.LoadScene(nextIndex);
-        }
-        else
-        {
-            Debug.Log("All levels completed!");
-        }
+    // Restart the campaign from level 1. Wallet money is kept (it lives in a
+    // separate PlayerPrefs key and a DontDestroyOnLoad Wallet) — only the level
+    // index is reset.
+    public static void RestartFromFirstLevel()
+    {
+        LevelProgress.Reset();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

@@ -15,23 +15,26 @@ MonoBehaviour:
   _id: picnic
   _displayName: Picnic
   _price: 0
-  _slotIcon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  _slotIcon: {fileID: 21300000, guid: 2caf538a90432504f8497ef6cbf406f2, type: 3}
   _ownedByDefault: 1
   _equippedByDefault: 1
   _backgroundSprite: {fileID: 21300000, guid: 2caf538a90432504f8497ef6cbf406f2, type: 3}
   _backgroundSize: {x: 2.3, y: 2.3, z: 2.3}
   _backgroundTileSize: {x: 12, y: 8}
-  _stationSprite: {fileID: 21300000, guid: 3059a85eed740f4488675c74e7374763, type: 3}
+  _stationSpriteA: {fileID: 21300000, guid: 3059a85eed740f4488675c74e7374763, type: 3}
+  _stationSpriteB: {fileID: 21300000, guid: 3059a85eed740f4488675c74e7374763, type: 3}
   _playAreaSprite: {fileID: 21300000, guid: e476c0948b01ebb41b787ec6a0a036f4, type: 3}
   _playAreaSize: {x: 1.34, y: 1.34, z: 1.34}
+  _playAreaRotationZ: 0.52
   _gridSprite: {fileID: 21300000, guid: 9e3847eac007b8f4d864671260609030, type: 3}
-  _gridSize: {x: 1.55, y: 1.55, z: 1.55}
   _gridTileSize: {x: 5.14, y: 5.14}
-  _gridColor: {r: 1, g: 1, b: 1, a: 1}
+  _gridColor: {r: 1, g: 1, b: 1, a: 0.83137256}
+  _gradientActive: 0
+  _gradientColor: {r: 1, g: 1, b: 1, a: 1}
   _bgPrimary: {r: 0.9843137, g: 0.9490196, b: 0.8627451, a: 1}
   _bgSecondary: {r: 0.9411765, g: 0.9647059, b: 0.8980392, a: 1}
   _bgContour: {r: 0.84705883, g: 0.72156864, b: 0.53333336, a: 1}
-  _bgShadow: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
+  _bgShadow: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 0.4392157}
   _textPrimary: {r: 0.41960785, g: 0.2901961, b: 0.16862746, a: 1}
   _textSecondary: {r: 0.73333335, g: 0.6509804, b: 0.54901963, a: 1}
   _textAdditional: {r: 0.37254903, g: 0.6392157, b: 0.41568628, a: 1}

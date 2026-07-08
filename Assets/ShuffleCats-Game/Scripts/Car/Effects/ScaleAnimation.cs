@@ -1,79 +1,76 @@
-using System.Collections;
 using UnityEngine;
 
 public class ScaleAnimation : MonoBehaviour
 {
-    [SerializeField] private float _minScaleX = 0.8f; // Minimum scale (e.g., 80%)
-    [SerializeField] private float _minScaleY = 0.8f; // Minimum scale (e.g., 80%)
-    //[SerializeField] private float _maxScale = 1.2f; // Maximum scale (e.g., 120%)
-    [SerializeField] private float _duration = 1.0f; // Time to go from-to min to max
+    [Header("Breath")]
+    [Tooltip("Breaths per second.")]
+    [SerializeField] private float _frequency = 0.5f;
+    [Tooltip("Peak squash/stretch as a fraction of rest scale (0.10 = ±10%).")]
+    [SerializeField, Range(0f, 0.5f)] private float _squashAmount = 0.10f;
+    [Tooltip("Shape of one breath cycle. X: 0→1 normalized phase. Y: -1 (squash X / stretch Y) to +1 (stretch X / squash Y). Asymmetric keys give quick squash, slow release.")]
+    [SerializeField] private AnimationCurve _breathCurve = new AnimationCurve(
+        new Keyframe(0f, 0f),
+        new Keyframe(0.18f, 1f),
+        new Keyframe(0.5f, 0f),
+        new Keyframe(0.68f, -1f),
+        new Keyframe(1f, 0f)
+    );
 
-    private Vector3 originalScale;
-    private bool _isActive = false;
-    private Coroutine _pulseRoutine;
+    [Header("Per-Instance Variation")]
+    [Tooltip("Randomizes frequency ±this fraction per instance so cats don't pulse in sync.")]
+    [SerializeField, Range(0f, 0.3f)] private float _frequencyJitter = 0.12f;
+    [Tooltip("Randomizes amplitude ±this fraction per instance.")]
+    [SerializeField, Range(0f, 0.3f)] private float _amplitudeJitter = 0.12f;
+
     private Transform _target;
+    private Vector3 _restScale;
+    private bool _isActive;
+
+    private float _phaseOffset;
+    private float _freqMul;
+    private float _ampMul;
 
     public void Activate(Transform target)
     {
-        _target = target;
-        originalScale = _target.localScale;
+        if (_isActive) Deactivate();
 
-        if (_pulseRoutine != null)
-        {
-            Deactivate();
-        }
+        _target = target;
+        _restScale = _target.localScale;
+
+        _phaseOffset = Random.value;
+        _freqMul = 1f + Random.Range(-_frequencyJitter, _frequencyJitter);
+        _ampMul = 1f + Random.Range(-_amplitudeJitter, _amplitudeJitter);
 
         _isActive = true;
-        _pulseRoutine = StartCoroutine(StartPulse());
     }
 
     public void Deactivate()
     {
+        if (!_isActive) return;
         _isActive = false;
-        StopCoroutine(StartPulse());
-        _pulseRoutine = null;
-        _target.localScale = originalScale;
+        if (_target != null)
+        {
+            _target.localScale = _restScale;
+        }
     }
 
-    private IEnumerator StartPulse()
+    private void LateUpdate()
     {
-        while (_isActive)
-        {
-            // Pulse X
-            yield return PulseAxis(true, false);
-            // Pulse Y
-            yield return PulseAxis(false, true);
-        }
+        if (!_isActive || _target == null) return;
 
-        _pulseRoutine = null;
+        float cycle = Mathf.Repeat(Time.time * _frequency * _freqMul + _phaseOffset, 1f);
+        float s = _breathCurve.Evaluate(cycle);
+        float amp = _squashAmount * _ampMul;
+
+        // Volume-preserving feel: when X squishes, Y stretches, and vice versa.
+        float sx = 1f - s * amp;
+        float sy = 1f + s * amp;
+        _target.localScale = new Vector3(_restScale.x * sx, _restScale.y * sy, _restScale.z);
     }
 
-    private IEnumerator PulseAxis(bool scaleX, bool scaleY)
+    private void Reset()
     {
-        float t = 0;
-        Vector3 start = _target.localScale;
-
-        Vector3 target = new Vector3(
-            scaleX ? start.x * _minScaleX : start.x,
-            scaleY ? start.y * _minScaleY : start.y,
-            start.z
-        );
-
-        // Shrink
-        while (t < _duration)
-        {
-            t += Time.deltaTime;
-            _target.localScale = Vector3.Lerp(start, target, t / _duration);
-            yield return null;
-        }
-
-        // Grow back
-        t = 0;
-        while (t < _duration)
-        {
-            t += Time.deltaTime;
-            _target.localScale = Vector3.Lerp(target, start, t / _duration);
-            yield return null;
-        }
+        for (int i = 0; i < _breathCurve.length; i++)
+            _breathCurve.SmoothTangents(i, 0f);
     }
 }

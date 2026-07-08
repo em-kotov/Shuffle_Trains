@@ -30,23 +30,23 @@ public class SplineOperator : MonoBehaviour
         _splineAnimate.Play();
     }
 
-    public void JumpForward()
+    public Vector3 PrepareSwitchToNearest(SplineContainer newSplineContainer, Vector3 worldPosition, float speed, out float targetT)
     {
-        float stepSize = 0.01f;
-        _splineAnimate.NormalizedTime = Mathf.Min(1f, _splineAnimate.NormalizedTime + stepSize);
-    }
-
-    public void SwitchSplineToNearest(SplineContainer newSplineContainer, Transform car, float speed)
-    {
-        Vector3 worldPosition = car.position;
-        _splineAnimate.Container = newSplineContainer;
-        _splineAnimate.StartOffset = 0f;
         Vector3 localPosition = newSplineContainer.transform.InverseTransformPoint(worldPosition);
         SplineUtilityExtension.GetNearestPoint(newSplineContainer.Spline, localPosition,
                                         out float3 nearest, out float t, resolution: 32, iterations: 8);
-        _splineAnimate.NormalizedTime = t;
-        car.position = newSplineContainer.transform.TransformPoint(nearest);
+        targetT = t;
+        // Configure container/offset/duration but do NOT touch NormalizedTime yet — setting
+        // NormalizedTime calls UpdateTransform() inside SplineAnimate which teleports the cat.
+        _splineAnimate.Container = newSplineContainer;
+        _splineAnimate.StartOffset = 0f;
         _splineAnimate.Duration = CalculateDuration(newSplineContainer.Spline, speed);
+        return newSplineContainer.transform.TransformPoint(nearest);
+    }
+
+    public void ApplyNormalizedTime(float t)
+    {
+        _splineAnimate.NormalizedTime = t;
     }
 
     private float CalculateDuration(ISpline spline, float speed)

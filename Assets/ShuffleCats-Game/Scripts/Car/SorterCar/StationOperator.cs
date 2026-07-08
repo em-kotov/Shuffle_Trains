@@ -35,6 +35,11 @@ public class StationOperator : MonoBehaviour
     {
         int stationIndex = _stationsProgress.FindIndex(progress => progress.station == station);
         _stationsProgress[stationIndex] = (_stationsProgress[stationIndex].station, true);
+
+        // TEMP DIAGNOSTIC — remove after debugging station misses.
+        int visited = _stationsProgress.FindAll(progress => progress.isVisited).Count;
+        Debug.Log($"[ScanDiag] {name} MarkVisited station={station.name} " +
+                  $"visited={visited}/{_totalStationCount} tracked={_stationsProgress.Count}", this);
     }
 
     public void ResetProgress()
@@ -43,6 +48,10 @@ public class StationOperator : MonoBehaviour
         {
             _stationsProgress[i] = (_stationsProgress[i].station, false);
         }
+
+        // TEMP DIAGNOSTIC — remove after debugging station misses.
+        Debug.Log($"[ScanDiag] {name} ResetProgress cleared visited flags " +
+                  $"(tracked={_stationsProgress.Count})", this);
     }
 
     public bool IsNeedToReset()

@@ -10,11 +10,13 @@ public class WinUI : UIPanel
     private void OnEnable()
     {
         _nextButton.onClick.AddListener(LevelLoader.LoadNextLevel);
+        _nextButton.onClick.AddListener(AudioManager.PlayUIClickStatic);
     }
 
     private void OnDisable()
     {
         _nextButton.onClick.RemoveListener(LevelLoader.LoadNextLevel);
+        _nextButton.onClick.RemoveListener(AudioManager.PlayUIClickStatic);
     }
 
     public void ShowWindow(int levelNumber)
@@ -22,6 +24,9 @@ public class WinUI : UIPanel
         base.Show();
         _nextButton.interactable = true;
         ShowText(levelNumber);
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayWin();
     }
 
     public void HideWindow()

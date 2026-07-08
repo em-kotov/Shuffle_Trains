@@ -12,6 +12,9 @@ public class Station : SeatTracker
 
     public CatColor CatColor { get; private set; }
 
+    // The sprite the ThemeApplier swaps/flips per level theme.
+    public SpriteRenderer ThemeTarget => _model;
+
     public void Initialize()
     {
         _passengers = new();
@@ -84,8 +87,6 @@ public class Station : SeatTracker
     private void SetColor(CatColor catColor)
     {
         CatColor = catColor;
-        Color color = ColorHelper.GetColor(CatColor);
-        _model.color = color;
     }
 
     private List<Passenger> GetPassengersByColor(CatColor catColor, int count)

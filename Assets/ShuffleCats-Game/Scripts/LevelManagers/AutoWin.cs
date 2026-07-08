@@ -4,21 +4,27 @@ using UnityEngine;
 public class AutoWin : MonoBehaviour
 {
     [SerializeField] private WinUI _winUI;
+    [SerializeField] private LastLevelUI _lastLevelUI;
 
     private int _totalCarsCount;
     private int _currentCarsCount;
     private int _levelNumber;
+    private bool _isLastLevel;
     private int _startCarsCount = 0;
 
     public event Action WinLevel;
 
-    public void Initialize(int totalCarsCount, int levelNumber)
+    public void Initialize(int totalCarsCount, int levelNumber, bool isLastLevel)
     {
         _totalCarsCount = totalCarsCount;
         _levelNumber = levelNumber;
+        _isLastLevel = isLastLevel;
         _currentCarsCount = _startCarsCount;
 
         _winUI.HideWindow();
+
+        if (_lastLevelUI != null)
+            _lastLevelUI.HideWindow();
     }
 
     public void AddCar()
@@ -34,6 +40,14 @@ public class AutoWin : MonoBehaviour
     public void ShootWin()
     {
         WinLevel?.Invoke();
-        _winUI.ShowWindow(_levelNumber);
+
+        if (_isLastLevel && _lastLevelUI != null)
+        {
+            _lastLevelUI.ShowWindow();
+        }
+        else
+        {
+            _winUI.ShowWindow(_levelNumber);
+        }
     }
 }

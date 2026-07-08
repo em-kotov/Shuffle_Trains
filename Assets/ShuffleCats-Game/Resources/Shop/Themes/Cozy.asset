@@ -14,24 +14,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: cozy
   _displayName: Cozy
-  _price: 200
-  _slotIcon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  _price: 5000
+  _slotIcon: {fileID: 21300000, guid: b3c6c3beca0339e4fad2ef4aa971fb95, type: 3}
   _ownedByDefault: 0
   _equippedByDefault: 0
-  _backgroundSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  _backgroundSize: {x: 1, y: 1, z: 1}
-  _backgroundTileSize: {x: 1, y: 1}
-  _stationSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  _playAreaSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  _playAreaSize: {x: 1, y: 1, z: 1}
-  _gridSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  _gridSize: {x: 1, y: 1, z: 1}
-  _gridTileSize: {x: 1, y: 1}
-  _gridColor: {r: 1, g: 1, b: 1, a: 1}
-  _bgPrimary: {r: 0.72327036, g: 0.37073287, b: 0.5859181, a: 1}
-  _bgSecondary: {r: 1, g: 1, b: 1, a: 1}
-  _bgContour: {r: 0, g: 0, b: 0, a: 1}
-  _bgShadow: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  _textPrimary: {r: 0, g: 0, b: 0, a: 1}
-  _textSecondary: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  _textAdditional: {r: 1, g: 1, b: 1, a: 1}
+  _backgroundSprite: {fileID: 21300000, guid: 4d5ccdf99ae08ea49ba0def73256f5d5, type: 3}
+  _backgroundSize: {x: 2.3, y: 2.3, z: 2.3}
+  _backgroundTileSize: {x: 12, y: 8}
+  _stationSpriteA: {fileID: 21300000, guid: 541fed31281ffb54cb88bdaaaadd36ad, type: 3}
+  _stationSpriteB: {fileID: 21300000, guid: b3c6c3beca0339e4fad2ef4aa971fb95, type: 3}
+  _stationSpriteScale: {x: 1.2, y: 1.2, z: 1.2}
+  _playAreaSprite: {fileID: 21300000, guid: af14cae5471ec134493cd2c729b1abba, type: 3}
+  _playAreaSize: {x: 1.34, y: 1.34, z: 1.34}
+  _playAreaRotationZ: 0
+  _gridSprite: {fileID: 21300000, guid: b97dadae54df96b42a94d9f990b8932c, type: 3}
+  _gridTileSize: {x: 5.14, y: 5.14}
+  _gridColor: {r: 1, g: 1, b: 1, a: 0.83137256}
+  _gradientActive: 0
+  _gradientColor: {r: 1, g: 1, b: 1, a: 1}
+  _bgPrimary: {r: 1, g: 0.9725491, b: 0.9333334, a: 1}
+  _bgSecondary: {r: 0.9843138, g: 0.9607844, b: 0.91372555, a: 1}
+  _bgContour: {r: 0.90196085, g: 0.83921576, b: 0.72156864, a: 1}
+  _bgShadow: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 0.4392157}
+  _textPrimary: {r: 0.4784314, g: 0.4156863, b: 0.32156864, a: 1}
+  _textSecondary: {r: 0.76470596, g: 0.72156864, b: 0.65882355, a: 1}
+  _textAdditional: {r: 0.37254903, g: 0.6392157, b: 0.4156863, a: 1}

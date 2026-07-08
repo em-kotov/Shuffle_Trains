@@ -34,9 +34,10 @@ public class GridCalculator : MonoBehaviour
     }
 
     public Vector3 GetFurthestCellToMove(ParkingCar car, Vector3 current, CarOrientation orientation,
-                                         float sign, out CellOccupancy cellOccupancy)
+                                         float sign, out CellOccupancy cellOccupancy, out ParkingCar bumpedCar)
     {
         cellOccupancy = CellOccupancy.Free;
+        bumpedCar = null;
         Vector2Int currentCell = WorldToGrid(current);
         Vector2Int furthestCell = currentCell;
 
@@ -54,6 +55,7 @@ public class GridCalculator : MonoBehaviour
             if (occupyingCar != null && occupyingCar != car)
             {
                 cellOccupancy = CellOccupancy.Car;
+                bumpedCar = occupyingCar;
 
                 if (i == firstIndex)
                 {

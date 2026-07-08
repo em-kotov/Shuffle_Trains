@@ -56,7 +56,14 @@ public class SorterCar : MonoBehaviour
 
     public void Sort(Station station)
     {
-        if (station.TrySetCurrentCar(this))
+        // TEMP DIAGNOSTIC — remove after debugging station misses.
+        // TrySetCurrentCar reserves the station on success, so it is called
+        // exactly once and the result reused — no extra call for logging.
+        bool reserved = station.TrySetCurrentCar(this);
+        Debug.Log($"[ScanDiag] {name} Sort station={station.name} " +
+                  $"TrySetCurrentCar={reserved}", this);
+
+        if (reserved)
         {
             _stationOperator.MarkVisited(station);
             IsSorting = true;
@@ -66,6 +73,10 @@ public class SorterCar : MonoBehaviour
 
     public void TryResetStationProgress() //station operator method
     {
+        // TEMP DIAGNOSTIC — remove after debugging station misses.
+        Debug.Log($"[ScanDiag] {name} TryResetStationProgress " +
+                  $"isNeedToSort={_isNeedToSort} isReset={_isReset}", this);
+
         if (_isNeedToSort)
         {
             if (_isReset == false)
@@ -166,12 +177,16 @@ public class SorterCar : MonoBehaviour
         bool haveColorsForDrop;
         CatColor colorToDrop = DetermineColorToDrop(station, out haveColorsForDrop);
 
+        // TEMP DIAGNOSTIC — track what this visit actually moves.
+        int droppedCount = 0;
+
         //drop-off
         if (haveColorsForDrop)
         {
 
             List<Transform> seats = station.GetFreeSeats();
             List<Passenger> dropPassengers = _passengerTracker.GetDropOffPassengers(station.CatColor, seats.Count);
+            droppedCount = dropPassengers.Count;
 
             //Debug.Log($"PassengerCar - drop passengers: {dropPassengers.Count}, station seats: {seats.Count}, car color: {_catColor}");
 
@@ -204,7 +219,14 @@ public class SorterCar : MonoBehaviour
 
         _isNeedToSort = IsNeedToSort(); //from this and below are for reset and exit
 
-        if (_stationOperator.IsNeedToReset())
+        bool needReset = _stationOperator.IsNeedToReset();
+
+        // TEMP DIAGNOSTIC — remove after debugging station misses.
+        Debug.Log($"[ScanDiag] {name} SortDone station={station.name} " +
+                  $"dropped={droppedCount} picked={pickPassengers.Count} " +
+                  $"isNeedToSort={_isNeedToSort} IsNeedToReset={needReset} isResetBefore={_isReset}", this);
+
+        if (needReset)
         {
             _isReset = false;
         }
@@ -220,8 +242,8 @@ public class SorterCar : MonoBehaviour
 
     private void AssignPassenger(Passenger passenger, Transform parent)
     {
-        passenger.transform.SetParent(parent);
-        passenger.transform.SetLocalPositionAndRotation(Vector3.zero,
-                                            Quaternion.Euler(Vector3.zero));
+        passenger.transform.SetParent(parent, false);
+        passenger.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        passenger.transform.localScale = Vector3.one;
     }
 }
