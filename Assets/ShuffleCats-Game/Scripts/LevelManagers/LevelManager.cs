@@ -66,6 +66,13 @@ public class LevelManager : MonoBehaviour
 
     private void Awake()
     {
+        // Register the complete scene list before ApplyStationMask filters it.
+        // Inactive stations must also receive the equipped theme.
+        if (_themeApplier != null)
+        {
+            _themeApplier.RegisterStations(_stations);
+        }
+
         if (_levelConfig != null)
         {
             ApplyConfig(_levelConfig, ResolveLayout());
@@ -74,6 +81,8 @@ public class LevelManager : MonoBehaviour
         if (_levelNumberText != null)
         {
             _levelNumberText.text = _levelNumber.ToString();
+            ResponsiveGameUI.Attach(_levelNumberText.canvas.rootCanvas);
+            LeaderboardUI.Attach(_levelNumberText.canvas.rootCanvas);
         }
 
         _parkingRegistrator.Initialize(_parkingGridWidth, _parkingGridHeight,
@@ -96,7 +105,19 @@ public class LevelManager : MonoBehaviour
             station.Initialize();
         }
 
-        _autoLoose.Initialize(_parkingRegistrator, _sorterRegistrator);
+        if (_levelNumberText != null)
+        {
+            CatHintController hints = gameObject.AddComponent<CatHintController>();
+            hints.Initialize(_carSubscribers, _stations, _parkingRegistrator, _trackRegistrator,
+                _levelNumberText.canvas.rootCanvas);
+            if (_levelNumber >= 1 && _levelNumber <= 3)
+            {
+                gameObject.AddComponent<TutorialController>().Initialize(_levelNumber, _carSubscribers,
+                    hints, _levelNumberText.canvas.rootCanvas);
+            }
+        }
+
+        _autoLoose.Initialize(_parkingRegistrator, _sorterRegistrator, _trackRegistrator);
         _autoWin.Initialize(_carSubscribers.Count, _levelNumber, IsLastLevel());
 
         _wallet = FindObjectOfType<Wallet>();
@@ -119,7 +140,7 @@ public class LevelManager : MonoBehaviour
     // override is treated as not-last (it has no sequence position).
     private bool IsLastLevel()
     {
-        if (_levelLayout != null)
+        if (HasManualLayout)
             return false;
 
         if (_levelSequence == null || _levelSequence.Count == 0)
@@ -130,7 +151,7 @@ public class LevelManager : MonoBehaviour
 
     private LevelLayout ResolveLayout()
     {
-        if (_levelLayout != null)
+        if (HasManualLayout)
             return _levelLayout;
 
         if (_levelSequence != null && _levelSequence.Count > 0)
@@ -140,6 +161,18 @@ public class LevelManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    private bool HasManualLayout
+    {
+        get
+        {
+#if UNITY_EDITOR
+            if (LevelProgress.EditorPreviewIndex >= 0)
+                return false;
+#endif
+            return _levelLayout != null;
+        }
     }
 
     private void ApplyConfig(LevelConfig baseConfig, LevelLayout layout)
@@ -250,6 +283,9 @@ public class LevelManager : MonoBehaviour
     private void OnWinLevel()
     {
         _autoWin.WinLevel -= OnWinLevel;
+
+        if (!HasManualLayout)
+            LevelProgress.RecordCompletion(_levelNumber);
 
         if (_wallet != null)
         {

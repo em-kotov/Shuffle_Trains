@@ -5,10 +5,39 @@ using UnityEngine.Splines;
 public class SplineOperator : MonoBehaviour
 {
     private SplineAnimate _splineAnimate;
+    private ParkingRegistrator _parkingRegistrator;
+    private float _baseDuration;
+    private float _speedMultiplier = 1f;
+    private bool _isFollowingSpline;
 
-    public void Initialize(SplineAnimate splineAnimate)
+    public void Initialize(SplineAnimate splineAnimate, ParkingRegistrator parkingRegistrator)
     {
         _splineAnimate = splineAnimate;
+        _parkingRegistrator = parkingRegistrator;
+        _isFollowingSpline = false;
+    }
+
+    private void Update()
+    {
+        if (!_isFollowingSpline)
+            return;
+
+        float multiplier = _parkingRegistrator.TrackSpeedMultiplier;
+        if (Mathf.Approximately(multiplier, _speedMultiplier))
+            return;
+
+        // Keep the current position and paused state when changing traversal speed.
+        float normalizedTime = _splineAnimate.NormalizedTime;
+        _speedMultiplier = multiplier;
+        _splineAnimate.Duration = _baseDuration / _speedMultiplier;
+        _splineAnimate.NormalizedTime = normalizedTime;
+    }
+
+    private void ConfigureDuration(ISpline spline, float speed)
+    {
+        _baseDuration = CalculateDuration(spline, speed);
+        _speedMultiplier = _parkingRegistrator.TrackSpeedMultiplier;
+        _splineAnimate.Duration = _baseDuration / _speedMultiplier;
     }
 
     public void EnableSplineAnimate(SplineContainer splineContainer, float startOffset, float speed)
@@ -16,7 +45,11 @@ public class SplineOperator : MonoBehaviour
         _splineAnimate.enabled = true;
         _splineAnimate.Container = splineContainer;
         _splineAnimate.StartOffset = startOffset;
-        _splineAnimate.Duration = CalculateDuration(splineContainer.Spline, speed);
+        ConfigureDuration(splineContainer.Spline, speed);
+        // OnEnable can Restart using the previous container/offset. Restore the
+        // actual entry position now, before LateUpdate records it for the trail.
+        _splineAnimate.NormalizedTime = 0f;
+        _isFollowingSpline = true;
         _splineAnimate.Play();
     }
 
@@ -32,6 +65,8 @@ public class SplineOperator : MonoBehaviour
 
     public Vector3 PrepareSwitchToNearest(SplineContainer newSplineContainer, Vector3 worldPosition, float speed, out float targetT)
     {
+        // The mover owns the position until the cat reaches the new spline.
+        _isFollowingSpline = false;
         Vector3 localPosition = newSplineContainer.transform.InverseTransformPoint(worldPosition);
         SplineUtilityExtension.GetNearestPoint(newSplineContainer.Spline, localPosition,
                                         out float3 nearest, out float t, resolution: 32, iterations: 8);
@@ -40,13 +75,14 @@ public class SplineOperator : MonoBehaviour
         // NormalizedTime calls UpdateTransform() inside SplineAnimate which teleports the cat.
         _splineAnimate.Container = newSplineContainer;
         _splineAnimate.StartOffset = 0f;
-        _splineAnimate.Duration = CalculateDuration(newSplineContainer.Spline, speed);
+        ConfigureDuration(newSplineContainer.Spline, speed);
         return newSplineContainer.transform.TransformPoint(nearest);
     }
 
     public void ApplyNormalizedTime(float t)
     {
         _splineAnimate.NormalizedTime = t;
+        _isFollowingSpline = true;
     }
 
     private float CalculateDuration(ISpline spline, float speed)

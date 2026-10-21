@@ -1,0 +1,1 @@
+Nunito Black, SIL Open Font License. Source: https://github.com/google-fonts-bower/nunito-bower. Used as a baked Turkish glyph fallback for Eno Black.

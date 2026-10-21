@@ -5,12 +5,9 @@ public class StationOperator : MonoBehaviour
 {
     private List<(Station station, bool isVisited)> _stationsProgress;
     private List<Station> _stations;
-    private int _totalStationCount;
 
     public void Initialize(int stationCount)
     {
-        _totalStationCount = stationCount;
-
         _stationsProgress = new();
         _stations = new();
     }
@@ -35,11 +32,6 @@ public class StationOperator : MonoBehaviour
     {
         int stationIndex = _stationsProgress.FindIndex(progress => progress.station == station);
         _stationsProgress[stationIndex] = (_stationsProgress[stationIndex].station, true);
-
-        // TEMP DIAGNOSTIC — remove after debugging station misses.
-        int visited = _stationsProgress.FindAll(progress => progress.isVisited).Count;
-        Debug.Log($"[ScanDiag] {name} MarkVisited station={station.name} " +
-                  $"visited={visited}/{_totalStationCount} tracked={_stationsProgress.Count}", this);
     }
 
     public void ResetProgress()
@@ -48,27 +40,10 @@ public class StationOperator : MonoBehaviour
         {
             _stationsProgress[i] = (_stationsProgress[i].station, false);
         }
-
-        // TEMP DIAGNOSTIC — remove after debugging station misses.
-        Debug.Log($"[ScanDiag] {name} ResetProgress cleared visited flags " +
-                  $"(tracked={_stationsProgress.Count})", this);
     }
 
-    public bool IsNeedToReset()
+    public bool HasAnyVisited()
     {
-        if (_stations.Count < _totalStationCount)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < _stationsProgress.Count; i++)
-        {
-            if (_stationsProgress[i].isVisited == false)
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return _stationsProgress.Exists(progress => progress.isVisited);
     }
 }

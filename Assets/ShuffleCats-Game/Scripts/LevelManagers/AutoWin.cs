@@ -40,6 +40,7 @@ public class AutoWin : MonoBehaviour
     public void ShootWin()
     {
         WinLevel?.Invoke();
+        YandexSdk.GameplayStop();
 
         if (_isLastLevel && _lastLevelUI != null)
         {

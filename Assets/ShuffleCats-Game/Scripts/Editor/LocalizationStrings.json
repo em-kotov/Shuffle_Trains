@@ -1,0 +1,449 @@
+{
+  "entries": [
+    {
+      "en": "SETTINGS",
+      "ru": "НАСТРОЙКИ",
+      "tr": "AYARLAR"
+    },
+    {
+      "en": "Music",
+      "ru": "музыка",
+      "tr": "Müzik"
+    },
+    {
+      "en": "Sound effects",
+      "ru": "эффекты",
+      "tr": "Ses efektleri"
+    },
+    {
+      "en": "Hints",
+      "ru": "Подсказки",
+      "tr": "İpuçları"
+    },
+    {
+      "en": "SHOP",
+      "ru": "МАГАЗИН",
+      "tr": "MAĞAZA"
+    },
+    {
+      "en": "Themes",
+      "ru": "Темы",
+      "tr": "Temalar"
+    },
+    {
+      "en": "Picnic",
+      "ru": "Пикник",
+      "tr": "Piknik"
+    },
+    {
+      "en": "Cozy",
+      "ru": "Уют",
+      "tr": "Sıcacık"
+    },
+    {
+      "en": "Cloud",
+      "ru": "Облака",
+      "tr": "Bulut"
+    },
+    {
+      "en": "level:",
+      "ru": "уровень:",
+      "tr": "bölüm:"
+    },
+    {
+      "en": "Level:",
+      "ru": "уровень:",
+      "tr": "bölüm:"
+    },
+    {
+      "en": "track:",
+      "ru": "на треке:",
+      "tr": "yolda:"
+    },
+    {
+      "en": "Level \ncomplete!",
+      "ru": "Уровень \nпройден!",
+      "tr": "Bölüm \ntamamlandı!"
+    },
+    {
+      "en": "All levels \ncomplete!",
+      "ru": "Все уровни \nпройдены!",
+      "tr": "Tüm bölümler \ntamamlandı!"
+    },
+    {
+      "en": "Level {0} completed!",
+      "ru": "Уровень {0} пройден!",
+      "tr": "Bölüm {0} tamamlandı!"
+    },
+    {
+      "en": "Next level",
+      "ru": "Дальше",
+      "tr": "Sonraki bölüm"
+    },
+    {
+      "en": "Try again?",
+      "ru": "Попробовать\nснова?",
+      "tr": "Tekrar\ndene?"
+    },
+    {
+      "en": "Restart level",
+      "ru": "Заново",
+      "tr": "Yeniden başlat"
+    },
+    {
+      "en": "play from 1 level",
+      "ru": "играть с 1 уровня",
+      "tr": "1. bölümden oyna"
+    },
+    {
+      "en": "restart 1 level",
+      "ru": "начать с 1 уровня",
+      "tr": "1. bölümden başla"
+    },
+    {
+      "en": "Buy",
+      "ru": "Купить",
+      "tr": "Satın al"
+    },
+    {
+      "en": "Equip",
+      "ru": "Надеть",
+      "tr": "Seç"
+    },
+    {
+      "en": "Equipped",
+      "ru": "Надето",
+      "tr": "Seçili"
+    },
+    {
+      "en": "Wait for the cats…",
+      "ru": "Подождём котиков…",
+      "tr": "Kedileri bekle…"
+    },
+    {
+      "en": "No clear hint — try another approach",
+      "ru": "Нет подсказки — попробуйте другой ход",
+      "tr": "İpucu yok — başka bir yol dene"
+    },
+    {
+      "en": "LEADERBOARD",
+      "ru": "РЕЙТИНГ",
+      "tr": "LİDER TABLOSU"
+    },
+    {
+      "en": "Highest completed level",
+      "ru": "Самый высокий пройденный уровень",
+      "tr": "Tamamlanan en yüksek bölüm"
+    },
+    {
+      "en": "Player",
+      "ru": "Игрок",
+      "tr": "Oyuncu"
+    },
+    {
+      "en": "Level",
+      "ru": "Уровень",
+      "tr": "Bölüm"
+    },
+    {
+      "en": "Sign in with Yandex",
+      "ru": "Войти с Яндекс ID",
+      "tr": "Yandex ile giriş yap"
+    },
+    {
+      "en": "Refresh",
+      "ru": "Обновить",
+      "tr": "Yenile"
+    },
+    {
+      "en": "Loading rankings...",
+      "ru": "Загружаем рейтинг...",
+      "tr": "Sıralama yükleniyor..."
+    },
+    {
+      "en": "Waiting for sign-in...",
+      "ru": "Ожидаем входа...",
+      "tr": "Giriş bekleniyor..."
+    },
+    {
+      "en": "Your best: {0}",
+      "ru": "Ваш рекорд: {0}",
+      "tr": "En iyi: {0}"
+    },
+    {
+      "en": "Your rank: #{0}   Best: {1}",
+      "ru": "Ваше место: #{0}   Рекорд: {1}",
+      "tr": "Sıran: #{0}   En iyi: {1}"
+    },
+    {
+      "en": "Sign in to add your result and see your rank.\nYou can keep playing as a guest.",
+      "ru": "Войдите, чтобы добавить результат и увидеть своё место.\nМожно играть без входа.",
+      "tr": "Sonucunu eklemek ve sıranı görmek için giriş yap.\nMisafir olarak oynamaya devam edebilirsin."
+    },
+    {
+      "en": "Your result is saved locally. Sync will retry.",
+      "ru": "Результат сохранён. Повторим отправку.",
+      "tr": "Sonucun cihazına kaydedildi. Eşitleme tekrar denenecek."
+    },
+    {
+      "en": "No scores yet. Complete a level to join!",
+      "ru": "Пока нет результатов. Пройдите уровень!",
+      "tr": "Henüz sonuç yok. Katılmak için bir bölüm bitir!"
+    },
+    {
+      "en": "Rankings are available on Yandex Games.",
+      "ru": "Рейтинг доступен в Яндекс Играх.",
+      "tr": "Sıralama Yandex Games'te kullanılabilir."
+    },
+    {
+      "en": "The leaderboard is not available yet.",
+      "ru": "Рейтинг пока недоступен.",
+      "tr": "Lider tablosu henüz kullanılamıyor."
+    },
+    {
+      "en": "Sign-in cancelled. You can keep playing.",
+      "ru": "Вход отменён. Можно продолжить игру.",
+      "tr": "Giriş iptal edildi. Oynamaya devam edebilirsin."
+    },
+    {
+      "en": "Please wait a moment, then refresh.",
+      "ru": "Подождите немного и обновите рейтинг.",
+      "tr": "Biraz bekleyip yenile."
+    },
+    {
+      "en": "Couldn't load rankings. Check your connection and retry.",
+      "ru": "Не удалось загрузить рейтинг. Проверьте интернет и попробуйте снова.",
+      "tr": "Sıralama yüklenemedi. Bağlantını kontrol edip tekrar dene."
+    },
+    {
+      "en": "LANGUAGE",
+      "ru": "ЯЗЫК",
+      "tr": "DİL"
+    },
+    {
+      "en": "AUTO",
+      "ru": "АВТО",
+      "tr": "OTO"
+    },
+    {
+      "en": "Restart",
+      "ru": "Заново",
+      "tr": "Yeniden başlat"
+    },
+    {
+      "en": "LEARN TO PLAY  {0}/{1}",
+      "ru": "ОБУЧЕНИЕ  {0}/{1}",
+      "tr": "NASIL OYNANIR  {0}/{1}"
+    },
+    {
+      "en": "Skip tutorial",
+      "ru": "Пропустить",
+      "tr": "Eğitimi geç"
+    },
+    {
+      "en": "Match the yarn!",
+      "ru": "Собери свой цвет!",
+      "tr": "Yumakları eşleştir!"
+    },
+    {
+      "en": "Each cat needs yarn of its own color. Tap this cat: the path in front of it is clear.",
+      "ru": "Каждому коту нужны клубки его цвета. Нажми на этого кота: путь перед ним свободен.",
+      "tr": "Her kediye kendi renginde yumaklar lazım. Bu kediye dokun: önündeki yol açık."
+    },
+    {
+      "en": "The way is clear!",
+      "ru": "Путь свободен!",
+      "tr": "Yol açıldı!"
+    },
+    {
+      "en": "Tap this cat now. At the baskets, cats swap yarn automatically. Matching all their yarn lets them leave!",
+      "ru": "Теперь нажми на этого кота. У корзинок коты сами меняются клубками. Собрав все клубки своего цвета, кот уходит!",
+      "tr": "Şimdi bu kediye dokun. Kediler sepetlerde yumakları kendileri değiştirir. Tüm yumakları kendi rengine dönünce giderler!"
+    },
+    {
+      "en": "Two places on the track",
+      "ru": "На дорожке два места",
+      "tr": "Yolda iki yer var"
+    },
+    {
+      "en": "Only 2 cats fit on the track. Tap this cat to send it to the baskets and collect yarn of its own color.",
+      "ru": "На дорожке помещаются только 2 кота. Нажми на этого кота: он отправится к корзинкам за клубками своего цвета.",
+      "tr": "Yola yalnızca 2 kedi sığar. Kendi renginde yumak toplamak üzere sepetlere gitmesi için bu kediye dokun."
+    },
+    {
+      "en": "Choose the right color",
+      "ru": "Выбери нужный цвет",
+      "tr": "Doğru rengi seç"
+    },
+    {
+      "en": "Tap this cat to collect matching yarn. Sending two cats of the same color can fill the track and block progress.",
+      "ru": "Нажми на этого кота — он соберёт клубки своего цвета. Два кота одного цвета могут занять всю дорожку и застрять.",
+      "tr": "Aynı renkteki yumakları toplaması için bu kediye dokun. Aynı renkten iki kedi yolu doldurup ilerlemeyi engelleyebilir."
+    },
+    {
+      "en": "Send the last cat!",
+      "ru": "Остался один кот!",
+      "tr": "Son kediyi gönder!"
+    },
+    {
+      "en": "A track space is free! Tap the last cat. Clear every cat to complete the level.",
+      "ru": "На дорожке есть место! Нажми на последнего кота. Чтобы пройти уровень, нужно отправить всех котов.",
+      "tr": "Yolda yer açıldı! Son kediye dokun. Bölümü bitirmek için tüm kedileri gönder."
+    },
+    {
+      "en": "Watch the baskets",
+      "ru": "Следи за корзинками",
+      "tr": "Sepetleri izle"
+    },
+    {
+      "en": "Cats leave yarn of other colors in the baskets and pick up their own color. A cat leaves once all its yarn matches.",
+      "ru": "Коты оставляют чужие клубки в корзинках и забирают клубки своего цвета. Собрав все свои клубки, кот уходит с дорожки.",
+      "tr": "Kediler başka renkteki yumakları sepetlere bırakıp kendi renklerini alır. Tüm yumakları kendi renginde olunca kedi yoldan ayrılır."
+    },
+    {
+      "en": "Continue tutorial",
+      "ru": "Продолжить",
+      "tr": "Devam et"
+    },
+    {
+      "en": "Waiting for track space...",
+      "ru": "Ждём место на дорожке...",
+      "tr": "Yolda yer bekleniyor..."
+    },
+    {
+      "en": "Read the track counter",
+      "ru": "Счётчик на дорожке",
+      "tr": "Yol sayacına bak"
+    },
+    {
+      "en": "0/2 means no cats on the track, out of 2 allowed. The number on the right is the limit.",
+      "ru": "0/2 — на дорожке пока нет котов, а помещаются двое. Число справа показывает, сколько котов могут ехать одновременно.",
+      "tr": "0/2, yolda hiç kedi yok ve en fazla 2 kedi olabilir demek. Sağdaki sayı sınırı gösterir."
+    },
+    {
+      "en": "These are the baskets",
+      "ru": "Вот корзинки",
+      "tr": "İşte sepetler"
+    },
+    {
+      "en": "Here, cats leave other colors and collect their own. A cat leaves the track once all its yarn matches.",
+      "ru": "Здесь коты оставляют чужие клубки и забирают свои. Собрав все клубки своего цвета, кот уходит с дорожки.",
+      "tr": "Kediler burada başka renkleri bırakıp kendi renklerini alır. Tüm yumakları kendi renginde olunca kedi yoldan ayrılır."
+    },
+    {
+      "en": "Help the other cat",
+      "ru": "Помоги второму коту",
+      "tr": "Diğer kediye yardım et"
+    },
+    {
+      "en": "Now send this cat to collect its own color. Clear every cat to finish the level.",
+      "ru": "Теперь отправь этого кота за клубками его цвета. Чтобы пройти уровень, нужно отправить всех котов.",
+      "tr": "Şimdi kendi rengini toplaması için bu kediyi gönder. Bölümü bitirmek için tüm kedileri gönder."
+    },
+    {
+      "en": "Let's try an example",
+      "ru": "Проверим на примере",
+      "tr": "Bir örnek deneyelim"
+    },
+    {
+      "en": "Send this green cat. We'll try filling both places with green cats to see what happens.",
+      "ru": "Отправь этого зелёного кота. Займём оба места зелёными котами и посмотрим, что получится.",
+      "tr": "Bu yeşil kediyi gönder. İki yeri de yeşil kedilerle doldurup ne olduğunu görelim."
+    },
+    {
+      "en": "Fill the second place",
+      "ru": "Займи второе место",
+      "tr": "İkinci yeri doldur"
+    },
+    {
+      "en": "Send the other green cat too. Both track places will be occupied, leaving the blue cat here.",
+      "ru": "Отправь и второго зелёного кота. Оба места на дорожке будут заняты, а синий кот останется здесь.",
+      "tr": "Diğer yeşil kediyi de gönder. Yoldaki iki yer dolacak ve mavi kedi burada kalacak."
+    },
+    {
+      "en": "Watch the cats...",
+      "ru": "Следим за котами...",
+      "tr": "Kedileri izleyelim..."
+    },
+    {
+      "en": "The track is full",
+      "ru": "Дорожка заполнена",
+      "tr": "Yol dolu"
+    },
+    {
+      "en": "2/2: both places are occupied. Another cat can enter only after a cat on the track collects all its yarn and leaves.",
+      "ru": "2/2 — оба места заняты. Следующий кот сможет выехать, только когда один из котов на дорожке соберёт все свои клубки и уйдёт.",
+      "tr": "2/2: iki yer de dolu. Başka bir kedi ancak yoldaki bir kedi tüm yumaklarını toplayıp ayrılınca yola girebilir."
+    },
+    {
+      "en": "Now the track is stuck",
+      "ru": "Теперь коты застряли",
+      "tr": "Şimdi yol tıkandı"
+    },
+    {
+      "en": "Both places are taken by green cats. They need the green yarn on the blue cat, but it cannot enter. Let's restart.",
+      "ru": "Оба места заняты зелёными котами. Нужные им зелёные клубки у синего кота, но ему негде ехать. Начнём заново.",
+      "tr": "İki yeri de yeşil kediler doldurdu. Gerekli yeşil yumaklar mavi kedide, ama yola giremiyor. Yeniden başlayalım."
+    },
+    {
+      "en": "Restart this level",
+      "ru": "Начни уровень заново",
+      "tr": "Bölümü yeniden başlat"
+    },
+    {
+      "en": "The green cats need green yarn, but the basket holds blue yarn. Their yarn is on the blue cat, which cannot enter the full track. Let's restart.",
+      "ru": "Зелёным котам нужны зелёные клубки, а в корзинке — синие. Зелёные клубки у синего кота, но на дорожке нет места. Начнём заново.",
+      "tr": "Yeşil kedilere yeşil yumak lazım, ama sepette mavi yumak var. Yeşil yumaklar mavi kedide, o da dolu yola giremiyor. Yeniden başlayalım."
+    },
+    {
+      "en": "Open Settings",
+      "ru": "Открой настройки",
+      "tr": "Ayarları aç"
+    },
+    {
+      "en": "Tap the gear. The Restart button is inside Settings.",
+      "ru": "Нажми на шестерёнку. В настройках есть кнопка «Заново».",
+      "tr": "Dişli simgesine dokun. Yeniden başlat düğmesi Ayarlar'ın içinde."
+    },
+    {
+      "en": "Tap Restart. Then we'll try an order that frees the track.",
+      "ru": "Нажми «Заново». Затем попробуем другой порядок, чтобы освободить дорожку.",
+      "tr": "Yeniden başlat'a dokun. Sonra yolu açan bir sıra deneyelim."
+    },
+    {
+      "en": "Try a different order",
+      "ru": "Попробуй другой порядок",
+      "tr": "Farklı bir sıra dene"
+    },
+    {
+      "en": "Start with this green cat. This time, keep the second track place for the blue cat.",
+      "ru": "Начни с этого зелёного кота. На этот раз оставь второе место на дорожке для синего.",
+      "tr": "Bu yeşil kediyle başla. Bu kez yoldaki ikinci yeri mavi kediye ayır."
+    },
+    {
+      "en": "Now send the blue cat",
+      "ru": "Теперь отправь синего",
+      "tr": "Şimdi mavi kediyi gönder"
+    },
+    {
+      "en": "The green cat needs green yarn to leave the track. Send the blue cat carrying that yarn.",
+      "ru": "Зелёному коту нужны зелёные клубки, чтобы уйти с дорожки. Отправь синего кота — он их везёт.",
+      "tr": "Yeşil kedinin yoldan ayrılması için yeşil yumaklara ihtiyacı var. Bu yumakları taşıyan mavi kediyi gönder."
+    },
+    {
+      "en": "Need a hint?",
+      "ru": "Нужна подсказка?",
+      "tr": "İpucu ister misin?"
+    },
+    {
+      "en": "Tap the light bulb to highlight a cat you can send next. Use it whenever you need help.",
+      "ru": "Нажми на лампочку — она выделит кота, которого можно отправить следующим. Пользуйся ей, когда нужна помощь.",
+      "tr": "Sırada gönderebileceğin kediyi görmek için ampule dokun. Yardıma ihtiyacın olduğunda kullan."
+    },
+    {
+      "en": "The light bulb highlights a cat you can send next. Hints are off; you can turn them on in Settings.",
+      "ru": "Лампочка выделяет кота, которого можно отправить следующим. Подсказки выключены — их можно включить в настройках.",
+      "tr": "Ampul, sırada gönderebileceğin kediyi gösterir. İpuçları kapalı; Ayarlar'dan açabilirsin."
+    }
+  ]
+}

@@ -1,0 +1,424 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Game UI_tr
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: tr
+  m_SharedData: {fileID: 11400000, guid: b47954751d59fa94596ba5176e409612, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 2535436288
+    m_Localized: AYARLAR
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2568990720
+    m_Localized: "M\xFCzik"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185024
+    m_Localized: Ses efektleri
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185025
+    m_Localized: "MA\u011EAZA"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185026
+    m_Localized: Temalar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185027
+    m_Localized: "b\xF6l\xFCm:"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185028
+    m_Localized: "b\xF6l\xFCm:"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185029
+    m_Localized: 'yolda:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185030
+    m_Localized: "B\xF6l\xFCm \ntamamland\u0131!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185031
+    m_Localized: "T\xFCm b\xF6l\xFCmler \ntamamland\u0131!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185032
+    m_Localized: "B\xF6l\xFCm {0} tamamland\u0131!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185033
+    m_Localized: "Sonraki b\xF6l\xFCm"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185034
+    m_Localized: 'Tekrar
+
+      dene?'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185035
+    m_Localized: "Yeniden ba\u015Flat"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185036
+    m_Localized: "1. b\xF6l\xFCmden oyna"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185037
+    m_Localized: "1. b\xF6l\xFCmden ba\u015Fla"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185038
+    m_Localized: "Sat\u0131n al"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185039
+    m_Localized: "Se\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185040
+    m_Localized: "Se\xE7ili"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185041
+    m_Localized: "Kedileri bekle\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185042
+    m_Localized: "\u0130pucu yok \u2014 ba\u015Fka bir yol dene"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185043
+    m_Localized: "L\u0130DER TABLOSU"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185044
+    m_Localized: "Tamamlanan en y\xFCksek b\xF6l\xFCm"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185045
+    m_Localized: Oyuncu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185046
+    m_Localized: "B\xF6l\xFCm"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185047
+    m_Localized: "Yandex ile giri\u015F yap"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185048
+    m_Localized: Yenile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185049
+    m_Localized: "S\u0131ralama y\xFCkleniyor..."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185050
+    m_Localized: "Giri\u015F bekleniyor..."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185051
+    m_Localized: 'En iyi: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185052
+    m_Localized: "S\u0131ran: #{0}   En iyi: {1}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185053
+    m_Localized: "Sonucunu eklemek ve s\u0131ran\u0131 g\xF6rmek i\xE7in giri\u015F
+      yap.\nMisafir olarak oynamaya devam edebilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185054
+    m_Localized: "Sonucun cihaz\u0131na kaydedildi. E\u015Fitleme tekrar denenecek."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185055
+    m_Localized: "Hen\xFCz sonu\xE7 yok. Kat\u0131lmak i\xE7in bir b\xF6l\xFCm bitir!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185056
+    m_Localized: "S\u0131ralama Yandex Games'te kullan\u0131labilir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185057
+    m_Localized: "Lider tablosu hen\xFCz kullan\u0131lam\u0131yor."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185058
+    m_Localized: "Giri\u015F iptal edildi. Oynamaya devam edebilirsin."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185059
+    m_Localized: Biraz bekleyip yenile.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185060
+    m_Localized: "S\u0131ralama y\xFCklenemedi. Ba\u011Flant\u0131n\u0131 kontrol
+      edip tekrar dene."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185061
+    m_Localized: "D\u0130L"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185062
+    m_Localized: OTO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185063
+    m_Localized: "Yeniden ba\u015Flat"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 290981939228672
+    m_Localized: "\u0130pu\xE7lar\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 306994005127168
+    m_Localized: Piknik
+    m_Metadata:
+      m_Items: []
+  - m_Id: 306994009321472
+    m_Localized: "S\u0131cac\u0131k"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 306994009321473
+    m_Localized: Bulut
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941037174784
+    m_Localized: NASIL OYNANIR  {0}/{1}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923520
+    m_Localized: "E\u011Fitimi ge\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923521
+    m_Localized: "Yumaklar\u0131 e\u015Fle\u015Ftir!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923522
+    m_Localized: "Her kediye kendi renginde yumaklar laz\u0131m. Bu kediye dokun:
+      \xF6n\xFCndeki yol a\xE7\u0131k."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923523
+    m_Localized: "Yol a\xE7\u0131ld\u0131!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923524
+    m_Localized: "\u015Eimdi bu kediye dokun. Kediler sepetlerde yumaklar\u0131 kendileri
+      de\u011Fi\u015Ftirir. T\xFCm yumaklar\u0131 kendi rengine d\xF6n\xFCnce giderler!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923525
+    m_Localized: "\xD6nce yer a\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923526
+    m_Localized: "Yola yaln\u0131zca 2 kedi s\u0131\u011Far. Arkas\u0131ndaki kedinin
+      yolunu a\xE7mak i\xE7in \xF6nce bu kediye dokun."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923527
+    m_Localized: "Do\u011Fru rengi se\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923528
+    m_Localized: "Ayn\u0131 renkteki yumaklar\u0131 toplamas\u0131 i\xE7in bu kediye
+      dokun. Ayn\u0131 renkten iki kedi yolu doldurup ilerlemeyi engelleyebilir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923529
+    m_Localized: "Son kediyi g\xF6nder!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923530
+    m_Localized: "Yolda yer a\xE7\u0131ld\u0131! Son kediye dokun. B\xF6l\xFCm\xFC
+      bitirmek i\xE7in t\xFCm kedileri g\xF6nder."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923531
+    m_Localized: Sepetleri izle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923532
+    m_Localized: "Kediler di\u011Fer renkleri sepetlere b\u0131rak\u0131p kendi renklerini
+      al\u0131r. Yolun ve yolda bir yerin a\xE7\u0131lmas\u0131n\u0131 bekle."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2137384860758016
+    m_Localized: Yolda iki yer var
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2137384864952320
+    m_Localized: "Yola yaln\u0131zca 2 kedi s\u0131\u011Far. Kendi renginde yumak
+      toplamak \xFCzere sepetlere gitmesi i\xE7in bu kediye dokun."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2137384864952321
+    m_Localized: "Kediler ba\u015Fka renkteki yumaklar\u0131 sepetlere b\u0131rak\u0131p
+      kendi renklerini al\u0131r. T\xFCm yumaklar\u0131 kendi renginde olunca kedi
+      yoldan ayr\u0131l\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2137384864952322
+    m_Localized: Devam et
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2137384864952323
+    m_Localized: Yolda yer bekleniyor...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731804307456
+    m_Localized: "Yol sayac\u0131na bak"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501760
+    m_Localized: "0/2, yolda hi\xE7 kedi yok ve en fazla 2 kedi olabilir demek. Sa\u011Fdaki
+      say\u0131 s\u0131n\u0131r\u0131 g\xF6sterir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501761
+    m_Localized: "\u0130\u015Fte sepetler"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501762
+    m_Localized: "Kediler burada ba\u015Fka renkleri b\u0131rak\u0131p kendi renklerini
+      al\u0131r. T\xFCm yumaklar\u0131 kendi renginde olunca kedi yoldan ayr\u0131l\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501763
+    m_Localized: "Di\u011Fer kediye yard\u0131m et"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501764
+    m_Localized: "\u015Eimdi kendi rengini toplamas\u0131 i\xE7in bu kediyi g\xF6nder.
+      B\xF6l\xFCm\xFC bitirmek i\xE7in t\xFCm kedileri g\xF6nder."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501765
+    m_Localized: "Bir \xF6rnek deneyelim"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501766
+    m_Localized: "Bu ye\u015Fil kediyi g\xF6nder. \u0130ki yeri de ye\u015Fil kedilerle
+      doldurup ne oldu\u011Funu g\xF6relim."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501767
+    m_Localized: "\u0130kinci yeri doldur"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501768
+    m_Localized: "Di\u011Fer ye\u015Fil kediyi de g\xF6nder. Yoldaki iki yer dolacak
+      ve mavi kedi burada kalacak."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501769
+    m_Localized: Kedileri izleyelim...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501770
+    m_Localized: "\u015Eimdi yol t\u0131kand\u0131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501771
+    m_Localized: "\u0130ki yeri de ye\u015Fil kediler doldurdu. Gerekli ye\u015Fil
+      yumaklar mavi kedide, ama yola giremiyor. Yeniden ba\u015Flayal\u0131m."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501772
+    m_Localized: "B\xF6l\xFCm\xFC yeniden ba\u015Flat"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501773
+    m_Localized: "Yeniden ba\u015Flat'a dokun. Sonra yolu a\xE7an bir s\u0131ra deneyelim."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501774
+    m_Localized: "Farkl\u0131 bir s\u0131ra dene"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501775
+    m_Localized: "Bu ye\u015Fil kediyle ba\u015Fla. Bu kez yoldaki ikinci yeri mavi
+      kediye ay\u0131r."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501776
+    m_Localized: "\u015Eimdi mavi kediyi g\xF6nder"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501777
+    m_Localized: "Mavi kedi ye\u015Fil yumak ta\u015F\u0131yor, ama mavi yumak istiyor.
+      Farkl\u0131 renkleri g\xF6nderince ikisi de gereken rengi alabilir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2160169884561408
+    m_Localized: Yol dolu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2160169892950016
+    m_Localized: "2/2: iki yer de dolu. Ba\u015Fka bir kedi ancak yoldaki bir kedi
+      t\xFCm yumaklar\u0131n\u0131 toplay\u0131p ayr\u0131l\u0131nca yola girebilir."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2166080854274048
+    m_Localized: "Ye\u015Fil kedilere ye\u015Fil yumak laz\u0131m, ama sepette mavi
+      yumak var. Ye\u015Fil yumaklar mavi kedide, o da dolu yola giremiyor. Yeniden
+      ba\u015Flayal\u0131m."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2166080854274049
+    m_Localized: "Ayarlar\u0131 a\xE7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2166080854274050
+    m_Localized: "Di\u015Fli simgesine dokun. Yeniden ba\u015Flat d\xFC\u011Fmesi
+      Ayarlar'\u0131n i\xE7inde."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2173509885210624
+    m_Localized: "Ye\u015Fil kedinin yoldan ayr\u0131lmas\u0131 i\xE7in ye\u015Fil
+      yumaklara ihtiyac\u0131 var. Bu yumaklar\u0131 ta\u015F\u0131yan mavi kediyi
+      g\xF6nder."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2178074089074688
+    m_Localized: "\u0130pucu ister misin?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2178074093268992
+    m_Localized: "S\u0131rada g\xF6nderebilece\u011Fin kediyi g\xF6rmek i\xE7in ampule
+      dokun. Yard\u0131ma ihtiyac\u0131n oldu\u011Funda kullan."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2178074093268993
+    m_Localized: "Ampul, s\u0131rada g\xF6nderebilece\u011Fin kediyi g\xF6sterir.
+      \u0130pu\xE7lar\u0131 kapal\u0131; Ayarlar'dan a\xE7abilirsin."
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

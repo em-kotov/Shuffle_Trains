@@ -71,7 +71,7 @@ MonoBehaviour:
   _stations:
   - _position: {x: -7.16, y: 0, z: 1.4}
     _eulerAngles: {x: -0, y: 0, z: 0}
-    _spriteVariant: 0
+    _spriteVariant: 1
     _flipX: 0
     _flipY: 1
   - _position: {x: 7.73, y: 0, z: 1.8}

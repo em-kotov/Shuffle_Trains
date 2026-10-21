@@ -1,0 +1,3320 @@
+[
+  {
+    "level": 1,
+    "cats": 2,
+    "initial_exits": 1,
+    "blocking_layers": 2,
+    "track_capacity": 2,
+    "random_order_success": 1.0,
+    "losing_order": null,
+    "solution": [
+      2,
+      1
+    ],
+    "inventory_sha256": "886e38feda0896b995f919354cdbb4191bdf23e26017f5bc564db91aaf9686f8",
+    "poses": [
+      [
+        2,
+        2,
+        1
+      ],
+      [
+        1,
+        2,
+        2
+      ]
+    ]
+  },
+  {
+    "level": 2,
+    "cats": 3,
+    "initial_exits": 2,
+    "blocking_layers": 2,
+    "track_capacity": 2,
+    "random_order_success": 0.75,
+    "losing_order": [
+      2,
+      1
+    ],
+    "solution": [
+      2,
+      3,
+      1
+    ],
+    "inventory_sha256": "dc35d911e4baf800f8cfc165c24aed42512045ad7f84e089310271f11bf96797",
+    "poses": [
+      [
+        1,
+        3,
+        3
+      ],
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "level": 3,
+    "cats": 3,
+    "initial_exits": 2,
+    "blocking_layers": 2,
+    "track_capacity": 2,
+    "random_order_success": 0.75,
+    "losing_order": [
+      1,
+      3
+    ],
+    "solution": [
+      1,
+      2,
+      3
+    ],
+    "inventory_sha256": "1912c87335a7399f1c72d06da793f678bb48108fed2dd628c21be79868233a8d",
+    "poses": [
+      [
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        2,
+        2
+      ],
+      [
+        1,
+        2,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 4,
+    "cats": 3,
+    "initial_exits": 2,
+    "blocking_layers": 2,
+    "track_capacity": 2,
+    "random_order_success": 0.75,
+    "losing_order": [
+      1,
+      2
+    ],
+    "solution": [
+      1,
+      3,
+      2
+    ],
+    "inventory_sha256": "f7467c27ee4d5ba4aa3cb9c2b3af7d671861d839dc99f0a6c4cefd13142ec2a9",
+    "poses": [
+      [
+        2,
+        2,
+        2
+      ],
+      [
+        3,
+        2,
+        1
+      ],
+      [
+        1,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "level": 5,
+    "cats": 4,
+    "initial_exits": 2,
+    "blocking_layers": 2,
+    "track_capacity": 2,
+    "random_order_success": 0.5,
+    "losing_order": [
+      1,
+      4
+    ],
+    "solution": [
+      1,
+      3,
+      2,
+      4
+    ],
+    "inventory_sha256": "903d676fd1e02e203c36a3add236c06faa85b0d4e367f7a486af1ee6fd2305d1",
+    "poses": [
+      [
+        1,
+        3,
+        2
+      ],
+      [
+        2,
+        2,
+        3
+      ],
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        3,
+        3,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 6,
+    "cats": 4,
+    "initial_exits": 2,
+    "blocking_layers": 2,
+    "track_capacity": 2,
+    "random_order_success": 0.5,
+    "losing_order": [
+      1,
+      4
+    ],
+    "solution": [
+      1,
+      3,
+      2,
+      4
+    ],
+    "inventory_sha256": "2fcce9f5791c1ecca88a387ddbcdcd21858f4dfdedbcecda6e37f41644955013",
+    "poses": [
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        1,
+        1,
+        1
+      ],
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        2,
+        3,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 7,
+    "cats": 5,
+    "initial_exits": 2,
+    "blocking_layers": 3,
+    "track_capacity": 2,
+    "random_order_success": 0.625,
+    "losing_order": [
+      3,
+      1,
+      4
+    ],
+    "solution": [
+      3,
+      1,
+      5,
+      4,
+      2
+    ],
+    "inventory_sha256": "31965b52bc8e22fc533a25604f77ab835b2dc9ebe856a5929ca0828e9793807e",
+    "poses": [
+      [
+        1,
+        1,
+        1
+      ],
+      [
+        2,
+        3,
+        3
+      ],
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        3,
+        1,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 8,
+    "cats": 6,
+    "initial_exits": 2,
+    "blocking_layers": 3,
+    "track_capacity": 2,
+    "random_order_success": 0.6435185185185185,
+    "losing_order": [
+      1,
+      2
+    ],
+    "solution": [
+      1,
+      5,
+      2,
+      3,
+      4,
+      6
+    ],
+    "inventory_sha256": "0b1d11870a28c91519fcec335263566ad2a5be36bb4858c6c87c2c504e204002",
+    "poses": [
+      [
+        2,
+        2,
+        1
+      ],
+      [
+        3,
+        2,
+        1
+      ],
+      [
+        3,
+        0,
+        1
+      ],
+      [
+        2,
+        3,
+        3
+      ],
+      [
+        1,
+        0,
+        2
+      ],
+      [
+        0,
+        3,
+        0
+      ]
+    ]
+  },
+  {
+    "level": 9,
+    "cats": 6,
+    "initial_exits": 2,
+    "blocking_layers": 3,
+    "track_capacity": 2,
+    "random_order_success": 0.6203703703703702,
+    "losing_order": [
+      1,
+      3,
+      4,
+      2
+    ],
+    "solution": [
+      1,
+      3,
+      5,
+      4,
+      2,
+      6
+    ],
+    "inventory_sha256": "ddee6f5fc73fe71448df1761213af95a08d08a4e691459a0a7bc5a7ab8eab3ba",
+    "poses": [
+      [
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
+        2
+      ],
+      [
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        3,
+        2
+      ],
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        3,
+        3,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 10,
+    "cats": 5,
+    "initial_exits": 2,
+    "blocking_layers": 3,
+    "track_capacity": 2,
+    "random_order_success": 0.75,
+    "losing_order": [
+      4,
+      2
+    ],
+    "solution": [
+      1,
+      3,
+      4,
+      2,
+      5
+    ],
+    "inventory_sha256": "89d52540402925da09ae7c13317a1e20ae7d9a45b700a23cea43a584b0cc9cb2",
+    "poses": [
+      [
+        0,
+        2,
+        2
+      ],
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        2,
+        1
+      ],
+      [
+        3,
+        0,
+        3
+      ],
+      [
+        1,
+        3,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 11,
+    "cats": 6,
+    "initial_exits": 2,
+    "blocking_layers": 3,
+    "track_capacity": 2,
+    "random_order_success": 0.625,
+    "losing_order": [
+      2,
+      1,
+      6
+    ],
+    "solution": [
+      2,
+      1,
+      5,
+      6,
+      4,
+      3
+    ],
+    "inventory_sha256": "58911e0a92ae51246d6b872dc92d3ebca34c6303c36a0d346d645744ae36d981",
+    "poses": [
+      [
+        0,
+        3,
+        3
+      ],
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        3,
+        2,
+        3
+      ],
+      [
+        3,
+        1,
+        1
+      ],
+      [
+        2,
+        3,
+        1
+      ],
+      [
+        1,
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "level": 12,
+    "cats": 5,
+    "initial_exits": 2,
+    "blocking_layers": 3,
+    "track_capacity": 2,
+    "random_order_success": 0.75,
+    "losing_order": [
+      2,
+      1
+    ],
+    "solution": [
+      2,
+      4,
+      1,
+      3,
+      5
+    ],
+    "inventory_sha256": "2ac38071455be9566ccf277d26ff6dcc2e7710f390aa0f331f5bee215cd12898",
+    "poses": [
+      [
+        3,
+        1,
+        2
+      ],
+      [
+        3,
+        3,
+        1
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        3
+      ],
+      [
+        0,
+        1,
+        0
+      ]
+    ]
+  },
+  {
+    "level": 13,
+    "cats": 6,
+    "initial_exits": 2,
+    "blocking_layers": 3,
+    "track_capacity": 2,
+    "random_order_success": 0.625,
+    "losing_order": [
+      4,
+      1
+    ],
+    "solution": [
+      4,
+      6,
+      1,
+      5,
+      2,
+      3
+    ],
+    "inventory_sha256": "98ce104793a744f6e4448b429a9547e795a3c0ef8cf568ac4b43ac3f21ceee29",
+    "poses": [
+      [
+        2,
+        3,
+        0
+      ],
+      [
+        3,
+        0,
+        2
+      ],
+      [
+        2,
+        0,
+        2
+      ],
+      [
+        3,
+        3,
+        2
+      ],
+      [
+        3,
+        2,
+        1
+      ],
+      [
+        0,
+        2,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 14,
+    "cats": 6,
+    "initial_exits": 2,
+    "blocking_layers": 3,
+    "track_capacity": 2,
+    "random_order_success": 0.6435185185185185,
+    "losing_order": [
+      3,
+      2
+    ],
+    "solution": [
+      3,
+      4,
+      1,
+      2,
+      5,
+      6
+    ],
+    "inventory_sha256": "839eb8d40af28f6741ac3870cb904b9f54359a3d98d564c4fc78d3b06522e457",
+    "poses": [
+      [
+        2,
+        2,
+        3
+      ],
+      [
+        0,
+        3,
+        3
+      ],
+      [
+        0,
+        0,
+        3
+      ],
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        3,
+        0,
+        0
+      ],
+      [
+        3,
+        2,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 15,
+    "cats": 6,
+    "initial_exits": 2,
+    "blocking_layers": 3,
+    "track_capacity": 2,
+    "random_order_success": 0.611111111111111,
+    "losing_order": [
+      2,
+      5,
+      6
+    ],
+    "solution": [
+      2,
+      3,
+      5,
+      6,
+      1,
+      4
+    ],
+    "inventory_sha256": "761952c014909df9eaf0c3b32fe153f39bbc03f0724778d9c9200604312544bc",
+    "poses": [
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        2,
+        3,
+        2
+      ],
+      [
+        2,
+        2,
+        2
+      ],
+      [
+        3,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 16,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5632716049382717,
+    "losing_order": [
+      3,
+      5,
+      1
+    ],
+    "solution": [
+      3,
+      6,
+      5,
+      1,
+      8,
+      4,
+      7,
+      2
+    ],
+    "inventory_sha256": "67ef731fa1deaef48ad9ca654b32bafe21ab90ab05a931f44a2f1e101aa70e46",
+    "poses": [
+      [
+        0,
+        2,
+        2
+      ],
+      [
+        3,
+        1,
+        1
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        0,
+        0,
+        2
+      ],
+      [
+        0,
+        3,
+        1
+      ],
+      [
+        3,
+        3,
+        2
+      ],
+      [
+        1,
+        1,
+        2
+      ],
+      [
+        1,
+        2,
+        0
+      ]
+    ]
+  },
+  {
+    "level": 17,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.4946469907407407,
+    "losing_order": [
+      1,
+      4,
+      5
+    ],
+    "solution": [
+      1,
+      4,
+      7,
+      5,
+      6,
+      2,
+      3,
+      8
+    ],
+    "inventory_sha256": "cadddb8ef25d71a55859d8c83bbe0806872ffd815f414b616fbb1ae3acbb7258",
+    "poses": [
+      [
+        0,
+        3,
+        1
+      ],
+      [
+        1,
+        1,
+        2
+      ],
+      [
+        2,
+        1,
+        1
+      ],
+      [
+        0,
+        0,
+        3
+      ],
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        1,
+        2,
+        0
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        1,
+        0,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 18,
+    "cats": 9,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5417791923868313,
+    "losing_order": [
+      7,
+      5,
+      8,
+      6,
+      9,
+      3
+    ],
+    "solution": [
+      7,
+      5,
+      8,
+      6,
+      9,
+      2,
+      3,
+      1,
+      4
+    ],
+    "inventory_sha256": "b071f0bbbfa7afb2abde04a10daefad2098e8661230358932e301e40766bba9f",
+    "poses": [
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        2,
+        2,
+        3
+      ],
+      [
+        1,
+        3,
+        1
+      ],
+      [
+        3,
+        3,
+        3
+      ],
+      [
+        0,
+        3,
+        2
+      ],
+      [
+        3,
+        2,
+        3
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 19,
+    "cats": 9,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5509259259259259,
+    "losing_order": [
+      7,
+      2,
+      8
+    ],
+    "solution": [
+      7,
+      8,
+      5,
+      1,
+      2,
+      4,
+      3,
+      6,
+      9
+    ],
+    "inventory_sha256": "f8b61f03745781c0d758b5e00f3904bbdd1bba61cdc2649573857009cc646433",
+    "poses": [
+      [
+        2,
+        3,
+        0
+      ],
+      [
+        1,
+        2,
+        3
+      ],
+      [
+        0,
+        3,
+        0
+      ],
+      [
+        1,
+        3,
+        0
+      ],
+      [
+        3,
+        0,
+        2
+      ],
+      [
+        2,
+        0,
+        2
+      ],
+      [
+        1,
+        1,
+        3
+      ],
+      [
+        3,
+        3,
+        2
+      ],
+      [
+        0,
+        1,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 20,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5439814814814814,
+    "losing_order": [
+      1,
+      5,
+      8
+    ],
+    "solution": [
+      1,
+      6,
+      5,
+      7,
+      8,
+      3,
+      4,
+      2
+    ],
+    "inventory_sha256": "ed2cbb1d5acf3ffa7c80b7b08939180951f7e1698981bdaa9cc567cc2fa4c782",
+    "poses": [
+      [
+        3,
+        3,
+        3
+      ],
+      [
+        0,
+        2,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        2,
+        3
+      ],
+      [
+        2,
+        3,
+        0
+      ],
+      [
+        0,
+        1,
+        0
+      ],
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        2,
+        2,
+        2
+      ]
+    ]
+  },
+  {
+    "level": 21,
+    "cats": 10,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5394907407407408,
+    "losing_order": [
+      7,
+      1,
+      8
+    ],
+    "solution": [
+      7,
+      10,
+      1,
+      4,
+      8,
+      3,
+      5,
+      6,
+      9,
+      2
+    ],
+    "inventory_sha256": "4938a24d2cdd037a25018fd940e9d8d050d7ea5039da70996d20350742a87e7e",
+    "poses": [
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        1,
+        3,
+        3
+      ],
+      [
+        2,
+        1,
+        0
+      ],
+      [
+        1,
+        2,
+        0
+      ],
+      [
+        3,
+        3,
+        3
+      ],
+      [
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ],
+      [
+        3,
+        1,
+        0
+      ],
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        2,
+        2,
+        2
+      ]
+    ]
+  },
+  {
+    "level": 22,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5416666666666666,
+    "losing_order": [
+      3,
+      5,
+      1,
+      6
+    ],
+    "solution": [
+      3,
+      1,
+      5,
+      4,
+      6,
+      2,
+      7,
+      8
+    ],
+    "inventory_sha256": "4e1e44cc53d62df68d383cd3d9f1a550398b188a1abf3ea1a9671a3bd8ddf15c",
+    "poses": [
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3
+      ],
+      [
+        3,
+        0,
+        0
+      ],
+      [
+        2,
+        2,
+        1
+      ],
+      [
+        1,
+        3,
+        2
+      ],
+      [
+        3,
+        1,
+        0
+      ],
+      [
+        0,
+        3,
+        0
+      ],
+      [
+        0,
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "level": 23,
+    "cats": 10,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5535204475308642,
+    "losing_order": [
+      1,
+      3,
+      4,
+      5
+    ],
+    "solution": [
+      1,
+      3,
+      4,
+      9,
+      5,
+      6,
+      2,
+      8,
+      7,
+      10
+    ],
+    "inventory_sha256": "76251fc7cdd016b8dc81abf67587de1163cf644873353337f406e76a208fa6eb",
+    "poses": [
+      [
+        0,
+        1,
+        1
+      ],
+      [
+        3,
+        1,
+        2
+      ],
+      [
+        2,
+        3,
+        2
+      ],
+      [
+        0,
+        3,
+        3
+      ],
+      [
+        3,
+        2,
+        0
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        3,
+        0,
+        1
+      ],
+      [
+        2,
+        0,
+        2
+      ],
+      [
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        3,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 24,
+    "cats": 10,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5371656378600823,
+    "losing_order": [
+      2,
+      5,
+      7,
+      4,
+      8,
+      9,
+      10
+    ],
+    "solution": [
+      2,
+      5,
+      10,
+      6,
+      7,
+      4,
+      8,
+      1,
+      3,
+      9
+    ],
+    "inventory_sha256": "c12b8eb32a1ba321c99249b01ee9e1cc18638a53851b58b45c3bba58a19e1473",
+    "poses": [
+      [
+        0,
+        3,
+        0
+      ],
+      [
+        0,
+        0,
+        3
+      ],
+      [
+        2,
+        1,
+        2
+      ],
+      [
+        3,
+        0,
+        2
+      ],
+      [
+        3,
+        2,
+        0
+      ],
+      [
+        1,
+        1,
+        3
+      ],
+      [
+        3,
+        1,
+        2
+      ],
+      [
+        2,
+        3,
+        0
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 25,
+    "cats": 11,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5707062601808984,
+    "losing_order": [
+      4,
+      1,
+      6,
+      10,
+      7
+    ],
+    "solution": [
+      4,
+      1,
+      6,
+      11,
+      9,
+      2,
+      3,
+      5,
+      10,
+      8,
+      7
+    ],
+    "inventory_sha256": "0bdab3d147615b2dcbcefaf5fe58648ce308bacabf7107ec27b050e413e21602",
+    "poses": [
+      [
+        1,
+        1,
+        1
+      ],
+      [
+        2,
+        2,
+        2
+      ],
+      [
+        3,
+        3,
+        1
+      ],
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        0,
+        2,
+        0
+      ],
+      [
+        1,
+        0,
+        2
+      ],
+      [
+        3,
+        1,
+        3
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        2,
+        3,
+        1
+      ],
+      [
+        3,
+        0,
+        0
+      ],
+      [
+        0,
+        3,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 26,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5555555555555556,
+    "losing_order": [
+      3,
+      4,
+      8,
+      2,
+      7
+    ],
+    "solution": [
+      3,
+      8,
+      2,
+      4,
+      1,
+      7,
+      6,
+      5
+    ],
+    "inventory_sha256": "23a04c92d962ea23e3672feba58834b2b95cbbb2281e37d6842302bd08ea6210",
+    "poses": [
+      [
+        1,
+        3,
+        0
+      ],
+      [
+        1,
+        1,
+        3
+      ],
+      [
+        3,
+        0,
+        3
+      ],
+      [
+        3,
+        3,
+        0
+      ],
+      [
+        2,
+        1,
+        2
+      ],
+      [
+        2,
+        2,
+        1
+      ],
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 27,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.8055555555555555,
+    "losing_order": [
+      2,
+      4,
+      6,
+      8
+    ],
+    "solution": [
+      2,
+      4,
+      3,
+      6,
+      8,
+      1,
+      7,
+      5
+    ],
+    "inventory_sha256": "d834f5d8cfd33d8e698d1cd34742dd86d70544a61135ed661568826b963eb32a",
+    "poses": [
+      [
+        1,
+        0,
+        2
+      ],
+      [
+        3,
+        1,
+        0
+      ],
+      [
+        3,
+        3,
+        2
+      ],
+      [
+        2,
+        1,
+        0
+      ],
+      [
+        2,
+        3,
+        1
+      ],
+      [
+        0,
+        1,
+        0
+      ],
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        1,
+        3,
+        2
+      ]
+    ]
+  },
+  {
+    "level": 28,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5648148148148148,
+    "losing_order": [
+      3,
+      1,
+      4,
+      8,
+      7
+    ],
+    "solution": [
+      3,
+      1,
+      4,
+      8,
+      2,
+      7,
+      5,
+      6
+    ],
+    "inventory_sha256": "3f50e01dfb6b3d1f97e0ad6a2a1b2f2de383fcef0bb798b634b5d51d6beb492f",
+    "poses": [
+      [
+        2,
+        1,
+        0
+      ],
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        3,
+        0,
+        3
+      ],
+      [
+        3,
+        2,
+        0
+      ],
+      [
+        1,
+        2,
+        3
+      ],
+      [
+        2,
+        3,
+        1
+      ],
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 29,
+    "cats": 12,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 4,
+    "random_order_success": 0.5475128600823044,
+    "losing_order": [
+      4,
+      6,
+      9,
+      2,
+      3,
+      7,
+      10,
+      11
+    ],
+    "solution": [
+      4,
+      6,
+      9,
+      2,
+      12,
+      3,
+      7,
+      10,
+      5,
+      11,
+      1,
+      8
+    ],
+    "inventory_sha256": "48307b661a3496dc7dca0a7b5b90291ceb477e723699a8f624319b2681573cfc",
+    "poses": [
+      [
+        2,
+        2,
+        3
+      ],
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        3,
+        3,
+        0
+      ],
+      [
+        1,
+        1,
+        2
+      ],
+      [
+        1,
+        3,
+        2
+      ],
+      [
+        0,
+        3,
+        3
+      ],
+      [
+        3,
+        1,
+        1
+      ],
+      [
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        2,
+        2
+      ],
+      [
+        2,
+        1,
+        3
+      ],
+      [
+        3,
+        0,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 30,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 3,
+    "track_capacity": 3,
+    "random_order_success": 0.5416666666666666,
+    "losing_order": [
+      2,
+      1,
+      3,
+      7,
+      8
+    ],
+    "solution": [
+      2,
+      1,
+      3,
+      6,
+      7,
+      4,
+      5,
+      8
+    ],
+    "inventory_sha256": "fbc5d37088def466f710c1f5b77f198b6dcbf4355318ed971e049abe0438f9bd",
+    "poses": [
+      [
+        2,
+        2,
+        3
+      ],
+      [
+        2,
+        0,
+        3
+      ],
+      [
+        3,
+        0,
+        3
+      ],
+      [
+        1,
+        2,
+        0
+      ],
+      [
+        1,
+        3,
+        0
+      ],
+      [
+        1,
+        1,
+        0
+      ],
+      [
+        3,
+        2,
+        3
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 31,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5462962962962963,
+    "losing_order": [
+      2,
+      3,
+      5,
+      6,
+      1
+    ],
+    "solution": [
+      2,
+      5,
+      3,
+      6,
+      8,
+      1,
+      7,
+      4
+    ],
+    "inventory_sha256": "b8df65254d80110f5c2d3eeef00f4796e6c5bd9bc61623a2a39f1872ec7050ac",
+    "poses": [
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        2,
+        0,
+        3
+      ],
+      [
+        2,
+        3,
+        0
+      ],
+      [
+        0,
+        2,
+        0
+      ],
+      [
+        3,
+        2,
+        2
+      ],
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        2,
+        1,
+        3
+      ],
+      [
+        1,
+        1,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 32,
+    "cats": 10,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5458766203703703,
+    "losing_order": [
+      3,
+      6,
+      7
+    ],
+    "solution": [
+      3,
+      6,
+      9,
+      2,
+      4,
+      5,
+      8,
+      7,
+      10,
+      1
+    ],
+    "inventory_sha256": "064a1c2477129bd7661ab164f8f361592bd930d372f212f916d2ee7615f93864",
+    "poses": [
+      [
+        2,
+        1,
+        2
+      ],
+      [
+        3,
+        2,
+        2
+      ],
+      [
+        0,
+        0,
+        3
+      ],
+      [
+        3,
+        1,
+        2
+      ],
+      [
+        1,
+        3,
+        0
+      ],
+      [
+        0,
+        2,
+        1
+      ],
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        1,
+        2,
+        2
+      ],
+      [
+        3,
+        3,
+        2
+      ],
+      [
+        2,
+        2,
+        0
+      ]
+    ]
+  },
+  {
+    "level": 33,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5377443415637859,
+    "losing_order": [
+      1,
+      3,
+      5,
+      4,
+      7,
+      8
+    ],
+    "solution": [
+      1,
+      3,
+      5,
+      4,
+      2,
+      7,
+      6,
+      8
+    ],
+    "inventory_sha256": "d170efdc27d916732bb8fef13f3dfbd2ec57c1b539a87ff59519be503ea8b287",
+    "poses": [
+      [
+        3,
+        3,
+        0
+      ],
+      [
+        2,
+        1,
+        1
+      ],
+      [
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        3
+      ],
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        2,
+        1
+      ],
+      [
+        0,
+        3,
+        2
+      ],
+      [
+        1,
+        3,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 34,
+    "cats": 11,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.557873476080247,
+    "losing_order": [
+      1,
+      2,
+      4,
+      7,
+      9,
+      10,
+      5,
+      6
+    ],
+    "solution": [
+      1,
+      7,
+      2,
+      4,
+      11,
+      9,
+      3,
+      10,
+      5,
+      6,
+      8
+    ],
+    "inventory_sha256": "ae5ba2c13822661bf9476f2038bec8c31c34cfddd25101c497221bb240268481",
+    "poses": [
+      [
+        3,
+        1,
+        0
+      ],
+      [
+        2,
+        0,
+        3
+      ],
+      [
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        0,
+        3,
+        2
+      ],
+      [
+        1,
+        3,
+        0
+      ],
+      [
+        2,
+        1,
+        0
+      ],
+      [
+        3,
+        2,
+        3
+      ],
+      [
+        0,
+        2,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 35,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5578703703703703,
+    "losing_order": [
+      3,
+      4,
+      6,
+      7,
+      2,
+      8
+    ],
+    "solution": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      2,
+      8,
+      1
+    ],
+    "inventory_sha256": "333116402e2ae7d7798b807717fc82e7df216e7dd452f4e59fd1948b83cbdbac",
+    "poses": [
+      [
+        2,
+        1,
+        0
+      ],
+      [
+        2,
+        2,
+        1
+      ],
+      [
+        0,
+        0,
+        3
+      ],
+      [
+        0,
+        3,
+        1
+      ],
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        2,
+        3,
+        1
+      ],
+      [
+        0,
+        2,
+        1
+      ],
+      [
+        3,
+        1,
+        2
+      ]
+    ]
+  },
+  {
+    "level": 36,
+    "cats": 10,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5578462577160495,
+    "losing_order": [
+      1,
+      6,
+      8,
+      10,
+      4,
+      5,
+      9
+    ],
+    "solution": [
+      1,
+      6,
+      8,
+      10,
+      4,
+      7,
+      5,
+      2,
+      9,
+      3
+    ],
+    "inventory_sha256": "6950ecf765a3ef93883e6d61a25091144d89ec69b3f8607e44690390c5c1b284",
+    "poses": [
+      [
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        2,
+        2
+      ],
+      [
+        1,
+        2,
+        1
+      ],
+      [
+        3,
+        3,
+        3
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        3,
+        1
+      ],
+      [
+        2,
+        3,
+        0
+      ],
+      [
+        1,
+        3,
+        1
+      ],
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        3,
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "level": 37,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5370370370370371,
+    "losing_order": [
+      3,
+      7,
+      6,
+      8,
+      4,
+      2
+    ],
+    "solution": [
+      3,
+      8,
+      4,
+      7,
+      2,
+      5,
+      6,
+      1
+    ],
+    "inventory_sha256": "c2f7977b4b672705b6a19b4544251aee29cd70e463021b6717e634cf90c7b60f",
+    "poses": [
+      [
+        1,
+        2,
+        2
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        2,
+        3,
+        0
+      ],
+      [
+        3,
+        3,
+        2
+      ],
+      [
+        3,
+        0,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 38,
+    "cats": 11,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5423649691358025,
+    "losing_order": [
+      2,
+      1,
+      4,
+      5,
+      8,
+      9
+    ],
+    "solution": [
+      2,
+      4,
+      1,
+      11,
+      10,
+      5,
+      7,
+      8,
+      6,
+      9,
+      3
+    ],
+    "inventory_sha256": "c0d01b295a0535381c6e11a34bf0ae06db37909ffc840919ca54a06e2702ccb4",
+    "poses": [
+      [
+        1,
+        3,
+        1
+      ],
+      [
+        0,
+        3,
+        2
+      ],
+      [
+        1,
+        1,
+        0
+      ],
+      [
+        3,
+        2,
+        2
+      ],
+      [
+        3,
+        0,
+        2
+      ],
+      [
+        2,
+        1,
+        2
+      ],
+      [
+        0,
+        0,
+        2
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        2,
+        3,
+        2
+      ],
+      [
+        0,
+        2,
+        2
+      ]
+    ]
+  },
+  {
+    "level": 39,
+    "cats": 12,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 4,
+    "random_order_success": 0.5540434156378601,
+    "losing_order": [
+      1,
+      5,
+      9,
+      2,
+      6
+    ],
+    "solution": [
+      1,
+      5,
+      9,
+      2,
+      12,
+      3,
+      6,
+      7,
+      8,
+      10,
+      11,
+      4
+    ],
+    "inventory_sha256": "2aa30eed24c4284f6df203dba9d6406f48323a607ee677d288e3fa4d33c84ef8",
+    "poses": [
+      [
+        2,
+        3,
+        2
+      ],
+      [
+        1,
+        2,
+        0
+      ],
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        0,
+        3,
+        3
+      ],
+      [
+        1,
+        3,
+        2
+      ],
+      [
+        2,
+        1,
+        2
+      ],
+      [
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        2,
+        2,
+        2
+      ],
+      [
+        3,
+        0,
+        1
+      ],
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        0,
+        0,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 40,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 3,
+    "track_capacity": 3,
+    "random_order_success": 0.5385802469135802,
+    "losing_order": [
+      2,
+      3,
+      4,
+      6
+    ],
+    "solution": [
+      2,
+      3,
+      4,
+      1,
+      6,
+      7,
+      8,
+      5
+    ],
+    "inventory_sha256": "b0d3a1e3877caef1caabb63d298e79c990995942f355c930d3a24f23ba48abd9",
+    "poses": [
+      [
+        2,
+        3,
+        1
+      ],
+      [
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        0,
+        3,
+        1
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        1,
+        1,
+        1
+      ],
+      [
+        3,
+        0,
+        0
+      ],
+      [
+        3,
+        1,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 41,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.539351851851852,
+    "losing_order": [
+      3,
+      4,
+      5,
+      1,
+      8
+    ],
+    "solution": [
+      3,
+      4,
+      1,
+      5,
+      8,
+      6,
+      2,
+      7
+    ],
+    "inventory_sha256": "8e23dcee05c28d1dc30f5f53a3d6c35dc69a059a9a28a8eef348a628d36d727d",
+    "poses": [
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        0,
+        1,
+        0
+      ],
+      [
+        3,
+        2,
+        2
+      ],
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        3
+      ],
+      [
+        2,
+        2,
+        2
+      ],
+      [
+        0,
+        2,
+        3
+      ],
+      [
+        2,
+        3,
+        0
+      ]
+    ]
+  },
+  {
+    "level": 42,
+    "cats": 10,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5638431641518061,
+    "losing_order": [
+      6,
+      1,
+      7,
+      4,
+      9,
+      5
+    ],
+    "solution": [
+      6,
+      7,
+      1,
+      4,
+      9,
+      10,
+      5,
+      3,
+      8,
+      2
+    ],
+    "inventory_sha256": "e3f3c27268df4a8c91da4e9ba0860480a34019d76a1c9cf917085ae7b92d67e4",
+    "poses": [
+      [
+        2,
+        1,
+        0
+      ],
+      [
+        3,
+        3,
+        3
+      ],
+      [
+        1,
+        3,
+        1
+      ],
+      [
+        2,
+        3,
+        3
+      ],
+      [
+        0,
+        3,
+        3
+      ],
+      [
+        3,
+        1,
+        3
+      ],
+      [
+        2,
+        0,
+        3
+      ],
+      [
+        3,
+        2,
+        1
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        2,
+        1
+      ]
+    ]
+  },
+  {
+    "level": 43,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 3,
+    "track_capacity": 3,
+    "random_order_success": 0.5477237654320987,
+    "losing_order": [
+      4,
+      3,
+      5,
+      6,
+      2,
+      1
+    ],
+    "solution": [
+      4,
+      3,
+      5,
+      6,
+      7,
+      8,
+      2,
+      1
+    ],
+    "inventory_sha256": "e9e177d67ce7366ea94875b570bfa98ddea2ff67f836b2de269583e31705eeb0",
+    "poses": [
+      [
+        1,
+        3,
+        0
+      ],
+      [
+        3,
+        3,
+        3
+      ],
+      [
+        2,
+        2,
+        3
+      ],
+      [
+        2,
+        0,
+        3
+      ],
+      [
+        0,
+        2,
+        1
+      ],
+      [
+        3,
+        0,
+        3
+      ],
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0
+      ]
+    ]
+  },
+  {
+    "level": 44,
+    "cats": 11,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5448641653806584,
+    "losing_order": [
+      3,
+      4,
+      5,
+      9
+    ],
+    "solution": [
+      3,
+      10,
+      4,
+      5,
+      2,
+      7,
+      6,
+      1,
+      9,
+      11,
+      8
+    ],
+    "inventory_sha256": "fda142d01dfd1babcee4968086202c2de623a2bb5ae8d88104eb3a7cb669f450",
+    "poses": [
+      [
+        3,
+        1,
+        1
+      ],
+      [
+        1,
+        3,
+        1
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        2,
+        1,
+        2
+      ],
+      [
+        0,
+        3,
+        2
+      ],
+      [
+        1,
+        1,
+        1
+      ],
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        3,
+        0,
+        1
+      ],
+      [
+        1,
+        2,
+        0
+      ],
+      [
+        0,
+        2,
+        1
+      ],
+      [
+        0,
+        0,
+        2
+      ]
+    ]
+  },
+  {
+    "level": 45,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 3,
+    "track_capacity": 3,
+    "random_order_success": 0.5606018518518517,
+    "losing_order": [
+      1,
+      3,
+      6,
+      2,
+      5
+    ],
+    "solution": [
+      1,
+      6,
+      4,
+      2,
+      3,
+      8,
+      5,
+      7
+    ],
+    "inventory_sha256": "f1fa540afe53adc9466494027841b751a395bf87ef0c57867a13c04590d01959",
+    "poses": [
+      [
+        0,
+        0,
+        3
+      ],
+      [
+        3,
+        1,
+        2
+      ],
+      [
+        0,
+        3,
+        2
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        2,
+        3,
+        0
+      ],
+      [
+        3,
+        3,
+        2
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        2,
+        1,
+        0
+      ]
+    ]
+  },
+  {
+    "level": 46,
+    "cats": 10,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5633573388203017,
+    "losing_order": [
+      6,
+      5,
+      3,
+      4,
+      8,
+      9,
+      1
+    ],
+    "solution": [
+      6,
+      5,
+      3,
+      9,
+      10,
+      1,
+      4,
+      8,
+      2,
+      7
+    ],
+    "inventory_sha256": "6ca64ea28115834fc388bda7effa14625635e11cd48bb5e40026dab1a9da92e1",
+    "poses": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        2,
+        3,
+        1
+      ],
+      [
+        3,
+        0,
+        1
+      ],
+      [
+        2,
+        1,
+        3
+      ],
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        1
+      ],
+      [
+        3,
+        3,
+        1
+      ],
+      [
+        1,
+        3,
+        3
+      ],
+      [
+        0,
+        2,
+        1
+      ],
+      [
+        3,
+        1,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 47,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5567129629629629,
+    "losing_order": [
+      4,
+      1,
+      5,
+      7
+    ],
+    "solution": [
+      4,
+      7,
+      6,
+      1,
+      5,
+      8,
+      3,
+      2
+    ],
+    "inventory_sha256": "289189de8c554a7f7805f7830fab8ae7a9b3b4ae92b1c660a3164d8db57a7008",
+    "poses": [
+      [
+        0,
+        0,
+        2
+      ],
+      [
+        1,
+        2,
+        2
+      ],
+      [
+        1,
+        3,
+        0
+      ],
+      [
+        0,
+        3,
+        1
+      ],
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        2,
+        3,
+        2
+      ],
+      [
+        2,
+        1,
+        1
+      ],
+      [
+        3,
+        2,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 48,
+    "cats": 11,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5632394547325102,
+    "losing_order": [
+      1,
+      5,
+      10,
+      2,
+      6
+    ],
+    "solution": [
+      1,
+      5,
+      10,
+      3,
+      2,
+      7,
+      4,
+      11,
+      6,
+      9,
+      8
+    ],
+    "inventory_sha256": "2e9efb1fd81eff4c4a2692738a5e7c6de42258a33532731a752692a249fbd2eb",
+    "poses": [
+      [
+        3,
+        2,
+        2
+      ],
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        1,
+        3,
+        1
+      ],
+      [
+        1,
+        0,
+        2
+      ],
+      [
+        3,
+        0,
+        3
+      ],
+      [
+        0,
+        0,
+        2
+      ],
+      [
+        1,
+        2,
+        2
+      ],
+      [
+        2,
+        0,
+        2
+      ],
+      [
+        2,
+        1,
+        0
+      ],
+      [
+        0,
+        3,
+        2
+      ],
+      [
+        3,
+        1,
+        3
+      ]
+    ]
+  },
+  {
+    "level": 49,
+    "cats": 12,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 4,
+    "random_order_success": 0.5426458497299382,
+    "losing_order": [
+      2,
+      4,
+      5,
+      3,
+      1,
+      6,
+      9,
+      10
+    ],
+    "solution": [
+      2,
+      4,
+      7,
+      5,
+      3,
+      1,
+      6,
+      8,
+      10,
+      11,
+      9,
+      12
+    ],
+    "inventory_sha256": "eee0eb5e6afc58433e23e5b7359277717db1ae3e55ded0dd276aa2d7cac85f2d",
+    "poses": [
+      [
+        2,
+        1,
+        2
+      ],
+      [
+        3,
+        0,
+        3
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        3,
+        1,
+        3
+      ],
+      [
+        3,
+        2,
+        0
+      ],
+      [
+        0,
+        3,
+        1
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        3,
+        3,
+        3
+      ],
+      [
+        1,
+        3,
+        1
+      ],
+      [
+        0,
+        0,
+        2
+      ],
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        0
+      ]
+    ]
+  },
+  {
+    "level": 50,
+    "cats": 8,
+    "initial_exits": 3,
+    "blocking_layers": 4,
+    "track_capacity": 3,
+    "random_order_success": 0.5462962962962962,
+    "losing_order": [
+      3,
+      4,
+      5,
+      1
+    ],
+    "solution": [
+      3,
+      4,
+      5,
+      7,
+      6,
+      8,
+      2,
+      1
+    ],
+    "inventory_sha256": "d35f217244514dba50b511458cf24288ba75982686598dd88d86b4f96e963d79",
+    "poses": [
+      [
+        1,
+        1,
+        1
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        1
+      ],
+      [
+        2,
+        2,
+        1
+      ],
+      [
+        0,
+        0,
+        3
+      ],
+      [
+        2,
+        3,
+        1
+      ],
+      [
+        0,
+        3,
+        1
+      ],
+      [
+        3,
+        1,
+        2
+      ]
+    ]
+  }
+]

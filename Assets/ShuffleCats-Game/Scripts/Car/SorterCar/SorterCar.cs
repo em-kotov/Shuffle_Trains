@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class SorterCar : MonoBehaviour
 {
-    private bool _isReset = true;
     private bool _isNeedToSort;
     private StationOperator _stationOperator;
     private PassengerTracker _passengerTracker;
@@ -56,14 +55,7 @@ public class SorterCar : MonoBehaviour
 
     public void Sort(Station station)
     {
-        // TEMP DIAGNOSTIC — remove after debugging station misses.
-        // TrySetCurrentCar reserves the station on success, so it is called
-        // exactly once and the result reused — no extra call for logging.
-        bool reserved = station.TrySetCurrentCar(this);
-        Debug.Log($"[ScanDiag] {name} Sort station={station.name} " +
-                  $"TrySetCurrentCar={reserved}", this);
-
-        if (reserved)
+        if (station.TrySetCurrentCar(this))
         {
             _stationOperator.MarkVisited(station);
             IsSorting = true;
@@ -73,17 +65,13 @@ public class SorterCar : MonoBehaviour
 
     public void TryResetStationProgress() //station operator method
     {
-        // TEMP DIAGNOSTIC — remove after debugging station misses.
-        Debug.Log($"[ScanDiag] {name} TryResetStationProgress " +
-                  $"isNeedToSort={_isNeedToSort} isReset={_isReset}", this);
-
-        if (_isNeedToSort)
+        // Crossing the loop-boundary reset collider begins a new lap: clear this
+        // cat's visited progress so every station is available again. Guarded on
+        // "any visited" so the scanner's repeated hits during a single crossing
+        // are no-ops after the first one clears the flags.
+        if (_stationOperator.HasAnyVisited())
         {
-            if (_isReset == false)
-            {
-                _stationOperator.ResetProgress();
-                _isReset = true;
-            }
+            _stationOperator.ResetProgress();
         }
     }
 
@@ -91,6 +79,22 @@ public class SorterCar : MonoBehaviour
     {
         catColor = _catColor;
         return _passengerTracker.HaveFreeSeats(out count);
+    }
+
+    // Read-only counterpart to ImitateSorting. Used only when checking whether
+    // the occupied track can make progress without admitting another cat.
+    public bool CanExchangeWith(Station station)
+    {
+        if (IsFinished)
+            return false;
+
+        DetermineColorToDrop(station, out bool canDrop);
+        if (canDrop && _passengerTracker.GetDropOffPassengers(
+                station.CatColor, station.GetFreeSeats().Count).Count > 0)
+            return true;
+
+        return _passengerTracker.HaveFreeSeats(out _) &&
+               station.HavePassengers(out _, out CatColor color) && color == _catColor;
     }
 
     private void TryFinishSorting()
@@ -177,16 +181,12 @@ public class SorterCar : MonoBehaviour
         bool haveColorsForDrop;
         CatColor colorToDrop = DetermineColorToDrop(station, out haveColorsForDrop);
 
-        // TEMP DIAGNOSTIC — track what this visit actually moves.
-        int droppedCount = 0;
-
         //drop-off
         if (haveColorsForDrop)
         {
 
             List<Transform> seats = station.GetFreeSeats();
             List<Passenger> dropPassengers = _passengerTracker.GetDropOffPassengers(station.CatColor, seats.Count);
-            droppedCount = dropPassengers.Count;
 
             //Debug.Log($"PassengerCar - drop passengers: {dropPassengers.Count}, station seats: {seats.Count}, car color: {_catColor}");
 
@@ -217,19 +217,7 @@ public class SorterCar : MonoBehaviour
 
         station.ClearCurrentCar();
 
-        _isNeedToSort = IsNeedToSort(); //from this and below are for reset and exit
-
-        bool needReset = _stationOperator.IsNeedToReset();
-
-        // TEMP DIAGNOSTIC — remove after debugging station misses.
-        Debug.Log($"[ScanDiag] {name} SortDone station={station.name} " +
-                  $"dropped={droppedCount} picked={pickPassengers.Count} " +
-                  $"isNeedToSort={_isNeedToSort} IsNeedToReset={needReset} isResetBefore={_isReset}", this);
-
-        if (needReset)
-        {
-            _isReset = false;
-        }
+        _isNeedToSort = IsNeedToSort(); //recompute for the finish/exit check below
 
         TryFinishSorting();
         IsSorting = false;

@@ -10,6 +10,8 @@ public class ClickDetector : MonoBehaviour, IPointerDownHandler, IPointerClickHa
     public event Action Pressed;
     public event Action Clicked;
 
+    public bool InteractionAllowed { get; set; } = true;
+
     public void Initialize(PhysicsRaycaster raycaster)
     {
         _raycaster = raycaster;
@@ -17,11 +19,13 @@ public class ClickDetector : MonoBehaviour, IPointerDownHandler, IPointerClickHa
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (YandexSdk.IsPaused || !InteractionAllowed) return;
         Pressed?.Invoke();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (YandexSdk.IsPaused || !InteractionAllowed) return;
         Clicked?.Invoke();
     }
 }

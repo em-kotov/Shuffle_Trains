@@ -9,11 +9,41 @@ public class Station : SeatTracker
 
     private List<Passenger> _passengers;
     private SorterCar _currentSorterCar;
+    private Transform _presentation;
+    private Vector3 _presentationPosition;
 
     public CatColor CatColor { get; private set; }
 
     // The sprite the ThemeApplier swaps/flips per level theme.
     public SpriteRenderer ThemeTarget => _model;
+
+    public void SetPortraitPresentation(bool portrait)
+    {
+        if (_model == null || (!portrait && _presentation == null)) return;
+
+        if (_presentation == null)
+        {
+            // Keep the station trigger and stopping point on the authored track.
+            // Only the artwork and yarn seats become compact in portrait.
+            _presentation = new GameObject("StationVisuals").transform;
+            _presentation.SetParent(transform, false);
+            _presentation.position = _model.transform.position;
+            _presentationPosition = _presentation.localPosition;
+            _model.transform.SetParent(_presentation, true);
+            foreach (Transform holdPoint in _holdPoints)
+                holdPoint.SetParent(_presentation, true);
+        }
+
+        _presentation.localPosition = _presentationPosition;
+        _presentation.localScale = Vector3.one * (portrait ? 0.8f : 1f);
+        if (portrait)
+        {
+            Vector3 position = _presentation.position;
+            // Leave room beside the field and a screen-edge margin for every theme.
+            position.x = Mathf.Clamp(position.x, -8.3f, 8.3f);
+            _presentation.position = position;
+        }
+    }
 
     public void Initialize()
     {

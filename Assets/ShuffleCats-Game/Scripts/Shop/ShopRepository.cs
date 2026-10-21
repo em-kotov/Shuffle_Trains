@@ -3,15 +3,11 @@ using UnityEngine;
 
 public class ShopRepository : IShopRepository
 {
-    private const string OwnedKey = "Shop.Owned";
-    private const string EquippedKey = "Shop.Equipped";
-    private const string SeededKey = "Shop.Seeded.v3";
-
     private readonly HashSet<string> _owned;
 
     public ShopRepository(ShopCatalog catalog)
     {
-        if (catalog != null && PlayerPrefs.GetInt(SeededKey, 0) == 0)
+        if (catalog != null && PlayerPrefs.GetInt(SaveKeys.ShopSeeded, 0) == 0)
         {
             Seed(catalog);
         }
@@ -34,13 +30,14 @@ public class ShopRepository : IShopRepository
 
     public string GetEquipped()
     {
-        return PlayerPrefs.GetString(EquippedKey, string.Empty);
+        return PlayerPrefs.GetString(SaveKeys.ShopEquipped, string.Empty);
     }
 
     public void SetEquipped(string id)
     {
-        PlayerPrefs.SetString(EquippedKey, id);
+        PlayerPrefs.SetString(SaveKeys.ShopEquipped, id);
         PlayerPrefs.Save();
+        CloudSave.Push();
     }
 
     private void Seed(ShopCatalog catalog)
@@ -55,22 +52,23 @@ public class ShopRepository : IShopRepository
             }
         }
 
-        PlayerPrefs.SetString(OwnedKey, string.Join(",", ownedIds));
+        PlayerPrefs.SetString(SaveKeys.ShopOwned, string.Join(",", ownedIds));
 
         Theme defaultEquipped = catalog.GetDefaultEquipped();
         if (defaultEquipped != null)
         {
-            PlayerPrefs.SetString(EquippedKey, defaultEquipped.Id);
+            PlayerPrefs.SetString(SaveKeys.ShopEquipped, defaultEquipped.Id);
         }
 
-        PlayerPrefs.SetInt(SeededKey, 1);
+        PlayerPrefs.SetInt(SaveKeys.ShopSeeded, 1);
         PlayerPrefs.Save();
+        CloudSave.Push();
     }
 
     private HashSet<string> LoadOwned()
     {
         HashSet<string> result = new HashSet<string>();
-        string raw = PlayerPrefs.GetString(OwnedKey, string.Empty);
+        string raw = PlayerPrefs.GetString(SaveKeys.ShopOwned, string.Empty);
 
         if (string.IsNullOrEmpty(raw))
         {
@@ -90,7 +88,8 @@ public class ShopRepository : IShopRepository
 
     private void SaveOwned()
     {
-        PlayerPrefs.SetString(OwnedKey, string.Join(",", _owned));
+        PlayerPrefs.SetString(SaveKeys.ShopOwned, string.Join(",", _owned));
         PlayerPrefs.Save();
+        CloudSave.Push();
     }
 }

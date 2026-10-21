@@ -3,10 +3,29 @@ using UnityEngine;
 
 public class ParkingRegistrator : MonoBehaviour
 {
+    [SerializeField, Min(1f)] private float _normalTrackSpeedMultiplier = 1.7f;
+    [Tooltip("Additional track speed multiplier after the final cat leaves parking.")]
+    [SerializeField, Min(1f)] private float _finalCatsSpeedMultiplier = 2.7f / 1.7f;
+
+    public float TrackSpeedMultiplier => Mathf.Max(1f, _normalTrackSpeedMultiplier)
+        * (_parkingCars != null && _parkingCars.Count == 0
+            ? Mathf.Max(1f, _finalCatsSpeedMultiplier) : 1f);
+
     private GridCalculator _gridCalculator;
     private ParkingCar[,] _gridCells;
     private List<ParkingCar> _parkingCars;
     float _cellSize;
+
+    public bool HasMovingCars
+    {
+        get
+        {
+            foreach (ParkingCar car in _parkingCars)
+                if (car.IsMoving)
+                    return true;
+            return false;
+        }
+    }
 
     public void Initialize(int width, int height, float cellSize,
                     int startX, int startY, float axisYLevel,
@@ -132,6 +151,22 @@ public class ParkingRegistrator : MonoBehaviour
     public ParkingCar GetCar(int gridX, int gridY)
     {
         return _gridCells[gridX, gridY];
+    }
+
+    // Read the entire exit lane, including blockers hidden behind the first cat.
+    // Hints simulate removing these cats without changing real cell reservations.
+    public List<ParkingCar> GetBlockingCars(ParkingCar car, CarOrientation orientation, float sign)
+    {
+        var blockers = new List<ParkingCar>();
+        Vector3 target = _gridCalculator.CalculateTargetPosition(car.transform.position,
+            orientation, sign, (_gridCells.GetLength(0) + _gridCells.GetLength(1)) * _cellSize);
+        foreach (Vector2Int cell in _gridCalculator.GetVisitedCells(target, car.transform.position))
+        {
+            ParkingCar occupant = _gridCells[cell.x, cell.y];
+            if (occupant != null && occupant != car && !blockers.Contains(occupant))
+                blockers.Add(occupant);
+        }
+        return blockers;
     }
 
     public bool IsPossibleToMove(out ParkingCar car)

@@ -39,6 +39,7 @@ public class Subscriber : MonoBehaviour
 
     private ParkingRegistrator _parkingRegistrator;
     private TrackRegistrator _trackRegistrator;
+    private SorterRegistrator _sorterRegistrator;
     private SplineContainer _trackSpline;
     private SplineContainer _exitSpline;
     private PhysicsRaycaster _raycaster;
@@ -49,8 +50,19 @@ public class Subscriber : MonoBehaviour
     private float _waitTime;
     private bool _isWaitingForTrack = false;
     private List<Passenger> _passengers;
+    private CatRunningTrail _runningTrail;
+    private CatTrackIndicator _trackIndicator;
 
     public event Action<Subscriber> ReachedEnd;
+
+    public ParkingCar Parking => _parkingCar;
+    public SorterCar Sorter => _sorterCar;
+    public SpriteRenderer CatSprite => _catTexture;
+    public CatColor Color => _carColor;
+    public int SeatCount => _holdPoints.Count;
+    public PassengerTracker Passengers => _passengerTracker;
+    public ClickDetector Clicks => _clickDetector;
+    public bool IsOnTrack { get; private set; }
 
     private void OnEnable()
     {
@@ -77,8 +89,18 @@ public class Subscriber : MonoBehaviour
 
         if (facingLock != null)
         {
+            _spriteFacingLock = facingLock;
             facingLock.SetInvertFlip(invertFlip);
             facingLock.SetTrackFlip(trackFlipSeparate, invertFlipTrack);
+            if (_length == 1)
+            {
+                Vector3 direction = orientation == CarOrientation.Horizontal
+                    ? Vector3.right * signDirection
+                    : Vector3.forward * signDirection;
+                // The green single-cell texture is drawn facing right; all
+                // other single-cell textures face left.
+                facingLock.SetParkingDirection(direction, _carColor == CatColor.Green);
+            }
         }
 
         if (_rotationFixer != null)
@@ -94,6 +116,7 @@ public class Subscriber : MonoBehaviour
     {
         _parkingRegistrator = parkingRegistrator;
         _trackRegistrator = trackRegistrator;
+        _sorterRegistrator = sorterRegistrator;
         _trackSpline = trackSpline;
         _exitSpline = exitSpline;
         _raycaster = raycaster;
@@ -102,6 +125,7 @@ public class Subscriber : MonoBehaviour
         _waitTime = waitTime;
         _searchMin = searchMin;
         _searchMax = searchMax;
+        IsOnTrack = false;
 
         ActivateParkingCar();
         _mover.Initialize(_carHead, _slideDuration);
@@ -109,6 +133,20 @@ public class Subscriber : MonoBehaviour
         _sorterCar.Initialize(_stationOperator, _passengerTracker, pass, _holdPoints, _carColor, stationCount, sorterRegistrator);
 
         _scaleAnimation.Activate(_catTexture.transform);
+        _runningTrail = GetComponent<CatRunningTrail>();
+        if (_runningTrail == null)
+            _runningTrail = gameObject.AddComponent<CatRunningTrail>();
+        Vector3 parkingDirection = _orientation == CarOrientation.Horizontal
+            ? Vector3.right * _signDirection : Vector3.forward * _signDirection;
+        _runningTrail.Initialize(_catTexture, _carHead, _carColor, parkingDirection);
+        _trackIndicator = GetComponent<CatTrackIndicator>();
+        if (_trackIndicator == null)
+            _trackIndicator = gameObject.AddComponent<CatTrackIndicator>();
+        // Normalized face locations in the source art. Long cats have their face
+        // near the top; the green short cat is the one drawn facing right.
+        Vector2 faceAnchor = _length > 1 ? new Vector2(0.53f, 0.68f) :
+            new Vector2(_carColor == CatColor.Green ? 0.65f : 0.38f, 0.55f);
+        _trackIndicator.Initialize(_catTexture, faceAnchor);
     }
 
     private IEnumerator OnBorderArrivalRoutine()
@@ -138,6 +176,7 @@ public class Subscriber : MonoBehaviour
             return;
 
         _isWaitingForTrack = true;
+        _trackIndicator?.ShowWaiting();
         StartCoroutine(OnBorderArrivalRoutine());
     }
 
@@ -147,26 +186,44 @@ public class Subscriber : MonoBehaviour
         _splineCar.Initialize(_mover, _carHead, _trackSwitcher,
                             _splineAnimate, _trackSpline, _trackSpeed,
                             _searchMin, _searchMax, _trackRegistrator,
-                            _exitSpline, _splineOperator);
+                            _exitSpline, _splineOperator, _parkingRegistrator);
 
         _scanner.BlockedAhead += OnBlockedAhead;
         _scanner.PathCleared += OnPathCleared;
         _scanner.StationFound += OnStationFound;
         _scanner.ResetFound += OnResetFound;
         _splineCar.TrackEntered += OnTrackEntered;
+        _splineCar.TrackEntryStarted += OnTrackEntryStarted;
 
+        _runningTrail?.Begin();
         _splineCar.GoToTrack();
     }
 
     private void OnTrackEntered()
     {
+        IsOnTrack = true;
         _splineCar.TrackEntered -= OnTrackEntered;
+        _splineCar.TrackEntryStarted -= OnTrackEntryStarted;
+        _trackIndicator?.Hide();
+        _sorterRegistrator.MarkOnTrack(_sorterCar);
         _rotationFixer.ApplyFix();
 
         if (_spriteFacingLock != null)
             _spriteFacingLock.SwitchToTrackFlip();
 
         _scanner.Initialize();
+    }
+
+    private void OnTrackEntryStarted()
+    {
+        _trackIndicator?.ShowReady();
+    }
+
+    private void OnParkingDepartureStarted()
+    {
+        // A repeated click at a full track must keep the waiting dots visible.
+        if (!_isWaitingForTrack)
+            _trackIndicator?.ShowReady();
     }
 
     private void ActivateParkingCar()
@@ -177,6 +234,7 @@ public class Subscriber : MonoBehaviour
         _clickDetector.Clicked += _parkingCar.OnClick;
         _mover.FinishedMoving += _parkingCar.OnFinishedMoving;
         _parkingCar.IsOnBorder += OnBorderArrival;
+        _parkingCar.DepartureStarted += OnParkingDepartureStarted;
         _parkingCar.BumpReceived += OnBumpReceived;
         _parkingCar.BumpAttempted += OnBumpAttempted;
         _bumpAnimation.Finished += OnBumpFinished;
@@ -189,6 +247,7 @@ public class Subscriber : MonoBehaviour
         _clickDetector.Clicked -= _parkingCar.OnClick;
         _mover.FinishedMoving -= _parkingCar.OnFinishedMoving;
         _parkingCar.IsOnBorder -= OnBorderArrival;
+        _parkingCar.DepartureStarted -= OnParkingDepartureStarted;
         _parkingCar.BumpReceived -= OnBumpReceived;
         _parkingCar.BumpAttempted -= OnBumpAttempted;
         _bumpAnimation.Finished -= OnBumpFinished;
@@ -200,6 +259,7 @@ public class Subscriber : MonoBehaviour
 
     private void OnBumpReceived(Vector2 impactDir)
     {
+        _trackIndicator?.ShowBump();
         _scaleAnimation.Deactivate();
         _bumpAnimation.Activate(_catTexture.transform, impactDir);
     }
@@ -211,6 +271,7 @@ public class Subscriber : MonoBehaviour
 
     private void OnBumpAttempted(Vector2 impactDir)
     {
+        _trackIndicator?.ShowBump();
         _scaleAnimation.Deactivate();
         _nudgeAnimation.Activate(_catTexture.transform, impactDir);
     }
@@ -232,9 +293,6 @@ public class Subscriber : MonoBehaviour
 
     private void OnResetFound()
     {
-        // TEMP DIAGNOSTIC — remove after debugging station misses.
-        Debug.Log($"[ScanDiag] {name} OnResetFound IsFinished={_sorterCar.IsFinished}", this);
-
         if (_sorterCar.IsFinished)
             return;
 
@@ -244,21 +302,10 @@ public class Subscriber : MonoBehaviour
 
     private void OnStationFound(Station station)
     {
-        // TEMP DIAGNOSTIC — remove after debugging station misses.
-        bool isFinished = _sorterCar.IsFinished;
-        Debug.Log($"[ScanDiag] {name} OnStationFound station={station.name} " +
-                  $"IsFinished={isFinished}", this);
-
-        if (isFinished)
+        if (_sorterCar.IsFinished)
             return;
 
-        // IsNeedToSort has a side effect (adds the station to progress), so it is
-        // called exactly once and the result reused — no extra call for logging.
-        bool needToSort = _sorterCar.IsNeedToSort(station);
-        Debug.Log($"[ScanDiag] {name} OnStationFound station={station.name} " +
-                  $"IsNeedToSort={needToSort}", this);
-
-        if (needToSort == false)
+        if (_sorterCar.IsNeedToSort(station) == false)
             return;
 
         _splineCar.Stop();
@@ -275,6 +322,7 @@ public class Subscriber : MonoBehaviour
 
         if (_sorterCar.IsFinished)
         {
+            _trackIndicator?.ShowExitReaction();
             _splineCar.SwitchSplineToNearest();
             yield return new WaitUntil(() => _splineCar.IsOnExit == true);
             StartCoroutine(WaitCompletedExit());
@@ -300,6 +348,10 @@ public class Subscriber : MonoBehaviour
 
         _scaleAnimation.Deactivate();
 
+        // The exit endpoint can be visible in wide or zoomed-out viewports.
+        // Stop rendering the whole completed cat, including its passengers and
+        // running trail, instead of relying on the endpoint being off camera.
+        gameObject.SetActive(false);
         ReachedEnd?.Invoke(this);
     }
 

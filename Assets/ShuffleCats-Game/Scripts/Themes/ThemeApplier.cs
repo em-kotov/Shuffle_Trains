@@ -52,6 +52,7 @@ public class ThemeApplier : MonoBehaviour
     private Shop _shop;
     private Quaternion _playAreaBaseRotation;
     private bool _playAreaBaseCached;
+    private Vector2 _backgroundBaseSize;
 
     // Used when stations are spawned at runtime (LevelBuilder) instead of being
     // hand-placed: the serialized _stations list points at the old scene
@@ -71,6 +72,22 @@ public class ThemeApplier : MonoBehaviour
             FlipX = flipX,
             FlipY = flipY
         });
+    }
+
+    public void RegisterStations(IEnumerable<Station> stations)
+    {
+        foreach (Station station in stations)
+        {
+            SpriteRenderer target = station != null ? station.ThemeTarget : null;
+            if (target == null || _stations.Exists(entry => entry != null && entry.Target == target))
+            {
+                continue;
+            }
+
+            // Unlisted scene stations use the station prefab's A variant.
+            // Keep their authored flips; upper stations retain explicit overrides.
+            AddStation(target, StationSpriteVariant.A, target.flipX, target.flipY);
+        }
     }
 
     public void Initialize(Shop shop)
@@ -148,6 +165,27 @@ public class ThemeApplier : MonoBehaviour
         _backgroundTarget.sprite = theme.BackgroundSprite;
         _backgroundTarget.size = theme.BackgroundTileSize;
         _backgroundTarget.transform.localScale = theme.BackgroundSize;
+        _backgroundBaseSize = theme.BackgroundTileSize;
+        FitBackgroundToCamera(Camera.main);
+    }
+
+    // Extend the tiled background instead of stretching the artwork or exposing
+    // the camera clear color above/below the board on tall browser viewports.
+    public void FitBackgroundToCamera(Camera camera)
+    {
+        if (_backgroundTarget == null || camera == null || !camera.orthographic) return;
+        Transform background = _backgroundTarget.transform;
+        var plane = new Plane(background.forward, background.position);
+        Vector2 size = _backgroundBaseSize;
+        for (int corner = 0; corner < 4; corner++)
+        {
+            Ray ray = camera.ViewportPointToRay(new Vector3(corner % 2, corner / 2, 0));
+            if (!plane.Raycast(ray, out float distance)) continue;
+            Vector3 local = background.InverseTransformPoint(ray.GetPoint(distance));
+            size.x = Mathf.Max(size.x, Mathf.Abs(local.x) * 2.02f);
+            size.y = Mathf.Max(size.y, Mathf.Abs(local.y) * 2.02f);
+        }
+        _backgroundTarget.size = size;
     }
 
     private void ApplyStations(Theme theme)

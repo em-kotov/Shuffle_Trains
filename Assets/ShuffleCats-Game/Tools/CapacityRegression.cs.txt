@@ -1,0 +1,174 @@
+// Headless test support only. The runner compiles the real sorting classes with
+// these inert rendering/transform stubs; it does not simulate Unity physics.
+namespace UnityEngine
+{
+    public class SerializeField : System.Attribute { }
+    public class Coroutine { }
+    public class MonoBehaviour
+    {
+        public Transform transform = new Transform();
+        protected Coroutine StartCoroutine(System.Collections.IEnumerator routine)
+        {
+            while (routine.MoveNext()) { }
+            return new Coroutine();
+        }
+    }
+    public class Transform
+    {
+        public Transform parent;
+        public Vector3 position, localScale, localPosition;
+        public void SetParent(Transform value, bool keepWorld) { parent = value; }
+        public void SetLocalPositionAndRotation(Vector3 p, Quaternion q) { }
+    }
+    public class GameObject { public Transform transform = new Transform(); public GameObject(string name) { } }
+    public struct Vector3 {
+        public float x, y, z;
+        public static Vector3 zero, one;
+        public static Vector3 operator *(Vector3 value, float scale) => value;
+    }
+    public static class Mathf { public static float Clamp(float v, float min, float max) => Math.Max(min, Math.Min(max, v)); }
+    public struct Quaternion { public static Quaternion identity; }
+    public struct Color { public static Color white; }
+    public class SpriteRenderer { public Color color; public Transform transform = new Transform(); }
+    public class WaitForSeconds { public WaitForSeconds(float seconds) { } }
+    public static class Gizmos
+    {
+        public static Color color;
+        public static void DrawWireSphere(Vector3 p, float size) { }
+    }
+}
+public static class ColorHelper
+{
+    public static UnityEngine.Color GetColor(CatColor color) => default;
+    public static UnityEngine.Color GetGizmoColor(CatColor color) => default;
+}
+public static partial class CapacityRegression
+{
+    public static int Passed;
+    private static void Set(object target, string name, object value)
+    {
+        target.GetType().GetField(name, System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.NonPublic).SetValue(target, value);
+    }
+    private static void Check(bool value, string message)
+    {
+        if (!value) throw new System.Exception(message);
+        Passed++;
+    }
+    private static List<Transform> Seats(int count)
+    {
+        var seats = new List<Transform>();
+        for (int i=0;i<count;i++) seats.Add(new Transform());
+        return seats;
+    }
+    private static Passenger Ball(int color)
+    {
+        var ball = new Passenger();
+        Set(ball, "_model", new SpriteRenderer());
+        ball.AssignColor((CatColor)color);
+        return ball;
+    }
+    private static List<Station> Stations(int count)
+    {
+        var stations = new List<Station>();
+        for (int i=0;i<count;i++)
+        {
+            var station = new Station();
+            Set(station, "_holdPoints", Seats(4));
+            station.Initialize();
+            stations.Add(station);
+        }
+        return stations;
+    }
+    private static SorterCar Cat(SorterRegistrator registry, int color, params int[] colors)
+    {
+        var passengers = new List<Passenger>();
+        foreach (int c in colors) passengers.Add(Ball(c));
+        var cat = new SorterCar();
+        cat.Initialize(new StationOperator(), new PassengerTracker(), passengers,
+            Seats(colors.Length), (CatColor)color, 4, registry);
+        return cat;
+    }
+    private static void Settle(List<SorterCar> active, List<Station> stations)
+    {
+        for (int lap=0;lap<100;lap++)
+        {
+            foreach (var cat in active)
+            {
+                if (cat.IsFinished) continue;
+                foreach (var station in stations)
+                {
+                    if (cat.IsNeedToSort(station)) cat.Sort(station);
+                    if (cat.IsFinished) break;
+                }
+                cat.TryResetStationProgress();
+            }
+            active.RemoveAll(c => c.IsFinished);
+        }
+    }
+    private static void Fill(Station station, int color, int count)
+    {
+        var seats = station.GetFreeSeats();
+        var balls = new List<Passenger>();
+        for (int i=0;i<count;i++)
+        {
+            var ball=Ball(color);
+            ball.transform.SetParent(seats[i], false);
+            balls.Add(ball);
+        }
+        station.UpdatePassengers(balls);
+    }
+    public static void EdgeCases()
+    {
+        var stations=Stations(2);
+        var registry=new SorterRegistrator(); registry.Initialize(stations);
+        var a=Cat(registry,0,1); var b=Cat(registry,0,1);
+        Cat(registry,1,0); // parked partner must not rescue a full track
+        registry.MarkOnTrack(a); registry.MarkOnTrack(b);
+        var active=new List<SorterCar>{a,b}; Settle(active,stations);
+        Check(stations[1].GetFreeSeats().Count==4,"Fixture must include an empty station");
+        Check(registry.IsTrackDeadlocked(2),"Full track with empty station must lose");
+        Check(!registry.IsTrackDeadlocked(3),"Reserved entry/exit slot must defer loss");
+        Set(a,"<IsSorting>k__BackingField",true);
+        Check(!registry.IsTrackDeadlocked(2),"An in-flight transfer must defer loss");
+        Set(a,"<IsSorting>k__BackingField",false);
+        registry.Unregister(b);
+        Check(!registry.IsTrackDeadlocked(2),"A completed cat still exiting must defer loss");
+
+        stations=Stations(2); registry=new SorterRegistrator(); registry.Initialize(stations);
+        a=Cat(registry,0,1,1); registry.MarkOnTrack(a);
+        active=new List<SorterCar>{a}; Settle(active,stations);
+        Fill(stations[1],0,1);
+        Check(a.CanExchangeWith(stations[1]),"Two free seats can pick up one matching ball");
+        Check(!registry.IsTrackDeadlocked(1),"Partial pickup is progress");
+
+        stations=Stations(2); registry=new SorterRegistrator(); registry.Initialize(stations);
+        a=Cat(registry,0,1); registry.MarkOnTrack(a);
+        Fill(stations[0],1,4);
+        Check(registry.IsTrackDeadlocked(1),"Full matching station prevents drop into unrelated empty station");
+
+        stations=Stations(2); registry=new SorterRegistrator(); registry.Initialize(stations);
+        a=Cat(registry,0,1); registry.MarkOnTrack(a);
+        Fill(stations[0],1,3);
+        Check(!registry.IsTrackDeadlocked(1),"Partially full matching station allows progress");
+    }
+    public static void Level(int number,int[] colors,int[][] balls,int[] order,int capacity,int stationCount,bool shouldWin)
+    {
+        var stations=Stations(stationCount);
+        var registry=new SorterRegistrator(); registry.Initialize(stations);
+        var cats=new List<SorterCar>();
+        for(int i=0;i<colors.Length;i++) cats.Add(Cat(registry,colors[i],balls[i]));
+        var active=new List<SorterCar>();
+        foreach(int index in order)
+        {
+            Check(active.Count<capacity,$"Level {number}: witness exceeds track capacity");
+            registry.MarkOnTrack(cats[index-1]); active.Add(cats[index-1]);
+            Settle(active,stations);
+        }
+        if(shouldWin)
+            Check(cats.All(c=>c.IsFinished),$"Level {number}: winning witness did not finish");
+        else
+            Check(active.Count==capacity && registry.IsTrackDeadlocked(capacity),
+                $"Level {number}: losing witness must trigger the real deadlock predicate");
+    }
+}

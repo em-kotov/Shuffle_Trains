@@ -11,4 +11,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/ShuffleCats-Game/Scenes/Level-1.unity
     guid: dad916d9e0518b045b424861c11ed50b
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: c13695df1176e6344ac1c94a9c1daf09, type: 2}
+    com.unity.localization.settings: {fileID: 11400000, guid: 3a76b2a9218c7664eaae310389e49200, type: 2}

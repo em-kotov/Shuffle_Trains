@@ -6,7 +6,10 @@ using UnityEngine.Splines;
 
 public class SplineCar : MonoBehaviour
 {
+    private const float TrackEntrySpeedMultiplier = 1.5f;
+
     public event Action TrackEntered;
+    public event Action TrackEntryStarted;
 
     private Mover _mover;
     private Transform _carHead;
@@ -27,7 +30,8 @@ public class SplineCar : MonoBehaviour
     public void Initialize(Mover mover, Transform carHead, TrackSwitcher trackSwitcher,
                         SplineAnimate splineAnimate, SplineContainer track, float speed,
                         float searchMin, float searchMax, TrackRegistrator trackRegistrator,
-                        SplineContainer exitTrack, SplineOperator splineOperator)
+                        SplineContainer exitTrack, SplineOperator splineOperator,
+                        ParkingRegistrator parkingRegistrator)
     {
         _mover = mover;
         _carHead = carHead;
@@ -39,7 +43,7 @@ public class SplineCar : MonoBehaviour
         _searchMin = searchMin;
         _searchMax = searchMax;
 
-        _splineOperator.Initialize(splineAnimate);
+        _splineOperator.Initialize(splineAnimate, parkingRegistrator);
         IsOnExit = false;
     }
 
@@ -116,7 +120,9 @@ public class SplineCar : MonoBehaviour
         _isMoving = true;
         _mover.FinishedMoving -= OnMoverFinishedMove;
         _mover.FinishedMoving += OnMoverFinishedMove;
-        _mover.MoveToPercent(_enterPoint, 0.1f);
+        // Capacity is reserved and the physical entrance is clear now.
+        TrackEntryStarted?.Invoke();
+        _mover.MoveToPercent(_enterPoint, 0.1f, speedMultiplier: TrackEntrySpeedMultiplier);
         _carHead.LookAt(_enterPoint);
 
         yield return new WaitUntil(() => _isMoving == false);
@@ -126,7 +132,7 @@ public class SplineCar : MonoBehaviour
         _isMoving = true;
         _mover.FinishedMoving -= OnMoverFinishedMove;
         _mover.FinishedMoving += OnMoverFinishedMove;
-        _mover.MoveTo(_enterPoint);
+        _mover.MoveTo(_enterPoint, speedMultiplier: TrackEntrySpeedMultiplier);
         _carHead.LookAt(_enterPoint);
 
         yield return new WaitUntil(() => _isMoving == false);

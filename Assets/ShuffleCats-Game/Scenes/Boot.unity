@@ -323,7 +323,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.4
+  m_Volume: 0.3
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -452,15 +452,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _musicSource: {fileID: 960278111}
-  _musicClip: {fileID: 8300000, guid: cf1bba5afc7c8e54ab03b1c1e844b9b1, type: 3}
+  _musicClips:
+  - {fileID: 8300000, guid: 8f006c9da5edc4a489b2c075779434e2, type: 3}
   _sfxSource: {fileID: 119208132}
-  _meowClip: {fileID: 8300000, guid: 65b719ef9dc8f734bb70d8315421093f, type: 3}
-  _meowStartTime: 0.3
+  _meowClip: {fileID: 8300000, guid: f305247ad17a09140ad235190131f050, type: 3}
+  _meowStartTime: 0
   _meowMinPitch: 0.55
   _meowMaxPitch: 1.25
-  _uiClickClip: {fileID: 0}
-  _winClip: {fileID: 0}
-  _coinBonusClip: {fileID: 0}
+  _uiClickClip: {fileID: 8300000, guid: 5ceef36aa316caa4ebfcf0b78d0d92f4, type: 3}
+  _winClip: {fileID: 8300000, guid: f552550fc17ecf340b6f5439d0476a61, type: 3}
+  _coinBonusClip: {fileID: 8300000, guid: 40f040f5261cb5a43a8c50ed4c613d5b, type: 3}
 --- !u!4 &1209355814
 Transform:
   m_ObjectHideFlags: 0

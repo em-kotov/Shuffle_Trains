@@ -7,13 +7,17 @@ public class AutoLoose : MonoBehaviour
 
     private ParkingRegistrator _parkingRegistrator;
     private SorterRegistrator _sorterRegistrator;
+    private TrackRegistrator _trackRegistrator;
+    // The tutorial explains a real deadlock before opening this same loss UI.
+    public bool TutorialOwnsDeadlock { get; set; }
 
     public void Initialize(ParkingRegistrator parkingRegistrator,
-                        SorterRegistrator sorterRegistrator)
+                        SorterRegistrator sorterRegistrator, TrackRegistrator trackRegistrator)
     {
         HideWindow();
         _parkingRegistrator = parkingRegistrator;
         _sorterRegistrator = sorterRegistrator;
+        _trackRegistrator = trackRegistrator;
 
         StartCoroutine(StartCheck());
     }
@@ -26,24 +30,21 @@ public class AutoLoose : MonoBehaviour
         {
             yield return wait;
 
-            if (CanMoveOnParking())
+            if (!_sorterRegistrator.HasUnfinishedCars)
+                yield break;
+
+            bool stalledTrack = _sorterRegistrator.IsTrackDeadlocked(_trackRegistrator.CurrentCount);
+            bool fullTrackDeadlock = !_trackRegistrator.IsCountAllows() && stalledTrack;
+            bool parkingDeadlock = !_parkingRegistrator.HasMovingCars &&
+                !_parkingRegistrator.IsPossibleToMove(out _) &&
+                (_trackRegistrator.CurrentCount == 0 || stalledTrack);
+
+            if ((fullTrackDeadlock || parkingDeadlock) && !TutorialOwnsDeadlock)
             {
-                if (CanSortOnTrack())
-                    continue;
+                ShowWindow();
+                yield break;
             }
-
-            ShowWindow();
         }
-    }
-
-    private bool CanMoveOnParking()
-    {
-        return _parkingRegistrator.IsPossibleToMove(out ParkingCar car);
-    }
-
-    private bool CanSortOnTrack()
-    {
-        return _sorterRegistrator.HaveMoves();
     }
 
     private void ShowWindow()

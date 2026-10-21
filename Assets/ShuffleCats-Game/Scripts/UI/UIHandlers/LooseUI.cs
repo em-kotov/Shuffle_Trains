@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class LooseUI : UIPanel
 {
     [SerializeField] private Button _restartButton;
+    public Button RestartButton => _restartButton;
 
     private void OnEnable()
     {
@@ -21,6 +22,7 @@ public class LooseUI : UIPanel
     {
         base.Show();
         _restartButton.interactable = true;
+        YandexSdk.GameplayStop();
     }
 
     public void HideWindow()

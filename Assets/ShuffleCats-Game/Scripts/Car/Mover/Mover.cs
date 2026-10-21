@@ -15,25 +15,26 @@ public class Mover : MonoBehaviour
         _slideDuration = duration;
     }
 
-    public void MoveTo(Vector3 target, float percent = 1f)
+    public void MoveTo(Vector3 target, float percent = 1f, float speedMultiplier = 1f)
     {
-        StartCoroutine(SmoothMoveTo(target, percent));
+        StartCoroutine(SmoothMoveTo(target, percent, speedMultiplier));
     }
 
-    public void MoveToPercent(Vector3 target, float percent = 1f)
+    public void MoveToPercent(Vector3 target, float percent = 1f, float speedMultiplier = 1f)
     {
-        StartCoroutine(SmoothMoveToPercent(target, percent));
+        StartCoroutine(SmoothMoveToPercent(target, percent, speedMultiplier));
     }
 
-    private IEnumerator SmoothMoveTo(Vector3 target, float percent = 1f)
+    private IEnumerator SmoothMoveTo(Vector3 target, float percent, float speedMultiplier)
     {
+        float duration = _slideDuration / Mathf.Max(0.01f, speedMultiplier);
         float elapsed = 0f;
         Vector3 start = _carHead.position;
 
-        while (elapsed < _slideDuration)
+        while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float time = elapsed / _slideDuration;
+            float time = elapsed / duration;
             _carHead.position = Vector3.Lerp(start, target, time);
             yield return null;
         }
@@ -42,18 +43,19 @@ public class Mover : MonoBehaviour
         FinishedMoving?.Invoke();
     }
 
-    private IEnumerator SmoothMoveToPercent(Vector3 target, float percent = 1f)
+    private IEnumerator SmoothMoveToPercent(Vector3 target, float percent, float speedMultiplier)
     {
+        float duration = _slideDuration / Mathf.Max(0.01f, speedMultiplier);
         float elapsed = 0f;
         Vector3 start = _carHead.position;
         Vector3 newTarget;
 
         newTarget = Vector3.Lerp(start, target, percent);
 
-        while (elapsed < _slideDuration)
+        while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float time = elapsed / _slideDuration;
+            float time = elapsed / duration;
             _carHead.position = Vector3.Lerp(start, newTarget, time);
             yield return null;
         }

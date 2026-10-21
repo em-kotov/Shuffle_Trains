@@ -15,66 +15,78 @@ MonoBehaviour:
   _levelNumber: 8
   _levelWinBonus: 1000
   _levelCarBonus: 100
-  _maxCarsOnTrackCount: 6
+  _maxCarsOnTrackCount: 2
   _cats:
   - _color: 2
     _length: 1
-    _cell: {x: 1, y: 1}
-    _eulerAngles: {x: -0, y: 180, z: 180}
-    _orientation: 0
-    _signDirection: -1
-    _invertFlip: 1
-    _applyRotationFix: 0
-    _rotateFixLeft: 1
-    _passengers: 04000000
-  - _color: 3
-    _length: 1
     _cell: {x: 2, y: 2}
-    _eulerAngles: {x: -0, y: 180, z: 180}
+    _eulerAngles: {x: 0, y: 180, z: 180}
     _orientation: 0
     _signDirection: -1
     _invertFlip: 1
     _applyRotationFix: 0
     _rotateFixLeft: 0
+    _trackFlipSeparate: 0
+    _invertFlipTrack: 0
     _passengers: 04000000
-  - _color: 2
-    _length: 1
-    _cell: {x: 2, y: 1}
-    _eulerAngles: {x: -0, y: 180, z: -0}
-    _orientation: 0
-    _signDirection: 1
-    _invertFlip: 0
-    _applyRotationFix: 0
-    _rotateFixLeft: 1
-    _passengers: 03000000
   - _color: 3
     _length: 1
     _cell: {x: 3, y: 2}
-    _eulerAngles: {x: -0, y: 180, z: -0}
+    _eulerAngles: {x: 0, y: 180, z: 180}
+    _orientation: 0
+    _signDirection: -1
+    _invertFlip: 1
+    _applyRotationFix: 0
+    _rotateFixLeft: 0
+    _trackFlipSeparate: 0
+    _invertFlipTrack: 0
+    _passengers: 04000000
+  - _color: 2
+    _length: 1
+    _cell: {x: 3, y: 0}
+    _eulerAngles: {x: 0, y: 180, z: 180}
+    _orientation: 0
+    _signDirection: -1
+    _invertFlip: 1
+    _applyRotationFix: 0
+    _rotateFixLeft: 0
+    _trackFlipSeparate: 0
+    _invertFlipTrack: 0
+    _passengers: 03000000
+  - _color: 3
+    _length: 1
+    _cell: {x: 2, y: 3}
+    _eulerAngles: {x: 0, y: 90, z: 0}
+    _orientation: 1
+    _signDirection: -1
+    _invertFlip: 1
+    _applyRotationFix: 1
+    _rotateFixLeft: 1
+    _trackFlipSeparate: 1
+    _invertFlipTrack: 0
+    _passengers: 02000000
+  - _color: 4
+    _length: 1
+    _cell: {x: 1, y: 0}
+    _eulerAngles: {x: 0, y: 90, z: 0}
+    _orientation: 1
+    _signDirection: 1
+    _invertFlip: 0
+    _applyRotationFix: 1
+    _rotateFixLeft: 1
+    _trackFlipSeparate: 0
+    _invertFlipTrack: 0
+    _passengers: 02000000
+  - _color: 4
+    _length: 1
+    _cell: {x: 0, y: 3}
+    _eulerAngles: {x: 0, y: 180, z: 0}
     _orientation: 0
     _signDirection: 1
     _invertFlip: 0
     _applyRotationFix: 0
     _rotateFixLeft: 0
-    _passengers: 02000000
-  - _color: 4
-    _length: 1
-    _cell: {x: 0, y: 1}
-    _eulerAngles: {x: -0, y: 180, z: 180}
-    _orientation: 0
-    _signDirection: -1
-    _invertFlip: 1
-    _applyRotationFix: 0
-    _rotateFixLeft: 0
-    _passengers: 02000000
-  - _color: 4
-    _length: 1
-    _cell: {x: 1, y: 2}
-    _eulerAngles: {x: -0, y: 180, z: 180}
-    _orientation: 0
-    _signDirection: -1
-    _invertFlip: 1
-    _applyRotationFix: 0
-    _rotateFixLeft: 0
+    _trackFlipSeparate: 0
+    _invertFlipTrack: 0
     _passengers: 03000000
   _activeStations: 01010001

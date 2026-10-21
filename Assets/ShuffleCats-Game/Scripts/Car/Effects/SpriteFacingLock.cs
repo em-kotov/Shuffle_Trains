@@ -22,6 +22,23 @@ public class SpriteFacingLock : MonoBehaviour
 
     private Quaternion _restWorldRotation;
     private bool _onTrack;
+    private bool _hasParkingFacing;
+    private bool _parkingFlip;
+
+    // A single-cell cat's artwork faces along its sprite X axis, while its
+    // CarHead.forward can be perpendicular to the parking movement axis.
+    // Resolve the flip from the grid direction, then keep it during the slide
+    // onto the track (where CarHead starts turning toward the spline).
+    public void SetParkingDirection(Vector3 direction, bool artFacesRight)
+    {
+        if (!_apply || _target == null || _spriteRenderer == null)
+            return;
+
+        Vector3 artDirection = _restWorldRotation * (artFacesRight ? Vector3.right : Vector3.left);
+        _parkingFlip = Vector3.Dot(artDirection, direction) < 0f;
+        _hasParkingFacing = true;
+        _spriteRenderer.flipX = _parkingFlip;
+    }
 
     // Set by the level builder from captured per-instance layout data, so a cat
     // reproduces the facing it had in the authored scene.
@@ -82,10 +99,24 @@ public class SpriteFacingLock : MonoBehaviour
         // sprite spin once the parent's rotation differs from rest.
         _target.rotation = _restWorldRotation;
 
+        if (!_onTrack && _hasParkingFacing)
+        {
+            _spriteRenderer.flipX = _parkingFlip;
+            return;
+        }
+
         if (_directionSource == null || _spriteRenderer == null) return;
 
         float dirX = _directionSource.forward.x;
         if (Mathf.Abs(dirX) < _directionDeadZone) return;
+
+        // While off the track, only a horizontally-dominant heading (a parked/idle
+        // cat) may set the facing. The brief slide onto the track points almost
+        // straight at the entry point, so its tiny sideways component — whose sign
+        // depends only on which side the nearest track point falls — must not mirror
+        // the sprite (that read as an upside-down cat for columns entering from -X).
+        if (_onTrack == false && Mathf.Abs(dirX) < Mathf.Abs(_directionSource.forward.z))
+            return;
 
         // Track keeps the parking flip unless it was given its own.
         bool invert = (_onTrack && _trackFlipSeparate) ? _invertFlipTrack : _invertFlip;

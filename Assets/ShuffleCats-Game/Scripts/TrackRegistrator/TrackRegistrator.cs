@@ -11,6 +11,9 @@ public class TrackRegistrator : MonoBehaviour
     private Counter _counter;
     private List<Transform> _carHeads;
 
+    public int CurrentCount => _counter.CurrentCount;
+    public int MaxCount => _counter.MaxCount;
+
     public void Initialize(SplineContainer track, Counter counter,
                         int maxCarsCount)
     {

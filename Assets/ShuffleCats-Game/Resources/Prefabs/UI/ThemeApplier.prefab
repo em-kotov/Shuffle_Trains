@@ -388,7 +388,7 @@ MonoBehaviour:
   _backgroundTarget: {fileID: 9016409974258811960}
   _stations:
   - Target: {fileID: 0}
-    Sprite: 0
+    Sprite: 1
     FlipX: 0
     FlipY: 1
   - Target: {fileID: 0}

@@ -31,6 +31,7 @@ public class ShopUI : UIPanel
         _openButton.onClick.RemoveListener(AudioManager.PlayUIClickStatic);
         _closeButton.onClick.RemoveListener(AudioManager.PlayUIClickStatic);
         _shop.Changed -= RefreshAllSlots;
+        YandexSdk.SetShopOpen(false);
     }
 
     private void Open()
@@ -38,12 +39,14 @@ public class ShopUI : UIPanel
         _openButton.interactable = false;
         Rebuild();
         Show();
+        YandexSdk.SetShopOpen(true);
     }
 
     private void Close()
     {
         Hide();
         _openButton.interactable = true;
+        YandexSdk.SetShopOpen(false);
     }
 
     private void Rebuild()
@@ -71,6 +74,8 @@ public class ShopUI : UIPanel
         }
 
         _sections.Add(sectionUI);
+        var scroll = _sectionsParent.GetComponentInParent<ScrollRect>();
+        if (scroll != null) { scroll.StopMovement(); scroll.verticalNormalizedPosition = 1; }
     }
 
     private void RefreshAllSlots()
@@ -90,6 +95,7 @@ public class ShopUI : UIPanel
         {
             if (section != null)
             {
+                section.gameObject.SetActive(false);
                 Destroy(section.gameObject);
             }
         }

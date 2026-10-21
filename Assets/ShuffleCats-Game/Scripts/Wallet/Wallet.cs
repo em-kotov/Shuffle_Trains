@@ -10,8 +10,6 @@ public class Wallet : MonoBehaviour, IWalletSpender
     private int _levelBalance;
     private int _defaultBalance = 0;
 
-    private readonly string _playerMoneyName = "PlayerMoney";
-
     public int Balance => _currentMoney;
 
     public event Action BalanceChanged;
@@ -19,7 +17,7 @@ public class Wallet : MonoBehaviour, IWalletSpender
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
-        _currentMoney = PlayerPrefs.GetInt(_playerMoneyName, _defaultBalance);
+        _currentMoney = PlayerPrefs.GetInt(SaveKeys.Money, _defaultBalance);
     }
 
     public bool TrySpend(int amount)
@@ -42,7 +40,7 @@ public class Wallet : MonoBehaviour, IWalletSpender
         _levelWinBonus = levelWinBonus;
         _walletUI = walletUI;
 
-        _currentMoney = PlayerPrefs.GetInt(_playerMoneyName, _defaultBalance);
+        _currentMoney = PlayerPrefs.GetInt(SaveKeys.Money, _defaultBalance);
         _levelBalance = _defaultBalance;
 
         ShowCurrent();
@@ -99,7 +97,8 @@ public class Wallet : MonoBehaviour, IWalletSpender
 
     private void SaveMoney()
     {
-        PlayerPrefs.SetInt(_playerMoneyName, _currentMoney);
+        PlayerPrefs.SetInt(SaveKeys.Money, _currentMoney);
         PlayerPrefs.Save();
+        CloudSave.Push();
     }
 }

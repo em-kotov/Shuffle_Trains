@@ -1,0 +1,79 @@
+public static partial class CapacityRegression
+{
+    public static void HintLevel(int number, int[] colors, int[][] balls, int[][] poses, int capacity, int stationCount)
+    {
+        var stations = Stations(stationCount);
+        var registry = new SorterRegistrator(); registry.Initialize(stations);
+        var cats = new List<SorterCar>();
+        var trackers = new List<PassengerTracker>();
+        var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+        for (int i = 0; i < colors.Length; i++)
+        {
+            cats.Add(Cat(registry, colors[i], balls[i]));
+            trackers.Add((PassengerTracker)typeof(SorterCar).GetField("_passengerTracker", flags).GetValue(cats[i]));
+        }
+        var active = new List<SorterCar>();
+        var order = new List<int>();
+        ulong parked = (1UL << colors.Length) - 1;
+        int[,] grid = new int[4,4];
+        for (int x=0;x<4;x++) for (int y=0;y<4;y++) grid[x,y]=-1;
+        int[] dx={1,-1,0,0}, dy={0,0,1,-1};
+        for (int i=0;i<colors.Length;i++)
+            for(int tail=0;tail<balls[i].Length;tail++)
+                grid[poses[i][0]-dx[poses[i][2]]*tail,poses[i][1]-dy[poses[i][2]]*tail]=i;
+        var blockers=new ulong[colors.Length];
+        for(int i=0;i<colors.Length;i++)
+        {
+            int x=poses[i][0]+dx[poses[i][2]],y=poses[i][1]+dy[poses[i][2]];
+            while(x>=0 && x<4 && y>=0 && y<4)
+            {
+                if(grid[x,y]>=0 && grid[x,y]!=i) blockers[i]|=1UL<<grid[x,y];
+                x+=dx[poses[i][2]]; y+=dy[poses[i][2]];
+            }
+        }
+        for(int turn=0;turn<colors.Length;turn++)
+        {
+            var snapshot=new CatHintPlanner.Cat[colors.Length];
+            for(int i=0;i<colors.Length;i++) snapshot[i]=new CatHintPlanner.Cat {
+                Color=colors[i], Capacity=balls[i].Length, Blockers=blockers[i],
+                Wrong=trackers[i].CopyWrongPassengerColors(), Right=trackers[i].RightPassengerCount };
+            var storage=new CatHintPlanner.StationState[stations.Count];
+            for(int s=0;s<stations.Count;s++)
+            {
+                stations[s].HavePassengers(out int count,out CatColor color);
+                storage[s]=new CatHintPlanner.StationState {Color=(int)color,Count=count,Capacity=count+stations[s].GetFreeSeats().Count};
+            }
+            var planner=new CatHintPlanner(snapshot,capacity);
+            var watch=System.Diagnostics.Stopwatch.StartNew();
+            int next=planner.FindNext(parked,order.ToArray(),storage);
+            watch.Stop();
+            Check(next>=0,$"Level {number}, turn {turn}: no hint in a solvable state");
+            Check((parked & (1UL<<next))!=0 && (blockers[next]&parked)==0,$"Level {number}: hint blocked or already launched");
+            Check(active.Count<capacity,$"Level {number}: hint exceeds real track capacity");
+            Check(watch.ElapsedMilliseconds<150,$"Level {number}: hint stalled for {watch.ElapsedMilliseconds}ms");
+            Check(planner.FindNext(parked,order.ToArray(),storage)==next,"Repeated hints must be deterministic and leave snapshot unchanged");
+            parked &= ~(1UL<<next);
+            active.Add(cats[next]); order.Add(next); registry.MarkOnTrack(cats[next]);
+            Settle(active,stations);
+            order.RemoveAll(i=>cats[i].IsFinished);
+        }
+        Check(cats.All(c=>c.IsFinished),$"Level {number}: following hints failed to finish in production sorting code");
+    }
+
+    public static void HintEdges()
+    {
+        var cats=new[] {
+            new CatHintPlanner.Cat {Color=0,Capacity=1,Wrong=new[]{1}},
+            new CatHintPlanner.Cat {Color=0,Capacity=1,Wrong=new[]{1}},
+            new CatHintPlanner.Cat {Color=1,Capacity=1,Wrong=new[]{0,0}}
+        };
+        var storage=new[]{new CatHintPlanner.StationState {Capacity=4},new CatHintPlanner.StationState {Capacity=4}};
+        Check(new CatHintPlanner(cats,2).FindNext(4,new[]{0,1},storage)==-1,"Already deadlocked track cannot produce a launch hint");
+        cats[2].Wrong=new[]{0}; cats[1].Color=1; cats[1].Wrong=new[]{0};
+        cats[0].Blockers=2; cats[1].Blockers=1;
+        Check(new CatHintPlanner(cats,2).FindNext(3,new int[0],storage)==-1,"Cyclic parking blockers must not get hints");
+        Check(new CatHintPlanner(cats,2).FindNext(0,new int[0],storage)==-1,"No hint after all launches");
+        var single=new[]{new CatHintPlanner.Cat {Color=0,Capacity=1,Wrong=new[]{0}}};
+        Check(new CatHintPlanner(single,1).FindNext(1,new int[0],storage)==0,"The last cat must still be suggested for a manual tap");
+    }
+}

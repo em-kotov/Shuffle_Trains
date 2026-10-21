@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: cloud
   _displayName: Cloud
-  _price: 5000
+  _price: 15000
   _slotIcon: {fileID: 21300000, guid: 2e296e942ee0c244193c3a4aff918ea6, type: 3}
   _ownedByDefault: 0
   _equippedByDefault: 0

@@ -19,6 +19,14 @@ public static class LevelConfigCapture
             "Progress reset to the first level in the sequence.", "OK");
     }
 
+    [MenuItem("ShuffleCats/Reset Wallet")]
+    public static void ResetWallet()
+    {
+        PlayerPrefs.SetInt(SaveKeys.Money, 0);
+        PlayerPrefs.Save();
+        EditorUtility.DisplayDialog("Reset Wallet", "Wallet reset to 0.", "OK");
+    }
+
     [MenuItem("ShuffleCats/Capture Base Config")]
     public static void Capture()
     {

@@ -1,0 +1,467 @@
+// Headless support: production C# supplies all pause/audio/input decisions.
+// These stubs do not claim to simulate WebGL audio playback or Unity rendering.
+namespace UnityEngine
+{
+    public class SerializeField : Attribute { }
+    public class Header : Attribute { public Header(string text) { } }
+    public class RequireComponent : Attribute { public RequireComponent(Type type) { } }
+    public class MonoBehaviour
+    {
+        public GameObject gameObject;
+        protected static void Destroy(object value) { }
+        protected static void DontDestroyOnLoad(object value) { }
+    }
+    public class GameObject
+    {
+        public GameObject(string name) { }
+        public T AddComponent<T>() where T : MonoBehaviour, new() { return new T { gameObject = this }; }
+    }
+    public class Collider { }
+    public static class Time { public static float timeScale = 1f, realtimeSinceStartup; }
+    public static class Application { public static bool isMobilePlatform; }
+    public static class Debug { public static void LogWarning(string value) { } }
+    public static class JsonUtility { public static T FromJson<T>(string value) where T : new() { return new T(); } }
+    public static class AudioListener { public static bool pause; public static float volume = 1f; }
+    public class AudioClip { public float length = 10f; }
+    public class AudioSource
+    {
+        public bool ignoreListenerVolume, loop, mute;
+        public float time, pitch, volume = 1f;
+        public AudioClip clip;
+        public bool playing, locallyPaused;
+        public int plays, unpauses;
+        public bool contextSuspended, pendingPlayback;
+        public bool isPlaying { get { return playing && !locallyPaused && !AudioListener.pause; } }
+        public bool audible { get { return isPlaying && !mute && volume > 0f && (ignoreListenerVolume || AudioListener.volume > 0f); } }
+        public void Play()
+        {
+            plays++;
+            if (contextSuspended) { pendingPlayback = true; return; }
+            playing = true;
+            locallyPaused = false;
+        }
+        public void PlayOneShot(AudioClip value) { Play(); }
+        public void Stop() { playing = locallyPaused = false; }
+        public void Pause() { if (playing) locallyPaused = true; }
+        public void UnPause() { locallyPaused = false; unpauses++; }
+        // Unity 2022.3.62f2's WebGL JS_Sound_Stop does not remove queued plays
+        // from soundsPendingContextResume. Model that backend race explicitly.
+        public void ResumeAudioContext()
+        {
+            contextSuspended = false;
+            if (pendingPlayback) { playing = true; locallyPaused = false; pendingPlayback = false; }
+        }
+    }
+    public static class PlayerPrefs
+    {
+        private static Dictionary<string, int> values = new Dictionary<string, int>();
+        private static Dictionary<string, float> floats = new Dictionary<string, float>();
+        private static Dictionary<string, string> strings = new Dictionary<string, string>();
+        public static int GetInt(string key, int fallback) { return values.ContainsKey(key) ? values[key] : fallback; }
+        public static void SetInt(string key, int value) { values[key] = value; }
+        public static float GetFloat(string key, float fallback) { return floats.ContainsKey(key) ? floats[key] : fallback; }
+        public static void SetFloat(string key, float value) { floats[key] = value; }
+        public static string GetString(string key, string fallback) { return strings.ContainsKey(key) ? strings[key] : fallback; }
+        public static void SetString(string key, string value) { strings[key] = value; }
+        public static void DeleteKey(string key) { values.Remove(key); floats.Remove(key); }
+        public static void Save() { }
+    }
+    public static class Mathf
+    {
+        public static int Max(int a, int b) { return Math.Max(a, b); }
+        public static float Max(float a, float b) { return Math.Max(a, b); }
+        public static int Clamp(int v, int a, int b) { return Math.Min(b, Math.Max(a, v)); }
+        public static float Clamp(float v, float a, float b) { return Math.Min(b, Math.Max(a, v)); }
+        public static float Clamp01(float v) { return Clamp(v, 0f, 1f); }
+    }
+    public static class Random { public static float Range(float a, float b) { return a; } }
+}
+namespace UnityEngine.SceneManagement
+{
+    public struct Scene { }
+    public enum LoadSceneMode { Single }
+    public static class SceneManager
+    {
+        public static event Action<Scene, LoadSceneMode> sceneLoaded;
+        public static void Load() { if (sceneLoaded != null) sceneLoaded(new Scene(), LoadSceneMode.Single); }
+    }
+}
+namespace UnityEngine.EventSystems
+{
+    public class PhysicsRaycaster { }
+    public class PointerEventData { }
+    public interface IPointerDownHandler { void OnPointerDown(PointerEventData data); }
+    public interface IPointerClickHandler { void OnPointerClick(PointerEventData data); }
+}
+public static class CloudSave { public static void Tick() { } public static void Push() { } }
+
+public static class YandexPauseRegression
+{
+    public static int Passed;
+    private const BindingFlags Fields = BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic;
+    private static void Check(bool ok, string message)
+    {
+        if (!ok) throw new Exception(message);
+        Passed++;
+    }
+    private static void Call(Type type, object instance, string method) { type.GetMethod(method, Fields).Invoke(instance, null); }
+    private static bool Running { get { return (bool)typeof(YandexSdk).GetField("_gameplayRunning", Fields).GetValue(null); } }
+    private static void SetAudio(AudioManager audio, string field, object value) { typeof(AudioManager).GetField(field, Fields).SetValue(audio, value); }
+    private static void Reset()
+    {
+        YandexSdk.Shutdown();
+        typeof(AudioManager).GetField("_instance", Fields).SetValue(null, null);
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
+        PlayerPrefs.SetInt(SaveKeys.Music, 1);
+        PlayerPrefs.SetInt(SaveKeys.Sfx, 1);
+        YandexSdk.Initialize();
+    }
+    private static void Reason(int reason, bool active)
+    {
+        if (reason == 0) YandexSdk.HandleBrowserFocus(!active);
+        if (reason == 1) YandexSdk.HandleSdkPause(active);
+        if (reason == 2) Call(typeof(YandexSdk), null, active ? "OpenAdvertisement" : "CloseAdvertisement");
+    }
+    public static void Run()
+    {
+        CheckMenus();
+        CheckLeaderboard();
+        CheckMusicReload();
+        int[][] orders = {
+            new[] { 0, 1, 2 }, new[] { 0, 2, 1 }, new[] { 1, 0, 2 },
+            new[] { 1, 2, 0 }, new[] { 2, 0, 1 }, new[] { 2, 1, 0 }
+        };
+        foreach (int[] enter in orders)
+        foreach (int[] leave in orders)
+        {
+            Reset();
+            Time.timeScale = 0.75f;
+            YandexSdk.GameReady();
+            YandexSdk.GameplayStart();
+            foreach (int reason in enter) { Reason(reason, true); Reason(reason, true); }
+            for (int i = 0; i < leave.Length; i++)
+            {
+                Reason(leave[i], false);
+                Reason(leave[i], false);
+                bool paused = i != leave.Length - 1;
+                Check(YandexSdk.IsPaused == paused, "Overlapping pause cleared too early");
+                Check(AudioListener.pause == paused, "Sound did not follow combined pause");
+                Check(Time.timeScale == (paused ? 0f : 0.75f), "Timescale was not preserved");
+                Check(Running == !paused, "Gameplay markup did not follow combined pause");
+            }
+        }
+
+        Reset();
+        YandexBridge bridge = YandexBridge.Create();
+        bridge.OnGameApiPause("");
+        YandexSdk.GameReady();
+        YandexSdk.GameplayStart();
+        Check(!Running && AudioListener.pause, "Startup ad must pause before audio exists");
+        var audio = new AudioManager();
+        var music = new AudioSource();
+        var sfx = new AudioSource();
+        SetAudio(audio, "_musicSource", music);
+        SetAudio(audio, "_sfxSource", sfx);
+        SetAudio(audio, "_musicClips", new[] { new AudioClip() });
+        SetAudio(audio, "_meowClip", new AudioClip());
+        SetAudio(audio, "_uiClickClip", new AudioClip());
+        Call(typeof(AudioManager), audio, "Awake");
+        Call(typeof(AudioManager), audio, "Start");
+        Check(audio.MusicVolume == 0.35f && audio.SfxVolume == 0.35f, "New players must start at 35 percent");
+        Check(music.volume == 0.35f && AudioListener.volume == 0.35f && music.ignoreListenerVolume,
+            "Default gains must apply independently to music and effects");
+        audio.MusicOn = true;
+        audio.PlayMeow();
+        audio.PlayUIClick();
+        Check(music.plays == 0 && sfx.plays == 0, "Audio started during startup ad");
+        bridge.OnGameApiResume("");
+        Check(Running && music.isPlaying, "Startup ad resume did not start pending gameplay/music");
+
+        audio.MusicVolume = 0.7f;
+        audio.SfxVolume = 0.2f;
+        Check(music.volume == 0.7f && AudioListener.volume == 0.2f && music.plays == 1,
+            "Moving sliders must change independent gains without restarting music");
+        audio.SfxOn = false;
+        audio.SfxVolume = 0.4f;
+        Check(AudioListener.volume == 0f && music.volume == 0.7f, "SFX slider must respect its mute toggle");
+        audio.SfxOn = true;
+        Check(AudioListener.volume == 0.4f, "Unmuting SFX must restore its chosen volume");
+
+        bridge.SetBrowserFocus("0");
+        audio.MusicVolume = 0.6f;
+        audio.SfxVolume = 0.25f;
+        Check(!music.isPlaying && AudioListener.pause && music.plays == 1, "Sliders must not bypass a platform pause");
+        bridge.SetBrowserFocus("1");
+        Check(music.volume == 0.6f && AudioListener.volume == 0.25f && music.plays == 1,
+            "Resume must preserve both volume values without restarting music");
+
+        audio.MusicVolume = -1f;
+        audio.SfxVolume = 2f;
+        Check(music.volume == 0f && AudioListener.volume == 1f, "Volumes must stay within zero and one");
+        audio.MusicVolume = 0.6f;
+        audio.SfxVolume = 0.25f;
+        var reloadedAudio = new AudioManager();
+        Check(reloadedAudio.MusicVolume == 0.6f && reloadedAudio.SfxVolume == 0.25f,
+            "A new audio manager must load persisted slider values");
+
+        bridge.SetBrowserFocus("0");
+        Call(typeof(AudioManager), audio, "Update");
+        Check(music.plays == 1, "Paused music incorrectly advanced the playlist");
+        audio.MusicOn = false;
+        audio.SfxOn = false;
+        bridge.SetBrowserFocus("1");
+        Check(!music.isPlaying && !audio.MusicOn && !audio.SfxOn && AudioListener.volume == 0f, "Resume overwrote sound preferences");
+
+        YandexSdk.GameplayStop();
+        bridge.OnGameApiPause("");
+        bridge.OnGameApiResume("");
+        Check(!Running, "SDK resume started gameplay on a menu/win screen");
+        bridge.SetBrowserFocus("0");
+        YandexSdk.GameplayStart();
+        Check(!Running, "Background level started gameplay markup");
+        bridge.SetBrowserFocus("1");
+        Check(Running, "Background level load lost its start request");
+        bridge.OnGameApiPause("");
+        YandexSdk.GameplayStop();
+        bridge.OnGameApiResume("");
+        Check(!Running, "Menu opened while suspended was forgotten");
+
+        var click = new ClickDetector();
+        int inputs = 0;
+        click.Pressed += () => inputs++;
+        click.Clicked += () => inputs++;
+        bridge.OnGameApiPause("");
+        click.OnPointerDown(null);
+        click.OnPointerClick(null);
+        Check(inputs == 0, "Gameplay input was accepted during pause");
+        bridge.OnGameApiResume("");
+        click.OnPointerDown(null);
+        click.OnPointerClick(null);
+        Check(inputs == 2, "Gameplay input did not resume");
+
+        Time.timeScale = 0f;
+        AudioListener.pause = true;
+        bridge.OnGameApiPause("");
+        bridge.OnGameApiResume("");
+        Check(Time.timeScale == 0f && AudioListener.pause, "Existing manual pause was overwritten");
+        Reset();
+        YandexSdk.HandleApplicationPause(true);
+        YandexSdk.HandleApplicationFocus(false);
+        YandexSdk.HandleApplicationPause(false);
+        Check(YandexSdk.IsPaused, "Application resume ignored focus loss");
+        YandexSdk.HandleApplicationFocus(true);
+        Check(!YandexSdk.IsPaused, "Application pause did not clear");
+        YandexSdk.Shutdown();
+    }
+
+    private static void CheckMenus()
+    {
+        foreach (Action<bool> setOpen in new Action<bool>[] { YandexSdk.SetOptionsOpen, YandexSdk.SetShopOpen })
+        {
+            Reset();
+            Time.timeScale = 0.75f;
+            YandexSdk.GameReady();
+            YandexSdk.GameplayStart();
+            var audio = new AudioManager();
+            var music = new AudioSource();
+            var sfx = new AudioSource();
+            SetAudio(audio, "_musicSource", music);
+            SetAudio(audio, "_sfxSource", sfx);
+            SetAudio(audio, "_musicClips", new[] { new AudioClip() });
+            SetAudio(audio, "_uiClickClip", new AudioClip());
+            Call(typeof(AudioManager), audio, "Awake");
+            var click = new ClickDetector();
+            int inputs = 0;
+            click.Pressed += () => inputs++;
+            click.Clicked += () => inputs++;
+
+            setOpen(true);
+            setOpen(true);
+            AudioManager.PlayUIClickStatic();
+            click.OnPointerDown(null);
+            click.OnPointerClick(null);
+            Check(YandexSdk.IsPaused && Time.timeScale == 0 && !Running && inputs == 0,
+                "Settings/shop must freeze gameplay and reject gameplay input");
+            Check(!AudioListener.pause && music.audible && sfx.audible,
+                "Settings/shop must keep UI click and music audible");
+
+            for (int reason = 0; reason < 3; reason++)
+            {
+                Reason(reason, true);
+                setOpen(false);
+                Check(YandexSdk.IsPaused && Time.timeScale == 0 && AudioListener.pause && !Running,
+                    "Closing settings/shop released a platform pause");
+                setOpen(true);
+                Reason(reason, false);
+                Check(YandexSdk.IsPaused && Time.timeScale == 0 && !Running && !AudioListener.pause && music.audible,
+                    "Platform resume must keep settings/shop gameplay paused but restore audio");
+            }
+
+            YandexSdk.SetLeaderboardOpen(true);
+            setOpen(false);
+            Check(YandexSdk.IsPaused, "Closing settings/shop released the leaderboard pause");
+            setOpen(true);
+            YandexSdk.SetLeaderboardOpen(false);
+            Check(YandexSdk.IsPaused, "Closing leaderboard released the settings/shop pause");
+            setOpen(false);
+            setOpen(false);
+            click.OnPointerDown(null);
+            click.OnPointerClick(null);
+            Check(!YandexSdk.IsPaused && Time.timeScale == 0.75f && Running && inputs == 2,
+                "Closing settings/shop must restore the original timescale and input");
+
+            YandexSdk.GameplayStop();
+            setOpen(true);
+            setOpen(false);
+            Check(!Running, "Closing settings/shop restarted gameplay stopped by another screen");
+            setOpen(true);
+            YandexSdk.Shutdown();
+            Check(!YandexSdk.IsPaused && Time.timeScale == 0.75f, "Shutdown left a settings/shop pause active");
+        }
+
+        Reset();
+        YandexSdk.SetOptionsOpen(true);
+        YandexSdk.SetShopOpen(true);
+        YandexSdk.SetOptionsOpen(false);
+        Check(YandexSdk.IsPaused, "Closing settings released the shop pause");
+        YandexSdk.SetOptionsOpen(true);
+        YandexSdk.SetShopOpen(false);
+        Check(YandexSdk.IsPaused, "Closing shop released the settings pause");
+        YandexSdk.SetOptionsOpen(false);
+        Check(!YandexSdk.IsPaused && Time.timeScale == 1f, "Menu pause survived closing both windows");
+        Reset();
+    }
+
+    private static void CheckMusicReload()
+    {
+        // A reload must apply the persisted toggle without requiring UI input.
+        Reset();
+        PlayerPrefs.SetInt(SaveKeys.Music, 0);
+        PlayerPrefs.SetFloat(SaveKeys.MusicVolume, 0.6f);
+        var music = new AudioSource();
+        var audio = new AudioManager();
+        SetAudio(audio, "_musicSource", music);
+        SetAudio(audio, "_musicClips", new[] { new AudioClip() });
+        Call(typeof(AudioManager), audio, "Awake");
+        Call(typeof(AudioManager), audio, "Start");
+        Check(!audio.MusicOn && music.plays == 0 && !music.audible, "Reload started disabled music");
+
+        // Cloud settings can arrive after Play was queued while the browser's
+        // audio context was blocked. Stop alone cannot silence the deferred play.
+        music.contextSuspended = true;
+        audio.MusicOn = true;
+        Check(music.pendingPlayback, "Expected startup music queued by the browser");
+        var cloud = SaveSnapshot.FromLocal();
+        cloud.music = 0;
+        cloud.ApplyToLocal();
+        music.ResumeAudioContext();
+        Check(!audio.MusicOn && !music.audible, "Deferred WebGL playback ignored restored music-off setting");
+        Check(audio.MusicVolume == 0.6f, "Disabling music erased the saved volume");
+
+        audio.MusicVolume = 0.8f;
+        Check(!music.audible, "Moving the volume slider unmuted disabled music");
+        int unpauses = music.unpauses;
+        YandexSdk.HandleBrowserFocus(false);
+        YandexSdk.HandleBrowserFocus(true);
+        Check(music.unpauses == unpauses && !music.audible, "Tab resume tried to restart disabled music");
+
+        audio.MusicOn = true;
+        Check(music.audible && music.volume == 0.8f, "Re-enabling music did not restore its chosen volume");
+        audio.SfxOn = false;
+        Check(music.audible && AudioListener.volume == 0f, "Music no longer works independently from SFX");
+
+        // Also keep a deferred play silent if the SDK pauses before it starts.
+        audio.MusicOn = false;
+        music.contextSuspended = true;
+        audio.MusicOn = true;
+        YandexSdk.HandleSdkPause(true);
+        music.ResumeAudioContext();
+        Check(music.mute && !music.audible, "Platform pause did not mute a deferred WebGL source");
+        cloud.music = 0;
+        cloud.ApplyToLocal();
+        YandexSdk.HandleSdkPause(false);
+        Check(!music.audible && !audio.MusicOn, "SDK resume ignored music disabled by a cloud save");
+
+        PlayerPrefs.DeleteKey(SaveKeys.MusicVolume);
+        Reset();
+    }
+
+    private static void CheckLeaderboard()
+    {
+        Reset();
+        YandexSdk.GameReady();
+        YandexSdk.GameplayStart();
+        var audio = new AudioManager();
+        var music = new AudioSource();
+        var sfx = new AudioSource();
+        SetAudio(audio, "_musicSource", music);
+        SetAudio(audio, "_sfxSource", sfx);
+        SetAudio(audio, "_musicClips", new[] { new AudioClip() });
+        SetAudio(audio, "_uiClickClip", new AudioClip());
+        Call(typeof(AudioManager), audio, "Awake");
+        AudioManager.PlayUIClickStatic();
+        YandexSdk.SetLeaderboardOpen(true);
+        Check(YandexSdk.IsPaused && Time.timeScale == 0 && !Running, "Leaderboard did not pause gameplay");
+        Check(sfx.audible && music.audible, "Opening leaderboard cut off the UI sound or menu music");
+        sfx.Stop();
+        AudioManager.PlayUIClickStatic();
+        Check(sfx.audible, "Leaderboard close click was suppressed while the menu was open");
+
+        for (int reason = 0; reason < 3; reason++)
+        {
+            Reason(reason, true);
+            int plays = sfx.plays;
+            AudioManager.PlayUIClickStatic();
+            Check(AudioListener.pause && !sfx.audible && !music.audible && sfx.plays == plays,
+                "Leaderboard audio bypassed a platform pause");
+            Reason(reason, false);
+            Check(YandexSdk.IsPaused && Time.timeScale == 0 && !Running && !AudioListener.pause && music.audible,
+                "Platform resume did not restore menu audio while keeping leaderboard gameplay paused");
+        }
+        YandexSdk.HandleApplicationPause(true);
+        Check(AudioListener.pause && !sfx.audible, "Application pause did not silence leaderboard audio");
+        YandexSdk.HandleApplicationPause(false);
+        Check(YandexSdk.IsPaused && !AudioListener.pause, "Application resume lost the leaderboard pause");
+        audio.SfxOn = false;
+        int mutedPlays = sfx.plays;
+        AudioManager.PlayUIClickStatic();
+        Check(sfx.plays == mutedPlays && !sfx.audible, "Leaderboard click ignored the SFX toggle");
+        audio.SfxOn = true;
+        YandexSdk.HandleAuthDialog(true);
+        Check(AudioListener.pause && !sfx.audible, "Authorization dialog did not silence leaderboard audio");
+        YandexSdk.SetLeaderboardOpen(false);
+        Check(YandexSdk.IsPaused, "Closing leaderboard resumed an open authorization dialog");
+        YandexSdk.HandleBrowserFocus(false);
+        YandexSdk.HandleAuthDialog(false);
+        Check(YandexSdk.IsPaused, "Authorization callback resumed a background tab");
+        YandexSdk.HandleBrowserFocus(true);
+        Check(!YandexSdk.IsPaused && Running, "Closing all pause reasons failed to restore gameplay");
+        YandexSdk.SetLeaderboardOpen(true);
+        YandexSdk.HandleSdkPause(true);
+        YandexSdk.HandleSdkPause(false);
+        Check(YandexSdk.IsPaused, "SDK resume bypassed leaderboard pause");
+        YandexSdk.GameplayStop();
+        YandexSdk.SetLeaderboardOpen(false);
+        Check(!Running, "Closing leaderboard started gameplay on another menu");
+
+        PlayerPrefs.SetInt(SaveKeys.LevelIndex, 7);
+        PlayerPrefs.DeleteKey(SaveKeys.BestCompletedLevel);
+        Check(LevelProgress.BestCompletedLevel == 7, "Legacy saves did not migrate completed levels");
+        LevelProgress.Reset();
+        Check(LevelProgress.CurrentIndex == 0 && LevelProgress.BestCompletedLevel == 7,
+            "Restarting the campaign erased the personal record");
+        LevelProgress.RecordCompletion(30);
+        Check(LevelProgress.BestCompletedLevel == 30, "Final level completion was not recorded immediately");
+        LevelProgress.RecordCompletion(2);
+        Check(LevelProgress.BestCompletedLevel == 30, "Replaying a level lowered the record");
+        SaveSnapshot snapshot = SaveSnapshot.FromLocal();
+        Check(snapshot.bestCompletedLevel == 30, "Personal record missing from cloud snapshot");
+        snapshot.bestCompletedLevel = 4;
+        snapshot.ApplyToLocal();
+        Check(LevelProgress.BestCompletedLevel == 30, "Older cloud snapshot lowered the record");
+        PlayerPrefs.DeleteKey(SaveKeys.LevelIndex);
+        PlayerPrefs.DeleteKey(SaveKeys.BestCompletedLevel);
+        Reset();
+    }
+}

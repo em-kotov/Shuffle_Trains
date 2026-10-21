@@ -9,6 +9,16 @@ public class PassengerTracker : SeatTracker
     private List<Transform> _holdPoints;
     private List<CatColor> _wrongPassengersColors;
 
+    public int RightPassengerCount => _rightPassengers.Count;
+
+    public int[] CopyWrongPassengerColors()
+    {
+        int[] colors = new int[_wrongPassengers.Count];
+        for (int i = 0; i < colors.Length; i++)
+            colors[i] = (int)_wrongPassengers[i].CatColor;
+        return colors;
+    }
+
     public void Initialize(int totalCount, List<Passenger> passengers, List<Transform> holdPoints)
     {
         //_wrongPassengers = passengers;

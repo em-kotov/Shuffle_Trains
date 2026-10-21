@@ -15,8 +15,14 @@ public class ParkingCar : MonoBehaviour
     private ParkingCar _pendingBumpedCar;
     private Vector2 _pendingImpactDir;
 
+    public bool IsMoving => _isMoving;
+    public bool IsAtBorderCell => _isAtBorderCell;
+    public System.Collections.Generic.List<ParkingCar> GetBlockingCars() =>
+        _parkingRegistrator.GetBlockingCars(this, _orientation, _signDirection);
+
     public event Action Bumped;
     public event Action IsOnBorder;
+    public event Action DepartureStarted;
     public event Action<Vector2> BumpReceived;
     public event Action<Vector2> BumpAttempted;
 
@@ -77,6 +83,9 @@ public class ParkingCar : MonoBehaviour
         if (cellOccupancy == CellOccupancy.Border)
         {
             _isAtBorderCell = true;
+            // The whole parking route is clear. Signal before the first move,
+            // including cats already in a border cell and automatic departures.
+            DepartureStarted?.Invoke();
 
             if (willMove == false)
             {

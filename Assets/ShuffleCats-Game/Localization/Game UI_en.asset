@@ -1,0 +1,419 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Game UI_en
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: b47954751d59fa94596ba5176e409612, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 2535436288
+    m_Localized: SETTINGS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2568990720
+    m_Localized: Music
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185024
+    m_Localized: Sound effects
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185025
+    m_Localized: SHOP
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185026
+    m_Localized: Themes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185027
+    m_Localized: 'level:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185028
+    m_Localized: 'Level:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185029
+    m_Localized: 'track:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185030
+    m_Localized: "Level \ncomplete!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185031
+    m_Localized: "All levels \ncomplete!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185032
+    m_Localized: Level {0} completed!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185033
+    m_Localized: Next level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185034
+    m_Localized: Try again?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185035
+    m_Localized: Restart level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185036
+    m_Localized: play from 1 level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185037
+    m_Localized: restart 1 level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185038
+    m_Localized: Buy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185039
+    m_Localized: Equip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185040
+    m_Localized: Equipped
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185041
+    m_Localized: "Wait for the cats\u2026"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185042
+    m_Localized: "No clear hint \u2014 try another approach"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185043
+    m_Localized: LEADERBOARD
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185044
+    m_Localized: Highest completed level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185045
+    m_Localized: Player
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185046
+    m_Localized: Level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185047
+    m_Localized: Sign in with Yandex
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185048
+    m_Localized: Refresh
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185049
+    m_Localized: Loading rankings...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185050
+    m_Localized: Waiting for sign-in...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185051
+    m_Localized: 'Your best: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185052
+    m_Localized: 'Your rank: #{0}   Best: {1}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185053
+    m_Localized: 'Sign in to add your result and see your rank.
+
+      You can keep
+      playing as a guest.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185054
+    m_Localized: Your result is saved locally. Sync will retry.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185055
+    m_Localized: No scores yet. Complete a level to join!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185056
+    m_Localized: Rankings are available on Yandex Games.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185057
+    m_Localized: The leaderboard is not available yet.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185058
+    m_Localized: Sign-in cancelled. You can keep playing.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185059
+    m_Localized: Please wait a moment, then refresh.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185060
+    m_Localized: Couldn't load rankings. Check your connection and retry.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185061
+    m_Localized: LANGUAGE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185062
+    m_Localized: AUTO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2573185063
+    m_Localized: Restart
+    m_Metadata:
+      m_Items: []
+  - m_Id: 290981939228672
+    m_Localized: Hints
+    m_Metadata:
+      m_Items: []
+  - m_Id: 306994005127168
+    m_Localized: Picnic
+    m_Metadata:
+      m_Items: []
+  - m_Id: 306994009321472
+    m_Localized: Cozy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 306994009321473
+    m_Localized: Cloud
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941037174784
+    m_Localized: LEARN TO PLAY  {0}/{1}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923520
+    m_Localized: Skip tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923521
+    m_Localized: Match the yarn!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923522
+    m_Localized: 'Each cat needs yarn of its own color. Tap this cat: the path in
+      front of it is clear.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923523
+    m_Localized: The way is clear!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923524
+    m_Localized: Tap this cat now. At the baskets, cats swap yarn automatically.
+      Matching all their yarn lets them leave!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923525
+    m_Localized: Make room first
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923526
+    m_Localized: Only 2 cats fit on the track. Tap this cat first to open the path
+      for the cat behind it.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923527
+    m_Localized: Choose the right color
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923528
+    m_Localized: Tap this cat to collect matching yarn. Sending two cats of the same
+      color can fill the track and block progress.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923529
+    m_Localized: Send the last cat!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923530
+    m_Localized: A track space is free! Tap the last cat. Clear every cat to complete
+      the level.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923531
+    m_Localized: Watch the baskets
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2127941074923532
+    m_Localized: Cats leave other colors at the baskets and pick up their own color.
+      Wait for a free path and track space.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2137384860758016
+    m_Localized: Two places on the track
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2137384864952320
+    m_Localized: Only 2 cats fit on the track. Tap this cat to send it to the baskets
+      and collect yarn of its own color.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2137384864952321
+    m_Localized: Cats leave yarn of other colors in the baskets and pick up their
+      own color. A cat leaves once all its yarn matches.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2137384864952322
+    m_Localized: Continue tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2137384864952323
+    m_Localized: Waiting for track space...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731804307456
+    m_Localized: Read the track counter
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501760
+    m_Localized: 0/2 means no cats on the track, out of 2 allowed. The number on
+      the right is the limit.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501761
+    m_Localized: These are the baskets
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501762
+    m_Localized: Here, cats leave other colors and collect their own. A cat leaves
+      the track once all its yarn matches.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501763
+    m_Localized: Help the other cat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501764
+    m_Localized: Now send this cat to collect its own color. Clear every cat to finish
+      the level.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501765
+    m_Localized: Let's try an example
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501766
+    m_Localized: Send this green cat. We'll try filling both places with green cats
+      to see what happens.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501767
+    m_Localized: Fill the second place
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501768
+    m_Localized: Send the other green cat too. Both track places will be occupied,
+      leaving the blue cat here.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501769
+    m_Localized: Watch the cats...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501770
+    m_Localized: Now the track is stuck
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501771
+    m_Localized: Both places are taken by green cats. They need the green yarn on
+      the blue cat, but it cannot enter. Let's restart.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501772
+    m_Localized: Restart this level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501773
+    m_Localized: Tap Restart. Then we'll try an order that frees the track.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501774
+    m_Localized: Try a different order
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501775
+    m_Localized: Start with this green cat. This time, keep the second track place
+      for the blue cat.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501776
+    m_Localized: Now send the blue cat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2146731808501777
+    m_Localized: The blue cat carries green yarn and needs blue yarn. Sending different
+      colors lets both cats get what they need.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2160169884561408
+    m_Localized: The track is full
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2160169892950016
+    m_Localized: '2/2: both places are occupied. Another cat can enter only after
+      a cat on the track collects all its yarn and leaves.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2166080854274048
+    m_Localized: The green cats need green yarn, but the basket holds blue yarn.
+      Their yarn is on the blue cat, which cannot enter the full track. Let's restart.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2166080854274049
+    m_Localized: Open Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2166080854274050
+    m_Localized: Tap the gear. The Restart button is inside Settings.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2173509885210624
+    m_Localized: The green cat needs green yarn to leave the track. Send the blue
+      cat carrying that yarn.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2178074089074688
+    m_Localized: Need a hint?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2178074093268992
+    m_Localized: Tap the light bulb to highlight a cat you can send next. Use it
+      whenever you need help.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2178074093268993
+    m_Localized: The light bulb highlights a cat you can send next. Hints are off;
+      you can turn them on in Settings.
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

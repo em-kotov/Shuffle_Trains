@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Localization-Assets-Shared
+  m_EditorClassIdentifier: 
+  m_GroupName: Localization-Assets-Shared
+  m_Data:
+    m_SerializedData: []
+  m_GUID: e8819d0d232a48a408ea6b8589725c14
+  m_SerializeEntries:
+  - m_GUID: b47954751d59fa94596ba5176e409612
+    m_Address: Assets/ShuffleCats-Game/Localization/Game UI Shared Data.asset
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 1
+  m_Settings: {fileID: 11400000, guid: da40266d99028574591ab8f1cd3e9150, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 2e8ca715218a94e4db8cf1e7d02aa774, type: 2}
+    - {fileID: 11400000, guid: 8bc188e288872944e8e685c41d00fcdc, type: 2}
+    - {fileID: 11400000, guid: 4cb069727146efc4eb241fb74cc827d4, type: 2}

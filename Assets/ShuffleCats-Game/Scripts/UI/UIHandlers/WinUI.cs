@@ -37,6 +37,6 @@ public class WinUI : UIPanel
 
     private void ShowText(int levelNumber)
     {
-        _levelText.text = $"Level {levelNumber} completed!";
+        LocalizationBinder.Set(_levelText, "Level {0} completed!", levelNumber);
     }
 }
