@@ -16,9 +16,9 @@ public class Station : SeatTracker
 
     public SpriteRenderer ThemeTarget => _model;
 
-    public void SetPortraitPresentation(bool portrait)
+    public void SetPortraitPresentation(bool isPortraitActive)
     {
-        if (_model == null || (portrait == false && _presentation == null))
+        if (_model == null || (isPortraitActive == false && _presentation == null))
             return;
 
         if (_presentation == null)
@@ -37,7 +37,7 @@ public class Station : SeatTracker
         _presentation.localPosition = _presentationPosition;
         float presentationScale;
 
-        if (portrait)
+        if (isPortraitActive)
         {
             presentationScale = 0.8f;
         }
@@ -48,7 +48,7 @@ public class Station : SeatTracker
 
         _presentation.localScale = Vector3.one * presentationScale;
 
-        if (portrait)
+        if (isPortraitActive)
         {
             Vector3 position = _presentation.position;
             position.x = Mathf.Clamp(position.x, -8.3f, 8.3f);

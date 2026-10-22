@@ -7,6 +7,11 @@ public class ParkingRegistrator : MonoBehaviour
     [Tooltip("Additional track speed multiplier after the final cat leaves parking.")]
     [SerializeField, Min(1f)] private float _finalCatsSpeedMultiplier = 2.7f / 1.7f;
 
+    private GridCalculator _gridCalculator;
+    private ParkingCar[,] _gridCells;
+    private List<ParkingCar> _parkingCars;
+    private float _cellSize;
+
     public float TrackSpeedMultiplier
     {
         get
@@ -26,11 +31,6 @@ public class ParkingRegistrator : MonoBehaviour
             return normalMultiplier * finalMultiplier;
         }
     }
-
-    private GridCalculator _gridCalculator;
-    private ParkingCar[,] _gridCells;
-    private List<ParkingCar> _parkingCars;
-    float _cellSize;
 
     public bool HasMovingCars
     {
