@@ -19,13 +19,17 @@ public class ClickDetector : MonoBehaviour, IPointerDownHandler, IPointerClickHa
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (YandexSdk.IsPaused || !InteractionAllowed) return;
+        if (YandexSdk.IsPaused || InteractionAllowed == false)
+            return;
+
         Pressed?.Invoke();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (YandexSdk.IsPaused || !InteractionAllowed) return;
+        if (YandexSdk.IsPaused || InteractionAllowed == false)
+            return;
+
         Clicked?.Invoke();
     }
 }

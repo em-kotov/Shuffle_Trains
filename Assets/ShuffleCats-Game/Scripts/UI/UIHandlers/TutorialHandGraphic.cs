@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// A scalable outlined glove, with its fingertip at the RectTransform origin.
 [RequireComponent(typeof(CanvasRenderer))]
 public sealed class TutorialHandGraphic : UnityEngine.UI.MaskableGraphic
 {
@@ -10,7 +9,6 @@ public sealed class TutorialHandGraphic : UnityEngine.UI.MaskableGraphic
     protected override void OnPopulateMesh(UnityEngine.UI.VertexHelper mesh)
     {
         mesh.Clear();
-        // Draw all dark silhouettes first, then their connected cream interiors.
         Glove(mesh, new Vector2(2, -3), 3, new Color32(0, 0, 0, 65));
         Glove(mesh, Vector2.zero, 2.4f, Outline);
         Glove(mesh, Vector2.zero, 0, Fill);
@@ -37,13 +35,39 @@ public sealed class TutorialHandGraphic : UnityEngine.UI.MaskableGraphic
         mesh.AddVert((from + to) * 0.5f, tint, Vector2.zero);
         float direction = Mathf.Atan2(to.y - from.y, to.x - from.x);
         const int half = 12;
+
         for (int end = 0; end < 2; end++)
-        for (int i = 0; i <= half; i++)
-        {
-            float angle = direction + (end == 0 ? -Mathf.PI * 0.5f : Mathf.PI * 0.5f) + i * Mathf.PI / half;
-            mesh.AddVert((end == 0 ? to : from) + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius, tint, Vector2.zero);
-        }
+            for (int i = 0; i <= half; i++)
+            {
+                float angleOffset;
+
+                if (end == 0)
+                {
+                    angleOffset = -Mathf.PI * 0.5f;
+                }
+                else
+                {
+                    angleOffset = Mathf.PI * 0.5f;
+                }
+
+                float angle = direction + angleOffset + i * Mathf.PI / half;
+                Vector2 capCenter;
+
+                if (end == 0)
+                {
+                    capCenter = to;
+                }
+                else
+                {
+                    capCenter = from;
+                }
+
+                mesh.AddVert(capCenter + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius, tint, Vector2.zero);
+            }
+
         int count = (half + 1) * 2;
-        for (int i = 0; i < count; i++) mesh.AddTriangle(start, start + i + 1, start + (i + 1) % count + 1);
+
+        for (int i = 0; i < count; i++)
+            mesh.AddTriangle(start, start + i + 1, start + (i + 1) % count + 1);
     }
 }

@@ -11,8 +11,7 @@ public abstract class UIPanel : MonoBehaviour
 
     protected virtual void Show()
     {
-        // The panel image sits behind its controls and follows its visibility.
-        // Configure it here because some scenes override or disable the prefab image.
+        // Some scenes override or disable the prefab image; restore its visibility with the panel.
         if (_panel.TryGetComponent<UnityEngine.UI.Image>(out var backdrop))
         {
             backdrop.enabled = true;

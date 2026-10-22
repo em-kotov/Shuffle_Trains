@@ -2,11 +2,6 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-// Captures the LevelManager's scene contents into data assets:
-//  - "Capture Base Config" grabs the shared grid/track/movement + full station
-//    list (run once for the game).
-//  - "Capture Level Layout" grabs just the cats + which stations are active
-//    (run per level). Stations' active state is read from their scene activeSelf.
 public static class LevelConfigCapture
 {
     private const string OutputFolder = "Assets/ShuffleCats-Game/Resources/Levels";
@@ -138,8 +133,7 @@ public static class LevelConfigCapture
             if (subscriber == null)
                 continue;
 
-            // Skip cats toggled off in the scene, so only active cats are captured.
-            if (!subscriber.gameObject.activeSelf)
+            if (subscriber.gameObject.activeSelf == false)
                 continue;
 
             SerializedObject catSo = new(subscriber);
@@ -148,8 +142,6 @@ public static class LevelConfigCapture
             CarOrientation orientation = (CarOrientation)catSo.FindProperty("_orientation").intValue;
             float signDirection = catSo.FindProperty("_signDirection").floatValue;
 
-            // The invert-flip checkbox lives on the SpriteFacingLock sitting on the
-            // cat's CatTexture; capture it so the built level reproduces the facing.
             bool invertFlip = false;
             bool trackFlipSeparate = false;
             bool invertFlipTrack = false;
@@ -163,8 +155,6 @@ public static class LevelConfigCapture
                 invertFlipTrack = lockSo.FindProperty("_invertFlipTrack").boolValue;
             }
 
-            // The rotation-fix checkboxes live on the cat's RotationFixer; capture
-            // them so the built level reproduces the on-track-entry rotation snap.
             bool applyRotationFix = false;
             bool rotateFixLeft = false;
             RotationFixer rotationFixer = subscriber.GetComponentInChildren<RotationFixer>(true);
@@ -284,8 +274,7 @@ public static class LevelConfigCapture
 
         if (existing != null && existing.GetType() == asset.GetType())
         {
-            // Overwrite contents in place so the asset GUID (and any scene
-            // reference to it) survives a re-capture.
+            // Update in place to preserve the asset GUID and scene references.
             EditorUtility.CopySerialized(asset, existing);
             EditorUtility.SetDirty(existing);
             Object.DestroyImmediate(asset);
@@ -311,7 +300,7 @@ public static class LevelConfigCapture
 
         string parent = "Assets/ShuffleCats-Game/Resources";
 
-        if (!AssetDatabase.IsValidFolder(parent))
+        if (AssetDatabase.IsValidFolder(parent) == false)
             AssetDatabase.CreateFolder("Assets/ShuffleCats-Game", "Resources");
 
         AssetDatabase.CreateFolder(parent, "Levels");

@@ -1,5 +1,3 @@
-// Current SDK API: ysdk.leaderboards, player.isAuthorized(), isAvailableMethod().
-// No auth popup is opened by reading a board or submitting a score.
 mergeInto(LibraryManager.library, {
   YG_LeaderboardRequest: function (jsonPtr) {
     var request = JSON.parse(UTF8ToString(jsonPtr));

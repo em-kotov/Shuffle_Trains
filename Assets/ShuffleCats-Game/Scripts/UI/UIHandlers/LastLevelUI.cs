@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// Shown when the final level in the sequence is completed. Its button restarts
-// from level 1 while keeping the wallet money (money lives in PlayerPrefs under
-// a separate key, so only the level index is reset).
 public class LastLevelUI : UIPanel
 {
     [SerializeField] private Button _playAgainButton;

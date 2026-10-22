@@ -26,8 +26,10 @@ public class PlayLevelByNumber : EditorWindow
         _levels.AddToClassList("level-list");
         StyleSheet styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(
             "Assets/ShuffleCats-Game/Scripts/Editor/PlayLevelByNumber.uss");
+
         if (styles != null)
             rootVisualElement.styleSheets.Add(styles);
+
         rootVisualElement.Add(_levels);
         RefreshLevels();
         rootVisualElement.schedule.Execute(UpdateAvailability).Every(100);
@@ -43,6 +45,7 @@ public class PlayLevelByNumber : EditorWindow
     {
         _levels.Clear();
         LevelSequence sequence = AssetDatabase.LoadAssetAtPath<LevelSequence>(SequencePath);
+
         if (sequence == null || sequence.Count == 0)
         {
             _levels.Add(new Label("No levels found in LevelSequence."));
@@ -53,26 +56,55 @@ public class PlayLevelByNumber : EditorWindow
         {
             int index = i;
             LevelLayout layout = sequence.Get(index);
-            Button button = new Button(() => Play(index))
+            Button button = new Button(() => Play(index));
+
+            if (layout != null)
             {
-                text = layout != null ? $"Level {layout.LevelNumber}" : $"Missing level (slot {index + 1})"
-            };
+                button.text = $"Level {layout.LevelNumber}";
+            }
+            else
+            {
+                button.text = $"Missing level (slot {index + 1})";
+            }
+
             button.SetEnabled(layout != null);
             _levels.Add(button);
         }
+
         UpdateAvailability();
     }
 
     private void UpdateAvailability()
     {
-        bool transitioning = EditorApplication.isPlayingOrWillChangePlaymode != EditorApplication.isPlaying;
-        bool booting = EditorApplication.isPlaying && SceneManager.GetActiveScene().path != GameplayPath;
-        _levels.SetEnabled(!EditorApplication.isCompiling && !transitioning && !booting);
+        bool transitioning;
+
+        if (EditorApplication.isPlayingOrWillChangePlaymode != EditorApplication.isPlaying)
+        {
+            transitioning = true;
+        }
+        else
+        {
+            transitioning = false;
+        }
+
+        bool booting;
+
+        if (EditorApplication.isPlaying && SceneManager.GetActiveScene().path != GameplayPath)
+        {
+            booting = true;
+        }
+        else
+        {
+            booting = false;
+        }
+
+        _levels.SetEnabled(EditorApplication.isCompiling == false && transitioning == false && booting == false);
     }
 
     private static void Play(int index)
     {
         LevelSequence sequence = AssetDatabase.LoadAssetAtPath<LevelSequence>(SequencePath);
+
         if (sequence == null || sequence.Get(index) == null)
             return;
 
@@ -84,6 +116,7 @@ public class PlayLevelByNumber : EditorWindow
         }
 
         LevelProgress.EditorPreviewIndex = index;
+
         if (EditorApplication.isPlaying)
         {
             EditorApplication.isPaused = false;

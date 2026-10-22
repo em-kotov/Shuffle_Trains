@@ -37,8 +37,7 @@ public class SorterCar : MonoBehaviour
         IsFinished = false;
     }
 
-    public bool IsNeedToSort(Station foundStation) //station operator method,
-                                                   // determines if station was visited this loop
+    public bool IsNeedToSort(Station foundStation)
     {
         bool isNeed = false;
 
@@ -63,12 +62,8 @@ public class SorterCar : MonoBehaviour
         }
     }
 
-    public void TryResetStationProgress() //station operator method
+    public void TryResetStationProgress()
     {
-        // Crossing the loop-boundary reset collider begins a new lap: clear this
-        // cat's visited progress so every station is available again. Guarded on
-        // "any visited" so the scanner's repeated hits during a single crossing
-        // are no-ops after the first one clears the flags.
         if (_stationOperator.HasAnyVisited())
         {
             _stationOperator.ResetProgress();
@@ -81,14 +76,13 @@ public class SorterCar : MonoBehaviour
         return _passengerTracker.HaveFreeSeats(out count);
     }
 
-    // Read-only counterpart to ImitateSorting. Used only when checking whether
-    // the occupied track can make progress without admitting another cat.
     public bool CanExchangeWith(Station station)
     {
         if (IsFinished)
             return false;
 
         DetermineColorToDrop(station, out bool canDrop);
+
         if (canDrop && _passengerTracker.GetDropOffPassengers(
                 station.CatColor, station.GetFreeSeats().Count).Count > 0)
             return true;
@@ -143,52 +137,16 @@ public class SorterCar : MonoBehaviour
 
     private IEnumerator ImitateSorting(Station station)
     {
-        //start determine which color to drop
-        // bool stationIsColored = false;
-
-        // if (station.CatColor != CatColor.Uncolored)
-        // {
-        //     stationIsColored = true;
-        // }
-
-        // CatColor colorToDrop = station.CatColor;
-
-        // List<CatColor> wrongColors = new List<CatColor>();
-        // wrongColors = _passengerTracker.GetWrongPassengersColors();
-
-
-        // Station coloredStation = null;
-
-        // if (stationIsColored == false)
-        // {
-        //     for (int i = 0; i < wrongColors.Count; i++)
-        //     {
-        //         if (_sorterRegistrator.HaveStationInColor(wrongColors[i], out coloredStation))
-        //         {
-        //             continue;
-        //         }
-
-        //         colorToDrop = wrongColors[i];
-        //         break;
-        //     }
-        // }
-
-        //end determine which color to drop
-
         float timeForPassenger = 0.25f;
         WaitForSeconds wait = new WaitForSeconds(timeForPassenger);
 
         bool haveColorsForDrop;
         CatColor colorToDrop = DetermineColorToDrop(station, out haveColorsForDrop);
 
-        //drop-off
         if (haveColorsForDrop)
         {
-
             List<Transform> seats = station.GetFreeSeats();
             List<Passenger> dropPassengers = _passengerTracker.GetDropOffPassengers(station.CatColor, seats.Count);
-
-            //Debug.Log($"PassengerCar - drop passengers: {dropPassengers.Count}, station seats: {seats.Count}, car color: {_catColor}");
 
             for (int i = 0; i < dropPassengers.Count; i++)
             {
@@ -200,12 +158,8 @@ public class SorterCar : MonoBehaviour
             station.UpdatePassengers(dropPassengers);
         }
 
-        //pickup
-
         List<Transform> pickupSeats = _passengerTracker.GetFreeSeats();
         List<Passenger> pickPassengers = station.GetPickupPassengers(_catColor, pickupSeats.Count);
-
-        //Debug.Log($"PassengerCar - pickup passengers: {pickPassengers.Count}, sorter seats: {pickupSeats.Count}, car color: {_catColor}");
 
         for (int i = 0; i < pickPassengers.Count; i++)
         {
@@ -217,7 +171,7 @@ public class SorterCar : MonoBehaviour
 
         station.ClearCurrentCar();
 
-        _isNeedToSort = IsNeedToSort(); //recompute for the finish/exit check below
+        _isNeedToSort = IsNeedToSort();
 
         TryFinishSorting();
         IsSorting = false;

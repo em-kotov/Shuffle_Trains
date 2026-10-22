@@ -2,8 +2,6 @@ using System;
 using TMPro;
 using UnityEngine;
 
-// Built beside the existing runtime hint button, so every sequence level gets
-// the same UI without adding prefab overrides to individual scenes.
 public sealed class LeaderboardUI : UIPanel
 {
     private static readonly Color Ink = new Color32(92, 62, 47, 255);
@@ -28,10 +26,22 @@ public sealed class LeaderboardUI : UIPanel
     private void Build(Canvas canvas)
     {
         var responsive = canvas.GetComponent<ResponsiveGameUI>();
-        _root = responsive != null ? responsive.SafeRoot : canvas.transform as RectTransform;
+
+        if (responsive != null)
+        {
+            _root = responsive.SafeRoot;
+        }
+        else
+        {
+            _root = canvas.transform as RectTransform;
+        }
+
         _font = Resources.Load<TMP_FontAsset>("Fonts/Eno Black SDF");
         var source = _root.Find("ShopPanel/BgImage")?.GetComponent<UnityEngine.UI.Image>();
-        if (source != null) _panelSprite = source.sprite;
+
+        if (source != null)
+            _panelSprite = source.sprite;
+
         _settingsTitle = _root.Find("OptionsPanel/Title")?.GetComponent<TMP_Text>();
 
         RectTransform cup = Rect("LeaderboardButton", _root);
@@ -41,7 +51,9 @@ public sealed class LeaderboardUI : UIPanel
         _open = cup.gameObject.AddComponent<UnityEngine.UI.Button>();
         _open.targetGraphic = cupGraphic;
         _open.onClick.AddListener(Open);
-        if (responsive != null) responsive.RegisterLeaderboardButton(cup);
+
+        if (responsive != null)
+            responsive.RegisterLeaderboardButton(cup);
 
         _panel = Rect("LeaderboardPanel", _root);
         Stretch(_panel);
@@ -119,9 +131,13 @@ public sealed class LeaderboardUI : UIPanel
 
     public void Open()
     {
-        if (IsVisible) return;
+        if (IsVisible)
+            return;
+
         foreach (UIPanel panel in FindObjectsOfType<UIPanel>(true))
-            if (panel != this && panel.BlocksGameplay) return;
+            if (panel != this && panel.BlocksGameplay)
+                return;
+
         AudioManager.PlayUIClickStatic();
         _panel.SetAsLastSibling();
         Show();
@@ -133,7 +149,9 @@ public sealed class LeaderboardUI : UIPanel
 
     public void Close()
     {
-        if (!IsVisible) return;
+        if (IsVisible == false)
+            return;
+
         AudioManager.PlayUIClickStatic();
         _requestVersion++;
         Hide();
@@ -147,30 +165,65 @@ public sealed class LeaderboardUI : UIPanel
     {
         Localization.Changed -= RefreshLanguage;
         _requestVersion++;
-        // During scene teardown the child CanvasGroup can already be destroyed.
-        if (_isOpen) YandexSdk.SetLeaderboardOpen(false);
+
+        // The child CanvasGroup may already be destroyed during scene teardown.
+        if (_isOpen)
+            YandexSdk.SetLeaderboardOpen(false);
     }
 
     private void Update()
     {
-        if (!IsVisible) return;
-        // SafeRoot uses logical Canvas units and follows notches/orientation.
+        if (IsVisible == false)
+            return;
+
         var size = new Vector2(Mathf.Min(440, _root.rect.width - 24),
             Mathf.Min(560, _root.rect.height - 24));
+
         if (_card.sizeDelta != size)
         {
             _card.sizeDelta = size;
             ResponsiveGameUI.StyleWindowTitle(_title, _settingsTitle, size.x);
             ResponsiveGameUI.StyleWindowTitle(_titleShadow, _settingsTitle, size.x, true);
         }
+
         int seconds = Mathf.CeilToInt(_refreshAt - Time.realtimeSinceStartup);
-        bool countingDown = !_busy && seconds > 0;
-        _refresh.interactable = !_busy && !countingDown;
-        _refreshText.text = countingDown ? seconds.ToString() : Localization.Get("Refresh");
-        // The leaderboard pauses gameplay, so the countdown animation uses real time.
-        if (countingDown) _refreshIcon.Rotate(0, 0, -180 * Time.unscaledDeltaTime);
-        else _refreshIcon.localRotation = Quaternion.identity;
-        if (Input.GetKeyDown(KeyCode.Escape)) Close();
+        bool countingDown;
+
+        if (_busy == false && seconds > 0)
+        {
+            countingDown = true;
+        }
+        else
+        {
+            countingDown = false;
+        }
+
+        if (_busy == false && countingDown == false)
+        {
+            _refresh.interactable = true;
+        }
+        else
+        {
+            _refresh.interactable = false;
+        }
+
+        if (countingDown)
+        {
+            _refreshText.text = seconds.ToString();
+        }
+        else
+        {
+            _refreshText.text = Localization.Get("Refresh");
+        }
+
+        // Gameplay is paused while the leaderboard is open; use unscaled time.
+        if (countingDown)
+            _refreshIcon.Rotate(0, 0, -180 * Time.unscaledDeltaTime);
+        else
+            _refreshIcon.localRotation = Quaternion.identity;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Close();
     }
 
     private void Refresh() => Request(false);
@@ -186,70 +239,180 @@ public sealed class LeaderboardUI : UIPanel
         _refresh.interactable = false;
         ClearRows();
         _status.gameObject.SetActive(true);
-        _status.text = Localization.Get(authorize ? "Waiting for sign-in..." : "Loading rankings...");
+        string statusKey;
+
+        if (authorize)
+        {
+            statusKey = "Waiting for sign-in...";
+        }
+        else
+        {
+            statusKey = "Loading rankings...";
+        }
+
+        _status.text = Localization.Get(statusKey);
         _summary.text = Localization.Format("Your best: {0}", LevelProgress.BestCompletedLevel);
         Action<YandexLeaderboard.Result> complete = result =>
         {
-            if (this == null || version != _requestVersion || !IsVisible) return;
+            if (this == null || version != _requestVersion || IsVisible == false)
+                return;
+
             _busy = false;
             _refreshAt = Time.realtimeSinceStartup + result.retryAfter;
             ShowResult(result);
         };
-        if (authorize) YandexLeaderboard.Authorize(complete);
-        else YandexLeaderboard.Read(complete);
+
+        if (authorize)
+            YandexLeaderboard.Authorize(complete);
+        else
+            YandexLeaderboard.Read(complete);
     }
 
     private void ShowResult(YandexLeaderboard.Result result)
     {
         _lastResult = result;
-        bool canSignIn = result.authorizationKnown && !result.authorized && YandexSdk.IsInitialized;
+        bool canSignIn;
+
+        if (result.authorizationKnown && result.authorized == false && YandexSdk.IsInitialized)
+        {
+            canSignIn = true;
+        }
+        else
+        {
+            canSignIn = false;
+        }
+
         _signIn.gameObject.SetActive(canSignIn);
-        _summary.text = canSignIn
-            ? Localization.Get("Sign in to add your result and see your rank.\nYou can keep playing as a guest.")
-            : Localization.Format("Your best: {0}", Mathf.Max(LevelProgress.BestCompletedLevel, result.bestScore));
+
+        if (canSignIn)
+        {
+            _summary.text = Localization.Get("Sign in to add your result and see your rank.\nYou can keep playing as a guest.");
+        }
+        else
+        {
+            _summary.text = Localization.Format("Your best: {0}", Mathf.Max(LevelProgress.BestCompletedLevel, result.bestScore));
+        }
+
         if (result.authorized && result.userRank > 0)
             _summary.text = Localization.Format("Your rank: #{0}   Best: {1}", result.userRank,
                 Mathf.Max(LevelProgress.BestCompletedLevel, result.bestScore));
-        if (result.authorized && !string.IsNullOrEmpty(result.scoreStatus))
+
+        if (result.authorized && string.IsNullOrEmpty(result.scoreStatus) == false)
             _summary.text += "\n" + Localization.Get("Your result is saved locally. Sync will retry.");
 
-        Place(_refresh.GetComponent<RectTransform>(), canSignIn ? new Vector2(1, 0) : new Vector2(0.5f, 0),
-            canSignIn ? new Vector2(-72, 34) : new Vector2(0, 34),
-            canSignIn ? new Vector2(108, 42) : new Vector2(220, 42));
+        RectTransform refreshRect = _refresh.GetComponent<RectTransform>();
+        Vector2 refreshAnchor;
 
-        _status.gameObject.SetActive(!result.Succeeded || result.entries.Length == 0);
-        switch (result.status)
+        if (canSignIn)
         {
-            case "ok": _status.text = Localization.Get("No scores yet. Complete a level to join!"); break;
-            case "unavailable": _status.text = Localization.Get("Rankings are available on Yandex Games."); break;
-            case "notConfigured": _status.text = Localization.Get("The leaderboard is not available yet."); break;
-            case "cancelled": _status.text = Localization.Get("Sign-in cancelled. You can keep playing."); break;
-            case "rateLimited": _status.text = Localization.Get("Please wait a moment, then refresh."); break;
-            default: _status.text = Localization.Get("Couldn't load rankings. Check your connection and retry."); break;
+            refreshAnchor = new Vector2(1, 0);
+        }
+        else
+        {
+            refreshAnchor = new Vector2(0.5f, 0);
         }
 
-        if (!result.Succeeded) return;
+        Vector2 refreshPosition;
+
+        if (canSignIn)
+        {
+            refreshPosition = new Vector2(-72, 34);
+        }
+        else
+        {
+            refreshPosition = new Vector2(0, 34);
+        }
+
+        Vector2 refreshSize;
+
+        if (canSignIn)
+        {
+            refreshSize = new Vector2(108, 42);
+        }
+        else
+        {
+            refreshSize = new Vector2(220, 42);
+        }
+
+        Place(refreshRect, refreshAnchor, refreshPosition, refreshSize);
+
+        _status.gameObject.SetActive(result.Succeeded == false || result.entries.Length == 0);
+        switch (result.status)
+        {
+            case "ok":
+                _status.text = Localization.Get("No scores yet. Complete a level to join!");
+                break;
+            case "unavailable":
+                _status.text = Localization.Get("Rankings are available on Yandex Games.");
+                break;
+            case "notConfigured":
+                _status.text = Localization.Get("The leaderboard is not available yet.");
+                break;
+            case "cancelled":
+                _status.text = Localization.Get("Sign-in cancelled. You can keep playing.");
+                break;
+            case "rateLimited":
+                _status.text = Localization.Get("Please wait a moment, then refresh.");
+                break;
+            default:
+                _status.text = Localization.Get("Couldn't load rankings. Check your connection and retry.");
+                break;
+        }
+
+        if (result.Succeeded == false)
+            return;
+
         int previousRank = 0;
+
         foreach (YandexLeaderboard.Entry entry in result.entries)
         {
-            if (entry.rank == previousRank) continue;
+            if (entry.rank == previousRank)
+                continue;
+
             if (previousRank > 0 && entry.rank > previousRank + 1)
             {
                 TMP_Text gap = Label("Gap", _content, "...", 14);
                 gap.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = 20;
             }
+
             previousRank = entry.rank;
             RectTransform row = Rect("Rank" + entry.rank, _content);
-            Image(row, entry.isUser ? new Color32(255, 220, 141, 255) :
-                entry.rank <= 3 ? new Color32(255, 237, 186, 255) : new Color32(245, 229, 204, 255));
+            Color rowColor;
+
+            if (entry.isUser)
+            {
+                rowColor = new Color32(255, 220, 141, 255);
+            }
+            else if (entry.rank <= 3)
+            {
+                rowColor = new Color32(255, 237, 186, 255);
+            }
+            else
+            {
+                rowColor = new Color32(245, 229, 204, 255);
+            }
+
+            Image(row, rowColor);
             row.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = 40;
-            string name = string.IsNullOrWhiteSpace(entry.name) ? Localization.Get("Player") : entry.name;
-            // Public names are untrusted text: no rich text tags, control chars,
-            // newlines, or unbounded layout. TMP ellipsis handles long names.
+            string name;
+
+            if (string.IsNullOrWhiteSpace(entry.name))
+            {
+                name = Localization.Get("Player");
+            }
+            else
+            {
+                name = entry.name;
+            }
+
             name = name.Replace('\n', ' ').Replace('\r', ' ').Replace('\t', ' ');
-            if (name.Length > 80) name = name.Substring(0, 80);
+
+            if (name.Length > 80)
+                name = name.Substring(0, 80);
+
             Columns(row, entry.rank.ToString(), name, entry.score.ToString(), 17);
         }
+
         UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
         _scroll.verticalNormalizedPosition = 1;
     }
@@ -273,7 +436,18 @@ public sealed class LeaderboardUI : UIPanel
         }
         else if (_busy)
         {
-            _status.text = Localization.Get(_authorizing ? "Waiting for sign-in..." : "Loading rankings...");
+            string statusKey;
+
+            if (_authorizing)
+            {
+                statusKey = "Waiting for sign-in...";
+            }
+            else
+            {
+                statusKey = "Loading rankings...";
+            }
+
+            _status.text = Localization.Get(statusKey);
             _summary.text = Localization.Format("Your best: {0}", LevelProgress.BestCompletedLevel);
         }
     }
@@ -296,17 +470,32 @@ public sealed class LeaderboardUI : UIPanel
     private TMP_Text Label(string name, Transform parent, string text, float size, bool localize = true)
     {
         var label = Rect(name, parent).gameObject.AddComponent<TextMeshProUGUI>();
-        if (_font != null) label.font = _font;
-        label.text = localize ? Localization.Get(text) : text;
+
+        if (_font != null)
+            label.font = _font;
+
+        if (localize)
+        {
+            label.text = Localization.Get(text);
+        }
+        else
+        {
+            label.text = text;
+        }
+
         label.fontSize = size;
         label.color = Ink;
         label.alignment = TextAlignmentOptions.Center;
         label.raycastTarget = false;
         label.richText = false;
-        // Status is composed from the latest request result, and must not be
-        // rebound to its initial loading message by the scene-wide binder.
-        if (!localize || name == "Status") label.gameObject.AddComponent<LocalizationIgnore>();
-        if (localize && name != "Status") LocalizationBinder.Set(label, text);
+
+        // The scene binder must not replace this live status with its initial loading message.
+        if (localize == false || name == "Status")
+            label.gameObject.AddComponent<LocalizationIgnore>();
+
+        if (localize && name != "Status")
+            LocalizationBinder.Set(label, text);
+
         return label;
     }
 
@@ -349,7 +538,10 @@ public sealed class LeaderboardUI : UIPanel
         var button = rect.gameObject.AddComponent<UnityEngine.UI.Button>();
         button.targetGraphic = background;
         var source = _root.Find("OptionsPanel/CloseButton")?.GetComponent<UnityEngine.UI.Button>();
-        if (source != null) button.colors = source.colors;
+
+        if (source != null)
+            button.colors = source.colors;
+
         button.onClick.AddListener(Close);
     }
 
@@ -360,6 +552,7 @@ public sealed class LeaderboardUI : UIPanel
         RectTransform rect = Rect(name, parent);
         Place(rect, anchor, position, size);
         UnityEngine.UI.Graphic background;
+
         if (languageStyle)
         {
             var face = rect.gameObject.AddComponent<LanguageCardGraphic>();
@@ -370,9 +563,12 @@ public sealed class LeaderboardUI : UIPanel
             shadow.effectColor = new Color32(108, 78, 48, 70);
             shadow.effectDistance = new Vector2(0, -3);
         }
-        else background = Image(rect, new Color32(241, 184, 112, 255));
+        else
+            background = Image(rect, new Color32(241, 184, 112, 255));
+
         var button = rect.gameObject.AddComponent<UnityEngine.UI.Button>();
         button.targetGraphic = background;
+
         if (languageStyle)
         {
             var colors = button.colors;
@@ -380,8 +576,20 @@ public sealed class LeaderboardUI : UIPanel
             colors.pressedColor = new Color(0.84f, 0.9f, 0.73f);
             button.colors = colors;
         }
+
         button.onClick.AddListener(action);
-        TMP_Text label = Label("Text", rect, text, languageStyle ? 17 : 15);
+        float fontSize;
+
+        if (languageStyle)
+        {
+            fontSize = 17;
+        }
+        else
+        {
+            fontSize = 15;
+        }
+
+        TMP_Text label = Label("Text", rect, text, fontSize);
         Stretch(label.rectTransform);
         label.margin = new Vector4(5, 2, 5, 2);
         return button;
@@ -391,11 +599,13 @@ public sealed class LeaderboardUI : UIPanel
     {
         var image = rect.gameObject.AddComponent<UnityEngine.UI.Image>();
         image.color = tint;
+
         if (rounded && _panelSprite != null)
         {
             image.sprite = _panelSprite;
             image.type = UnityEngine.UI.Image.Type.Sliced;
         }
+
         return image;
     }
 

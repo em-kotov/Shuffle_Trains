@@ -19,17 +19,20 @@ public class ShopSectionUI : MonoBehaviour
         ((RectTransform)_slotsParent).pivot = new Vector2(0.5f, 1);
         _grid = _slotsParent.GetComponent<UnityEngine.UI.GridLayoutGroup>();
         _sectionLayout = GetComponent<UnityEngine.UI.VerticalLayoutGroup>();
+
         if (_grid != null)
         {
             _grid.cellSize = new Vector2(136, 204);
             _grid.spacing = new Vector2(12, 12);
             _grid.padding = new RectOffset(0, 0, 0, 4);
         }
+
         if (_sectionLayout != null)
         {
             _sectionLayout.padding = new RectOffset(2, 2, 4, 4);
             _sectionLayout.spacing = 10;
         }
+
         if (_header != null)
         {
             _header.fontSize = _header.fontSizeMax = 20;
@@ -40,18 +43,48 @@ public class ShopSectionUI : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (_slotsParent == null) return;
-        if (_grid == null) _grid = _slotsParent.GetComponent<UnityEngine.UI.GridLayoutGroup>();
-        if (_grid == null) return;
+        if (_slotsParent == null)
+            return;
 
-        if (_scroll == null) _scroll = GetComponentInParent<UnityEngine.UI.ScrollRect>();
-        if (_sectionLayout == null) _sectionLayout = GetComponent<UnityEngine.UI.VerticalLayoutGroup>();
-        // Use the viewport, not the grid's own width: a three-column grid can
-        // impose a minimum width on its parents and otherwise never shrink.
-        float width = _scroll != null && _scroll.viewport != null
-            ? _scroll.viewport.rect.width - (_sectionLayout != null ? _sectionLayout.padding.horizontal : 0)
-            : ((RectTransform)_slotsParent).rect.width;
-        if (Mathf.Approximately(width, _lastWidth)) return;
+        if (_grid == null)
+            _grid = _slotsParent.GetComponent<UnityEngine.UI.GridLayoutGroup>();
+
+        if (_grid == null)
+            return;
+
+        if (_scroll == null)
+            _scroll = GetComponentInParent<UnityEngine.UI.ScrollRect>();
+
+        if (_sectionLayout == null)
+            _sectionLayout = GetComponent<UnityEngine.UI.VerticalLayoutGroup>();
+
+        // The grid can impose a minimum width on its parents; measure the viewport instead.
+        float width;
+
+        if (_scroll != null && _scroll.viewport != null)
+        {
+            width = _scroll.viewport.rect.width;
+            int horizontalPadding;
+
+            if (_sectionLayout != null)
+            {
+                horizontalPadding = _sectionLayout.padding.horizontal;
+            }
+            else
+            {
+                horizontalPadding = 0;
+            }
+
+            width -= horizontalPadding;
+        }
+        else
+        {
+            width = ((RectTransform)_slotsParent).rect.width;
+        }
+
+        if (Mathf.Approximately(width, _lastWidth))
+            return;
+
         _lastWidth = width;
         float available = width - _grid.padding.horizontal;
         int columns = Mathf.Clamp(Mathf.FloorToInt((available + _grid.spacing.x) / (136 + _grid.spacing.x)), 1, 3);
@@ -59,10 +92,10 @@ public class ShopSectionUI : MonoBehaviour
         _grid.constraintCount = columns;
         _grid.cellSize = new Vector2(Mathf.Min(208, (available - (columns - 1) * _grid.spacing.x) / columns), 204);
         _grid.childAlignment = TextAnchor.UpperCenter;
+
         if (_scroll != null)
         {
-            // Reflow before restoring the top: ScrollRect can otherwise clamp
-            // against the old row height during an orientation change.
+            // Reflow first or ScrollRect may clamp against the previous orientation's row height.
             UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_slotsParent);
             UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)transform);
             UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(_scroll.content);

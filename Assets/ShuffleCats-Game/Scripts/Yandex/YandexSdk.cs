@@ -2,9 +2,6 @@ using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-// Facade over the Yandex Games SDK (see Plugins/WebGL/YandexGames.jslib).
-// Outside a WebGL player SDK calls are no-ops and ad callbacks fire immediately.
-// Unity focus/pause callbacks still suspend gameplay in editor/standalone builds.
 public static class YandexSdk
 {
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -20,16 +17,12 @@ public static class YandexSdk
     [DllImport("__Internal")] private static extern string YG_GetLanguage();
     [DllImport("__Internal")] private static extern string YG_GetDeviceType();
 
-    // static readonly, not const: a const false would make every guarded
-    // branch below compile as unreachable code in the editor.
+    // Use readonly to avoid compile-time unreachable branches in editor builds.
     private static readonly bool RunsOnYandex = true;
 #else
     private static readonly bool RunsOnYandex = false;
 #endif
 
-    // Requirement 4.4: fullscreen ads only at logical pauses. Yandex throttles
-    // them to one per minute anyway - asking sooner only shows the "ad is
-    // coming" splash for nothing.
     private const float MinSecondsBetweenInterstitials = 60f;
 
     private static YandexBridge _bridge;
@@ -52,23 +45,19 @@ public static class YandexSdk
     private static Action _interstitialCallback;
     private static Action<bool> _rewardedCallback;
 
-    // True once YaGames.init() resolved. Always false in the editor, so nothing
-    // that gates gameplay may depend on it.
+    // Always false outside WebGL; boot must not wait for successful SDK initialization.
     public static bool IsInitialized { get; private set; }
 
-    // The SDK answered, one way or the other. Bootstrap waits for this (with a
-    // timeout) before loading the first level.
+    // Unlike IsInitialized, this also becomes true when SDK initialization fails.
     public static bool IsResolved { get; private set; }
 
     public static bool IsPaused { get; private set; }
     public static bool IsAudioPaused { get; private set; }
 
-    // Guided menu interaction may continue during the settings pause, but
-    // never during a platform interruption or a different blocking menu.
     public static bool IsOnlyOptionsPaused => IsPaused && _optionsOpen &&
-        !IsAudioPaused && !_leaderboardOpen && !_shopOpen && !_tutorialOpen;
+        IsAudioPaused == false && _leaderboardOpen == false && _shopOpen == false && _tutorialOpen == false;
     public static bool IsOnlyTutorialPaused => IsPaused && _tutorialOpen &&
-        !IsAudioPaused && !_leaderboardOpen && !_shopOpen && !_optionsOpen;
+        IsAudioPaused == false && _leaderboardOpen == false && _shopOpen == false && _optionsOpen == false;
 
     public static string Language
     {
@@ -79,6 +68,7 @@ public static class YandexSdk
             {
                 return YG_GetLanguage();
             }
+
 #endif
             return "ru";
         }
@@ -94,6 +84,7 @@ public static class YandexSdk
                 string type = YG_GetDeviceType();
                 return type == "mobile" || type == "tablet";
             }
+
 #endif
             return Application.isMobilePlatform;
         }
@@ -120,7 +111,6 @@ public static class YandexSdk
 #endif
     }
 
-    // Requirement 1.19.2: called the moment the player can actually start playing.
     public static void GameReady()
     {
         if (_gameReadySent)
@@ -135,13 +125,9 @@ public static class YandexSdk
 #endif
     }
 
-    // Requirement 1.19.3: brackets around actual gameplay. Both calls are
-    // idempotent so scene loads and panel toggles can fire them freely.
     public static void GameplayStart()
     {
-        // The boot scene and panels closing from OnEnable both call in before
-        // Game Ready has gone out. Those early calls are dropped; Bootstrap
-        // opens the first section itself once the gameplay scene is up.
+        // Ignore scene/menu callbacks before Game Ready; Bootstrap starts the first gameplay section.
         if (_gameReadySent == false)
         {
             return;
@@ -158,12 +144,19 @@ public static class YandexSdk
         UpdateGameplayState();
     }
 
-    // Shows an interstitial and then runs onFinished. When no ad can be shown
-    // (throttled, SDK missing, editor) onFinished still runs - callers continue
-    // the level flow from it, so it must never be dropped.
+    // Invoke onFinished even when no ad is shown; level transitions depend on the callback.
     public static void ShowInterstitial(Action onFinished)
     {
-        bool throttled = Time.realtimeSinceStartup - _lastInterstitialTime < MinSecondsBetweenInterstitials;
+        bool throttled;
+
+        if (Time.realtimeSinceStartup - _lastInterstitialTime < MinSecondsBetweenInterstitials)
+        {
+            throttled = true;
+        }
+        else
+        {
+            throttled = false;
+        }
 
         if (CanShowAdvertisement() == false || throttled)
         {
@@ -181,8 +174,6 @@ public static class YandexSdk
 #endif
     }
 
-    // onFinished receives true when the reward was earned. Nothing calls this
-    // yet - it is the hook for a "watch an ad" button (requirement 4.5).
     public static void ShowRewardedVideo(Action<bool> onFinished)
     {
         if (CanShowAdvertisement() == false)
@@ -218,6 +209,7 @@ public static class YandexSdk
             YG_LoadData();
             return;
         }
+
 #endif
         YandexBridge.ReportDataLoaded(string.Empty);
     }
@@ -253,8 +245,6 @@ public static class YandexSdk
         callback?.Invoke(rewarded);
     }
 
-    // Requirement 1.3: no sound while the tab is in the background, and the
-    // gameplay section is closed for the time the player is away.
     internal static void HandleBrowserFocus(bool focused)
     {
         _browserFocused = focused;
@@ -267,11 +257,8 @@ public static class YandexSdk
         ApplyPause();
     }
 
-    // Unity's own focus event, used by the editor and standalone players only.
-    // On WebGL the canvas reports itself unfocused for reasons unrelated to the
-    // player leaving - it has not been clicked yet, or an ad overlay took focus
-    // - which would wrongly pause the game and suppress GameplayAPI.start().
-    // There, browser events and the SDK are the authority.
+    // WebGL canvas focus can be lost before the first click or during an ad.
+    // Use browser/SDK signals there; Unity focus is only authoritative outside WebGL.
     internal static void HandleApplicationFocus(bool focused)
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -370,16 +357,31 @@ public static class YandexSdk
         ApplyPause();
     }
 
-    // Requirement 4.7: pause sound and gameplay for the whole ad; 1.3 requires
-    // silence while unfocused. A reason only releases its own pause, so an ad
-    // close or SDK resume cannot restart a game that is still in the background.
+    // Each interruption releases only its own pause so closing an ad cannot resume a hidden tab.
     private static void ApplyPause()
     {
-        // An in-game menu stops gameplay but keeps UI sounds and music audible,
-        // just like shop/options. Platform interruptions still silence all audio.
-        bool audioPaused = _sdkPaused || _advertisementOpen || _applicationPaused ||
-            _authDialogOpen || _browserFocused == false;
-        bool paused = audioPaused || _leaderboardOpen || _optionsOpen || _shopOpen || _tutorialOpen;
+        bool audioPaused;
+
+        if (_sdkPaused || _advertisementOpen || _applicationPaused ||
+            _authDialogOpen || _browserFocused == false)
+        {
+            audioPaused = true;
+        }
+        else
+        {
+            audioPaused = false;
+        }
+
+        bool paused;
+
+        if (audioPaused || _leaderboardOpen || _optionsOpen || _shopOpen || _tutorialOpen)
+        {
+            paused = true;
+        }
+        else
+        {
+            paused = false;
+        }
 
         if (paused && IsPaused == false)
         {
@@ -395,12 +397,12 @@ public static class YandexSdk
             Time.timeScale = _timeScaleBeforePause;
         }
 
-        if (audioPaused && !IsAudioPaused)
+        if (audioPaused && IsAudioPaused == false)
             _audioPausedBeforePause = AudioListener.pause;
 
         if (audioPaused)
         {
-            // Silence every source, even if AudioManager has not awakened yet.
+            // AudioManager may not have awakened yet; silence all sources through the listener.
             AudioListener.pause = true;
         }
         else if (IsAudioPaused)
@@ -421,13 +423,24 @@ public static class YandexSdk
 
     private static void UpdateGameplayState()
     {
-        bool running = _gameReadySent && _gameplayRequested && IsPaused == false;
+        bool running;
+
+        if (_gameReadySent && _gameplayRequested && IsPaused == false)
+        {
+            running = true;
+        }
+        else
+        {
+            running = false;
+        }
+
         if (_gameplayRunning == running)
         {
             return;
         }
 
         _gameplayRunning = running;
+
 #if UNITY_WEBGL && !UNITY_EDITOR
         if (running)
             YG_GameplayStart();

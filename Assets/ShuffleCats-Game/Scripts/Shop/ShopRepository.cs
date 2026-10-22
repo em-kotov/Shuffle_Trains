@@ -55,6 +55,7 @@ public class ShopRepository : IShopRepository
         PlayerPrefs.SetString(SaveKeys.ShopOwned, string.Join(",", ownedIds));
 
         Theme defaultEquipped = catalog.GetDefaultEquipped();
+
         if (defaultEquipped != null)
         {
             PlayerPrefs.SetString(SaveKeys.ShopEquipped, defaultEquipped.Id);
@@ -77,7 +78,7 @@ public class ShopRepository : IShopRepository
 
         foreach (string id in raw.Split(','))
         {
-            if (!string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id) == false)
             {
                 result.Add(id);
             }

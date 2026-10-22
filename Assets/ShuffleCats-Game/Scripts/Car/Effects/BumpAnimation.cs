@@ -26,14 +26,16 @@ public class BumpAnimation : MonoBehaviour
 
     public void Activate(Transform target, Vector2 impactDir)
     {
-        if (_isActive) Deactivate();
+        if (_isActive)
+            Deactivate();
 
         _target = target;
         _restScale = _target.localScale;
 
-        if (impactDir.sqrMagnitude > 1e-6f) impactDir.Normalize();
-        // Axis-aligned approximation of directional squash: +1 = pure horizontal impact,
-        // -1 = pure vertical, 0 at 45° (degenerate — no squash on perfect diagonals).
+        if (impactDir.sqrMagnitude > 1e-6f)
+            impactDir.Normalize();
+
+        // Axis bias is +1 horizontally, -1 vertically, and zero at 45 degrees (no squash).
         _axisBias = impactDir.x * impactDir.x - impactDir.y * impactDir.y;
 
         _elapsed = 0f;
@@ -42,8 +44,11 @@ public class BumpAnimation : MonoBehaviour
 
     public void Deactivate()
     {
-        if (!_isActive) return;
+        if (_isActive == false)
+            return;
+
         _isActive = false;
+
         if (_target != null)
         {
             _target.localScale = _restScale;
@@ -52,10 +57,12 @@ public class BumpAnimation : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!_isActive || _target == null) return;
+        if (_isActive == false || _target == null)
+            return;
 
         _elapsed += Time.deltaTime;
         float t = _elapsed / _duration;
+
         if (t >= 1f)
         {
             _target.localScale = _restScale;

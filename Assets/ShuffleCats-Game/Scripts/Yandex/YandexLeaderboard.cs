@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-// Matches the technical name in the Yandex Console. Scores are highest completed
-// level numbers, including the final level, rather than spendable coins.
 public static class YandexLeaderboard
 {
     public const string TechnicalName = "levelsCompleted";
@@ -59,12 +57,18 @@ public static class YandexLeaderboard
 
     public static void Read(Action<Result> callback) => Send("read", callback);
 
-    // Only call from the explicit, localized "Sign in with Yandex" button.
     public static void Authorize(Action<Result> callback) => Send("authorize", callback);
 
     public static void SyncScore()
     {
-        _scoreDirty = LevelProgress.BestCompletedLevel > 0;
+        if (LevelProgress.BestCompletedLevel > 0)
+        {
+            _scoreDirty = true;
+        }
+        else
+        {
+            _scoreDirty = false;
+        }
     }
 
     public static void Tick()
@@ -72,14 +76,18 @@ public static class YandexLeaderboard
         if (Pending.Count > 0)
         {
             var expired = new List<int>();
+
             foreach (var pair in Pending)
-                if (Time.realtimeSinceStartup >= pair.Value.deadline) expired.Add(pair.Key);
+                if (Time.realtimeSinceStartup >= pair.Value.deadline)
+                    expired.Add(pair.Key);
+
             foreach (int id in expired)
                 Complete(new Result { id = id, status = "timeout" });
         }
 
-        if (!_scoreDirty || _submitting || !YandexSdk.IsInitialized ||
-            Time.realtimeSinceStartup < _nextSubmitAt) return;
+        if (_scoreDirty == false || _submitting || YandexSdk.IsInitialized == false ||
+            Time.realtimeSinceStartup < _nextSubmitAt)
+            return;
 
         _submitting = true;
         int score = LevelProgress.BestCompletedLevel;
@@ -87,29 +95,43 @@ public static class YandexLeaderboard
         {
             _submitting = false;
             _nextSubmitAt = Time.realtimeSinceStartup + 30f;
-            // Keep a failed submission for a later retry. Guests submit when
-            // they explicitly sign in; do not poll or prompt them repeatedly.
-            _scoreDirty = result.status != "unauthorized" &&
-                (!result.Succeeded || LevelProgress.BestCompletedLevel > score);
+
+            // Retain failed scores for a later retry; guest submission waits for explicit sign-in.
+            if (result.status != "unauthorized" &&
+                (result.Succeeded == false || LevelProgress.BestCompletedLevel > score))
+            {
+                _scoreDirty = true;
+            }
+            else
+            {
+                _scoreDirty = false;
+            }
         });
     }
 
     private static void Send(string action, Action<Result> callback)
     {
-        if (!YandexSdk.IsInitialized)
+        if (YandexSdk.IsInitialized == false)
         {
             callback?.Invoke(new Result { status = "unavailable" });
             return;
         }
 
         var request = new Request { id = ++_nextId, action = action, score = LevelProgress.BestCompletedLevel };
-        Pending.Add(request.id, new PendingRequest
+        PendingRequest pendingRequest = new PendingRequest();
+
+        // Do not time out an active login dialog; its lifetime belongs to the SDK and the user.
+        if (action == "authorize")
         {
-            // Login is controlled by the user. Never resume an active SDK dialog
-            // on a timer; the modal can still be closed to return to the game.
-            deadline = action == "authorize" ? float.PositiveInfinity : Time.realtimeSinceStartup + RequestTimeout,
-            callback = callback
-        });
+            pendingRequest.deadline = float.PositiveInfinity;
+        }
+        else
+        {
+            pendingRequest.deadline = Time.realtimeSinceStartup + RequestTimeout;
+        }
+
+        pendingRequest.callback = callback;
+        Pending.Add(request.id, pendingRequest);
 #if UNITY_WEBGL && !UNITY_EDITOR
         YG_LeaderboardRequest(JsonUtility.ToJson(request));
 #else
@@ -122,7 +144,9 @@ public static class YandexLeaderboard
         try
         {
             Result result = JsonUtility.FromJson<Result>(json);
-            if (result != null) Complete(result);
+
+            if (result != null)
+                Complete(result);
         }
         catch (ArgumentException exception)
         {
@@ -132,11 +156,15 @@ public static class YandexLeaderboard
 
     private static void Complete(Result result)
     {
-        if (!Pending.TryGetValue(result.id, out PendingRequest request)) return;
+        if (Pending.TryGetValue(result.id, out PendingRequest request) == false)
+            return;
+
         Pending.Remove(result.id);
         result.entries ??= Array.Empty<Entry>();
-        if (result.authorized && !string.IsNullOrEmpty(result.scoreStatus))
+
+        if (result.authorized && string.IsNullOrEmpty(result.scoreStatus) == false)
             SyncScore();
+
         request.callback?.Invoke(result);
     }
 

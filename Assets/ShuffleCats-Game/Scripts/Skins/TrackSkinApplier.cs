@@ -42,6 +42,7 @@ public class TrackSkinApplier : MonoBehaviour
         }
 
         SkinItem equipped = SkinResolver.GetEquipped(_catalog, SkinCategory.Track);
+
         if (equipped == null || equipped.AppliedSprite == null)
         {
             return;

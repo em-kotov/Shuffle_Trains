@@ -1,6 +1,3 @@
-// Bridge between the Unity build and the Yandex Games SDK (/sdk.js, loaded by the
-// WebGLTemplates/YandexGames template). Every callback is pushed back into the
-// "YandexGamesBridge" GameObject that YandexSdk keeps alive across scenes.
 mergeInto(LibraryManager.library, {
 
   YG_Init: function () {
@@ -82,8 +79,6 @@ mergeInto(LibraryManager.library, {
     };
 
     if (typeof YaGames === "undefined") {
-      // Running outside Yandex Games (local file, itch, etc.). The game must
-      // still boot, so report the failure and let C# fall back to local saves.
       send("OnSdkFailed", "YaGames is not defined");
       return;
     }
@@ -98,8 +93,6 @@ mergeInto(LibraryManager.library, {
       sdk.on("game_api_pause", pause);
       sdk.on("game_api_resume", resume);
 
-      // The player is needed for cloud saves. It resolves for guests too - the
-      // SDK then keeps the data locally, which satisfies requirement 1.2.2.
       return sdk.getPlayer({ scopes: false }).then(function (player) {
         if (!disposed) window.ygPlayer = player;
       }).catch(function () {

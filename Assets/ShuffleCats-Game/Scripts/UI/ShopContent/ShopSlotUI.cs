@@ -26,15 +26,52 @@ public class ShopSlotUI : MonoBehaviour
     {
         _theme = theme;
         _shop = shop;
-        if (_card == null) BuildCard();
+
+        if (_card == null)
+            BuildCard();
+
         LocalizationBinder.Set(_name, theme.DisplayName);
-        _icon.sprite = theme.BackgroundSprite != null ? theme.BackgroundSprite : theme.SlotIcon;
+
+        if (theme.BackgroundSprite != null)
+        {
+            _icon.sprite = theme.BackgroundSprite;
+        }
+        else
+        {
+            _icon.sprite = theme.SlotIcon;
+        }
+
         _board.sprite = theme.PlayAreaSprite;
-        _board.enabled = _board.sprite != null;
+
+        if (_board.sprite != null)
+        {
+            _board.enabled = true;
+        }
+        else
+        {
+            _board.enabled = false;
+        }
+
         _stationA.sprite = theme.StationSpriteA;
         _stationB.sprite = theme.StationSpriteB;
-        _stationA.enabled = _stationA.sprite != null;
-        _stationB.enabled = _stationB.sprite != null;
+
+        if (_stationA.sprite != null)
+        {
+            _stationA.enabled = true;
+        }
+        else
+        {
+            _stationA.enabled = false;
+        }
+
+        if (_stationB.sprite != null)
+        {
+            _stationB.enabled = true;
+        }
+        else
+        {
+            _stationB.enabled = false;
+        }
 
         _actionButton.onClick.RemoveAllListeners();
         _actionButton.onClick.AddListener(OnClick);
@@ -51,19 +88,104 @@ public class ShopSlotUI : MonoBehaviour
         }
 
         SlotStatus status = _shop.GetStatus(_theme);
-        bool equipped = status == SlotStatus.Equipped;
-        bool locked = status == SlotStatus.Locked;
-        _card.color = equipped ? Selected : Cream;
-        _card.BorderColor = equipped ? SelectedBorder : Border;
+        bool equipped;
+
+        if (status == SlotStatus.Equipped)
+        {
+            equipped = true;
+        }
+        else
+        {
+            equipped = false;
+        }
+
+        bool locked;
+
+        if (status == SlotStatus.Locked)
+        {
+            locked = true;
+        }
+        else
+        {
+            locked = false;
+        }
+
+        if (equipped)
+        {
+            _card.color = Selected;
+        }
+        else
+        {
+            _card.color = Cream;
+        }
+
+        if (equipped)
+        {
+            _card.BorderColor = SelectedBorder;
+        }
+        else
+        {
+            _card.BorderColor = Border;
+        }
+
         _card.SetVerticesDirty();
-        _buttonFace.color = equipped ? Selected : Cream;
-        _buttonFace.BorderColor = equipped ? SelectedBorder : Border;
+
+        if (equipped)
+        {
+            _buttonFace.color = Selected;
+        }
+        else
+        {
+            _buttonFace.color = Cream;
+        }
+
+        if (equipped)
+        {
+            _buttonFace.BorderColor = SelectedBorder;
+        }
+        else
+        {
+            _buttonFace.BorderColor = Border;
+        }
+
         _buttonFace.SetVerticesDirty();
         _check.SetActive(equipped);
-        // Hide the amount and its coin together on owned/equipped cards.
         _priceRow.gameObject.SetActive(locked);
         _status.color = Ink;
-        Band(_status.rectTransform, locked ? 22 : 0, locked ? 20 : 44, equipped ? 25 : 4, 4);
+        float statusBottom;
+
+        if (locked)
+        {
+            statusBottom = 22;
+        }
+        else
+        {
+            statusBottom = 0;
+        }
+
+        float statusHeight;
+
+        if (locked)
+        {
+            statusHeight = 20;
+        }
+        else
+        {
+            statusHeight = 44;
+        }
+
+        float statusLeft;
+
+        if (equipped)
+        {
+            statusLeft = 25;
+        }
+        else
+        {
+            statusLeft = 4;
+        }
+
+        Band(_status.rectTransform, statusBottom, statusHeight, statusLeft, 4);
 
         switch (status)
         {
@@ -85,16 +207,16 @@ public class ShopSlotUI : MonoBehaviour
         }
     }
 
-    // Match the runtime language cards and leaderboard button, retaining the
-    // prefab's serialized controls and purchase/equip event path.
     private void BuildCard()
     {
         var oldBackground = GetComponent<UnityEngine.UI.Image>();
-        if (oldBackground != null) oldBackground.enabled = false;
+
+        if (oldBackground != null)
+            oldBackground.enabled = false;
+
         RectTransform face = Rect("CardFace", transform);
         Fill(face);
         face.SetAsFirstSibling();
-        // The card surface also receives swipes for its parent ScrollRect.
         _card = Card(face, true);
         _card.Radius = 10;
         Shadow(face);
@@ -133,9 +255,13 @@ public class ShopSlotUI : MonoBehaviour
         var buttonRect = (RectTransform)_actionButton.transform;
         Band(buttonRect, 10, 44, 10, 10);
         var oldFace = _actionButton.GetComponent<UnityEngine.UI.Image>();
-        if (oldFace != null) oldFace.enabled = false;
+
+        if (oldFace != null)
+            oldFace.enabled = false;
+
         foreach (TMP_Text unused in _actionButton.GetComponentsInChildren<TMP_Text>(true))
             unused.gameObject.SetActive(false);
+
         RectTransform buttonFace = Rect("Face", buttonRect);
         Fill(buttonFace);
         buttonFace.SetAsFirstSibling();
@@ -161,6 +287,7 @@ public class ShopSlotUI : MonoBehaviour
         StyleText(_price, 15);
         _price.rectTransform.sizeDelta = new Vector2(0, 22);
         var coin = _price.transform.Find("CoinIcon") as RectTransform;
+
         if (coin != null)
         {
             coin.SetParent(_priceRow, false);
@@ -176,16 +303,62 @@ public class ShopSlotUI : MonoBehaviour
             coinImage.preserveAspect = true;
             coinImage.raycastTarget = false;
         }
+
         var coinShadow = _price.transform.Find("CoinIconShadow");
-        if (coinShadow != null) coinShadow.gameObject.SetActive(false);
+
+        if (coinShadow != null)
+            coinShadow.gameObject.SetActive(false);
+
         var check = PreviewImage("Selected", buttonRect, Vector2.zero, Vector2.one * 18);
         check.rectTransform.anchorMin = check.rectTransform.anchorMax = new Vector2(0, 0.5f);
         check.rectTransform.anchoredPosition = new Vector2(16, 0);
         var canvas = GetComponentInParent<Canvas>();
-        var responsive = canvas != null ? canvas.GetComponent<ResponsiveGameUI>() : null;
-        Transform root = responsive != null ? responsive.SafeRoot : canvas != null ? canvas.transform : null;
-        var source = root != null ? root.Find("OptionsPanel/MusicToggle/Background/Checkmark") : null;
-        check.sprite = source != null ? source.GetComponent<UnityEngine.UI.Image>()?.sprite : null;
+        ResponsiveGameUI responsive;
+
+        if (canvas != null)
+        {
+            responsive = canvas.GetComponent<ResponsiveGameUI>();
+        }
+        else
+        {
+            responsive = null;
+        }
+
+        Transform root;
+
+        if (responsive != null)
+        {
+            root = responsive.SafeRoot;
+        }
+        else if (canvas != null)
+        {
+            root = canvas.transform;
+        }
+        else
+        {
+            root = null;
+        }
+
+        Transform source;
+
+        if (root != null)
+        {
+            source = root.Find("OptionsPanel/MusicToggle/Background/Checkmark");
+        }
+        else
+        {
+            source = null;
+        }
+
+        if (source != null)
+        {
+            check.sprite = source.GetComponent<UnityEngine.UI.Image>()?.sprite;
+        }
+        else
+        {
+            check.sprite = null;
+        }
+
         check.color = new Color32(76, 125, 62, 255);
         _check = check.gameObject;
         buttonRect.SetAsLastSibling();
@@ -194,7 +367,13 @@ public class ShopSlotUI : MonoBehaviour
     private static void StyleText(TMP_Text text, float size)
     {
         var font = Resources.Load<TMP_FontAsset>("Fonts/Eno Black SDF");
-        if (font != null) { text.font = font; text.fontSharedMaterial = font.material; }
+
+        if (font != null)
+        {
+            text.font = font;
+            text.fontSharedMaterial = font.material;
+        }
+
         text.fontStyle = FontStyles.Normal;
         text.fontSize = text.fontSizeMax = size;
         text.fontSizeMin = 12;

@@ -1,5 +1,3 @@
-// Every PlayerPrefs key the game persists. Progress/audio keys are mirrored by
-// SaveSnapshot; device-specific preferences are marked explicitly below.
 public static class SaveKeys
 {
     public const string LevelIndex = "CurrentLevelIndex";
@@ -12,9 +10,8 @@ public static class SaveKeys
     public const string Sfx = "Audio.Sfx";
     public const string MusicVolume = "Audio.MusicVolume";
     public const string SfxVolume = "Audio.SfxVolume";
-    // Device preference: Auto follows this device/platform. Deliberately
-    // excluded from the progress snapshot in cloud saves.
+    // Device-specific language choice is intentionally excluded from cloud saves.
     public const string Language = "Localization.Language";
-    // Local assistance preference, kept on this device like the language choice.
+    // Keep the assistance preference local to this device.
     public const string Hints = "Hints.Enabled";
 }

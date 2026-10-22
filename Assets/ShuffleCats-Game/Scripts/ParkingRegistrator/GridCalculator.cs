@@ -104,7 +104,7 @@ public class GridCalculator : MonoBehaviour
         int differenceX = targetCell.x - currentCell.x;
         int differenceY = targetCell.y - currentCell.y;
 
-        visitedCells.Add(currentCell); //to return at least current cell
+        visitedCells.Add(currentCell);
 
         int noDifferenceValue = 0;
 

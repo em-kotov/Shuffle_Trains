@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Ordered list of level layouts the game advances through. Drag the
-// Level-N-Layout assets in here in play order.
 [CreateAssetMenu(fileName = "LevelSequence", menuName = "ShuffleCats/Level Sequence")]
 public class LevelSequence : ScriptableObject
 {

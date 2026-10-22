@@ -28,6 +28,7 @@ public class SorterRegistrator : MonoBehaviour
     public void Unregister(SorterCar sorterCar)
     {
         _activeTrackCars.Remove(sorterCar);
+
         if (_cars.Contains(sorterCar))
         {
             _cars.Remove(sorterCar);
@@ -40,8 +41,7 @@ public class SorterRegistrator : MonoBehaviour
             _activeTrackCars.Add(sorterCar);
     }
 
-    // Only diagnose a stable track state. Reserved slots can belong to cats
-    // still entering or finished cats leaving, either of which can change it.
+    // Reserved slots can belong to entering or exiting cats; wait for a stable track state.
     public bool IsTrackDeadlocked(int occupiedSlots)
     {
         if (_activeTrackCars.Count == 0 || _activeTrackCars.Count != occupiedSlots)
@@ -59,8 +59,7 @@ public class SorterRegistrator : MonoBehaviour
             }
         }
 
-        // With no possible transfer, another lap cannot free a track slot.
-        // An empty station alone is not evidence of a useful move.
+        // An empty station is not enough: without a possible transfer, another lap cannot free a slot.
         return true;
     }
 

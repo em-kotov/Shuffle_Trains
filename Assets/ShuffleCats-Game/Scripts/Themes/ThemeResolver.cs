@@ -10,9 +10,10 @@ public static class ThemeResolver
         ShopRepository repository = new ShopRepository(catalog);
         string equippedId = repository.GetEquipped();
 
-        if (!string.IsNullOrEmpty(equippedId))
+        if (string.IsNullOrEmpty(equippedId) == false)
         {
             Theme theme = catalog.Find(equippedId);
+
             if (theme != null)
             {
                 return theme;

@@ -4,14 +4,15 @@ using UnityEngine.Localization;
 using UnityEngine.Localization.Components;
 using UnityEngine.SceneManagement;
 
-// Each binding retains its English key, including when returning to English.
 public class LocalizationBinder : MonoBehaviour
 {
     private static LocalizationBinder _instance;
 
     public static void Create()
     {
-        if (_instance != null) return;
+        if (_instance != null)
+            return;
+
         var host = new GameObject(nameof(LocalizationBinder));
         _instance = host.AddComponent<LocalizationBinder>();
         DontDestroyOnLoad(host);
@@ -28,9 +29,12 @@ public class LocalizationBinder : MonoBehaviour
             foreach (TMP_Text label in root.GetComponentsInChildren<TMP_Text>(true))
                 if (label.GetComponent<LocalizationIgnore>() == null && label.GetComponent<LocalizeStringEvent>() == null && Localization.HasKey(label.text))
                     Set(label, label.text);
+
             foreach (UnityEngine.UI.Text label in root.GetComponentsInChildren<UnityEngine.UI.Text>(true))
             {
-                if (label.GetComponent<LocalizeStringEvent>() != null || !Localization.HasKey(label.text)) continue;
+                if (label.GetComponent<LocalizeStringEvent>() != null || Localization.HasKey(label.text) == false)
+                    continue;
+
                 string key = label.text;
                 var binding = label.gameObject.AddComponent<LocalizeStringEvent>();
                 binding.OnUpdateString.AddListener(value => label.text = value);
@@ -43,9 +47,17 @@ public class LocalizationBinder : MonoBehaviour
 
     public static void Set(TMP_Text label, string key, params object[] arguments)
     {
-        if (label == null) return;
-        if (!Localization.HasKey(key)) { label.text = key; return; }
+        if (label == null)
+            return;
+
+        if (Localization.HasKey(key) == false)
+        {
+            label.text = key;
+            return;
+        }
+
         var binding = label.GetComponent<LocalizeStringEvent>();
+
         if (binding == null)
         {
             binding = label.gameObject.AddComponent<LocalizeStringEvent>();
@@ -57,9 +69,11 @@ public class LocalizationBinder : MonoBehaviour
             label.fontSizeMax = label.fontSize;
             label.fontSizeMin = Mathf.Min(10, label.fontSize);
             label.enableAutoSizing = true;
+
             if (key == "Try again?" || key == "SETTINGS" || key == "SHOP")
                 label.enableWordWrapping = false;
         }
+
         binding.StringReference = new LocalizedString(Localization.TableName, key) { Arguments = arguments };
         label.text = Localization.Format(key, arguments);
         binding.RefreshString();

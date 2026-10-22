@@ -19,14 +19,14 @@ public class SplineOperator : MonoBehaviour
 
     private void Update()
     {
-        if (!_isFollowingSpline)
+        if (_isFollowingSpline == false)
             return;
 
         float multiplier = _parkingRegistrator.TrackSpeedMultiplier;
+
         if (Mathf.Approximately(multiplier, _speedMultiplier))
             return;
 
-        // Keep the current position and paused state when changing traversal speed.
         float normalizedTime = _splineAnimate.NormalizedTime;
         _speedMultiplier = multiplier;
         _splineAnimate.Duration = _baseDuration / _speedMultiplier;
@@ -46,8 +46,7 @@ public class SplineOperator : MonoBehaviour
         _splineAnimate.Container = splineContainer;
         _splineAnimate.StartOffset = startOffset;
         ConfigureDuration(splineContainer.Spline, speed);
-        // OnEnable can Restart using the previous container/offset. Restore the
-        // actual entry position now, before LateUpdate records it for the trail.
+        // OnEnable may restart with the old container/offset; restore entry before the trail samples it.
         _splineAnimate.NormalizedTime = 0f;
         _isFollowingSpline = true;
         _splineAnimate.Play();
@@ -65,14 +64,12 @@ public class SplineOperator : MonoBehaviour
 
     public Vector3 PrepareSwitchToNearest(SplineContainer newSplineContainer, Vector3 worldPosition, float speed, out float targetT)
     {
-        // The mover owns the position until the cat reaches the new spline.
         _isFollowingSpline = false;
         Vector3 localPosition = newSplineContainer.transform.InverseTransformPoint(worldPosition);
         SplineUtilityExtension.GetNearestPoint(newSplineContainer.Spline, localPosition,
                                         out float3 nearest, out float t, resolution: 32, iterations: 8);
         targetT = t;
-        // Configure container/offset/duration but do NOT touch NormalizedTime yet — setting
-        // NormalizedTime calls UpdateTransform() inside SplineAnimate which teleports the cat.
+        // Setting NormalizedTime here would invoke SplineAnimate.UpdateTransform and teleport the cat.
         _splineAnimate.Container = newSplineContainer;
         _splineAnimate.StartOffset = 0f;
         ConfigureDuration(newSplineContainer.Spline, speed);

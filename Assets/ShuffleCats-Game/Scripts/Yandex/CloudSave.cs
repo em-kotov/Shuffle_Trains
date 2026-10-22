@@ -1,14 +1,9 @@
 using System;
 using UnityEngine;
 
-// Mirrors the PlayerPrefs the game already writes into the Yandex player data
-// (requirement 1.9 / 1.13.3: progress survives a reload and follows the player
-// across devices). PlayerPrefs stays the single source of truth at runtime -
-// this only copies it out and, once at boot, copies a further-along cloud state in.
 public static class CloudSave
 {
-    // Yandex allows 100 setData calls per 5 minutes. Pushes are batched so a
-    // burst of purchases or a level transition costs one request.
+    // Batch saves to stay within the SDK limit of 100 setData calls per five minutes.
     private const float SecondsBetweenPushes = 3f;
 
     private static bool _dirty;
@@ -16,9 +11,6 @@ public static class CloudSave
     private static Action _loadCallback;
     private static bool _loading;
 
-    // Reads the cloud snapshot and applies it when it is further along than the
-    // local one, then invokes onLoaded. onLoaded always runs, including when
-    // there is no SDK - the boot flow waits on it.
     public static void Load(Action onLoaded)
     {
         if (_loading)
@@ -38,7 +30,6 @@ public static class CloudSave
         _dirty = true;
     }
 
-    // Driven by YandexBridge so the debounce keeps running across scene loads.
     public static void Tick()
     {
         if (_dirty == false || Time.unscaledTime - _lastPushTime < SecondsBetweenPushes)
@@ -86,8 +77,9 @@ public static class CloudSave
             return;
         }
 
-        // A restarted campaign may have a higher personal record but a lower index.
+        // A restarted campaign can have a higher personal record but a lower current index.
         LevelProgress.MergeBestCompletedLevel(Mathf.Max(cloud.bestCompletedLevel, cloud.levelIndex));
+
         if (cloud.IsAheadOf(SaveSnapshot.FromLocal()) == false)
         {
             return;

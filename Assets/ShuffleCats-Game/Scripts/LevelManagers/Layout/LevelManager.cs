@@ -46,7 +46,6 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Passenger _passengerPrefab;
     [SerializeField] private AutoLoose _autoLoose;
     [SerializeField] private AutoWin _autoWin;
-    //[SerializeField] private Wallet _wallet;
     [SerializeField] private Shop _shop;
     [SerializeField] private ThemeApplier _themeApplier;
     [SerializeField] private List<Station> _stations;
@@ -66,8 +65,7 @@ public class LevelManager : MonoBehaviour
 
     private void Awake()
     {
-        // Register the complete scene list before ApplyStationMask filters it.
-        // Inactive stations must also receive the equipped theme.
+        // Register before filtering the station list so inactive stations also receive the theme.
         if (_themeApplier != null)
         {
             _themeApplier.RegisterStations(_stations);
@@ -110,6 +108,7 @@ public class LevelManager : MonoBehaviour
             CatHintController hints = gameObject.AddComponent<CatHintController>();
             hints.Initialize(_carSubscribers, _stations, _parkingRegistrator, _trackRegistrator,
                 _levelNumberText.canvas.rootCanvas);
+
             if (_levelNumber >= 1 && _levelNumber <= 3)
             {
                 gameObject.AddComponent<TutorialController>().Initialize(_levelNumber, _carSubscribers,
@@ -127,6 +126,9 @@ public class LevelManager : MonoBehaviour
             _wallet.Initialize(_levelWinBonus, _levelCarBonus, _walletUI);
         }
 
+        if (_shop != null)
+            _shop.Initialize(_wallet);
+
         _autoWin.WinLevel += OnWinLevel;
 
         if (_themeApplier != null)
@@ -135,9 +137,6 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    // True when playing the final level of the sequence, so AutoWin shows the
-    // LastLevelPanel instead of the normal Win (Next) panel. A manual layout
-    // override is treated as not-last (it has no sequence position).
     private bool IsLastLevel()
     {
         if (HasManualLayout)
@@ -170,6 +169,7 @@ public class LevelManager : MonoBehaviour
 #if UNITY_EDITOR
             if (LevelProgress.EditorPreviewIndex >= 0)
                 return false;
+
 #endif
             return _levelLayout != null;
         }
@@ -198,8 +198,6 @@ public class LevelManager : MonoBehaviour
             _levelWinBonus = layout.LevelWinBonus;
             _levelCarBonus = layout.LevelCarBonus;
 
-            // Per-level cats-on-track limit overrides the base when set (>0);
-            // 0 keeps the base config's value. Shown in CatsCounter MaxTextPrimary.
             if (layout.MaxCarsOnTrackCount > 0)
                 _maxCarsOnTrackCount = layout.MaxCarsOnTrackCount;
         }
@@ -216,18 +214,22 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-        // Stations are level-invariant scene objects (same spots every level),
-        // so we never spawn them — we just toggle which are active per layout.
         ApplyStationMask(layout);
         _stationCount = _stations.Count;
 
-        // Cats vary per level: hide the hand-placed authoring set and spawn the
-        // layout's cats. (Authoring cats never get Initialize()d, so if left
-        // active they linger as static, non-clickable duplicates.)
         DisableAuthoringCats();
 
-        IReadOnlyList<CatPlacement> cats =
-            (layout != null && layout.Cats.Count > 0) ? layout.Cats : baseConfig.Cats;
+        IReadOnlyList<CatPlacement> cats;
+
+        if ((layout != null && layout.Cats.Count > 0))
+        {
+            cats = layout.Cats;
+        }
+        else
+        {
+            cats = baseConfig.Cats;
+        }
+
         _carSubscribers = _levelBuilder.BuildCats(baseConfig, cats);
     }
 
@@ -243,13 +245,20 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    // Activates the scene stations selected by the layout's mask (parallel to
-    // the scene station list by index) and narrows _stations to the active set.
     private void ApplyStationMask(LevelLayout layout)
     {
         List<Station> sceneStations = _stations;
         List<Station> active = new();
-        bool hasMask = layout != null && layout.ActiveStations.Count > 0;
+        bool hasMask;
+
+        if (layout != null && layout.ActiveStations.Count > 0)
+        {
+            hasMask = true;
+        }
+        else
+        {
+            hasMask = false;
+        }
 
         for (int i = 0; i < sceneStations.Count; i++)
         {
@@ -258,7 +267,17 @@ public class LevelManager : MonoBehaviour
             if (station == null)
                 continue;
 
-            bool on = !hasMask || (i < layout.ActiveStations.Count && layout.ActiveStations[i]);
+            bool on;
+
+            if (hasMask == false || (i < layout.ActiveStations.Count && layout.ActiveStations[i]))
+            {
+                on = true;
+            }
+            else
+            {
+                on = false;
+            }
+
             station.gameObject.SetActive(on);
 
             if (on)
@@ -284,7 +303,7 @@ public class LevelManager : MonoBehaviour
     {
         _autoWin.WinLevel -= OnWinLevel;
 
-        if (!HasManualLayout)
+        if (HasManualLayout == false)
             LevelProgress.RecordCompletion(_levelNumber);
 
         if (_wallet != null)

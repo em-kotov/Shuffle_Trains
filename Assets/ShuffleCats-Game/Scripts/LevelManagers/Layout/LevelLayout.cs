@@ -1,9 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Per-level data that varies: the cat layout and which of the shared base
-// stations are active. Everything else (grid, track, movement, station
-// positions/rotations/theme) comes from the shared LevelConfig base.
 [CreateAssetMenu(fileName = "LevelLayout", menuName = "ShuffleCats/Level Layout")]
 public class LevelLayout : ScriptableObject
 {
@@ -27,7 +24,7 @@ public class LevelLayout : ScriptableObject
     public int LevelNumber => _levelNumber;
     public int LevelWinBonus => _levelWinBonus;
     public int LevelCarBonus => _levelCarBonus;
-    // 0 means "inherit the base config's value" (see LevelManager.ApplyConfig).
+    // Zero inherits the base config value.
     public int MaxCarsOnTrackCount => _maxCarsOnTrackCount;
     public IReadOnlyList<CatPlacement> Cats => _cats;
     public IReadOnlyList<bool> ActiveStations => _activeStations;

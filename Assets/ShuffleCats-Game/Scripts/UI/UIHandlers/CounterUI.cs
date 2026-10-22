@@ -12,7 +12,6 @@ public class CounterUI : UIPanel
         _currentCarsText.text = current.ToString();
         _maxCarsText.text = $"/{max}";
 
-        // Center the pair as a single x/x readout, including two-digit counts.
         float currentWidth = _currentCarsText.preferredWidth;
         float maxWidth = _maxCarsText.preferredWidth;
         float left = -(currentWidth + maxWidth) * 0.5f;

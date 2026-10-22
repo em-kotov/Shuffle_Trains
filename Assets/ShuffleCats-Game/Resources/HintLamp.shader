@@ -101,7 +101,6 @@ Shader "ShuffleCats/HintLamp"
                 Paint(artwork, Disc(p, float2(30, 35), 12), ink);
                 Paint(artwork, Disc(p, float2(30, 35.5), 9.5), float4(255.0, 209.0, 91.0, 255.0) / 255.0);
 
-                // Union the rounded strokes so shared endpoints do not overlap.
                 float strokes = Line(p, float2(25, 24), float2(35, 24), 5);
                 strokes = min(strokes, Line(p, float2(26, 20), float2(34, 20), 3));
                 strokes = min(strokes, Line(p, float2(28, 16), float2(32, 16), 3));

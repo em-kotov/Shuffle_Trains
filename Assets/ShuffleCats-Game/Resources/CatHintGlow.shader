@@ -89,7 +89,6 @@ Shader "ShuffleCats/CatHintGlow"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                // Match the HUD scale instead of vanishing at high resolution.
                 float2 dx = ddx(i.uv) * _GlowScale, dy = ddy(i.uv) * _GlowScale;
                 float center = Alpha(i.uv);
                 float width = 2.4 + 0.35 * sin(_HintAge * 4.71239);

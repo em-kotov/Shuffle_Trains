@@ -2,16 +2,6 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-// Makes Play in the editor behave like the real game.
-//
-// Pressing Play inside a level scene skips Bootstrap, so there is no Wallet, no
-// AudioManager and - since Localization.Initialize() never runs - the UI is
-// always English. Forcing play to start from Boot runs the real flow whichever
-// scene is open, so what you see is what ships.
-//
-// The preview language is a menu toggle because there is no SDK in the editor to
-// ask (Yandex requirement 2.14 is answered by environment.i18n.lang, which only
-// exists in a WebGL player on their servers).
 [InitializeOnLoad]
 public static class EditorPlayMode
 {

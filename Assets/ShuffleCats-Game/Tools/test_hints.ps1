@@ -4,7 +4,7 @@ $hintSources = @(
     'Scripts/SorterRegistrator/CatColor.cs', 'Scripts/SorterRegistrator/SeatTracker.cs',
     'Scripts/SorterRegistrator/SorterRegistrator.cs', 'Scripts/Car/SorterCar/PassengerTracker.cs',
     'Scripts/Car/SorterCar/StationOperator.cs', 'Scripts/Car/SorterCar/SorterCar.cs',
-    'Scripts/Station/Station.cs', 'Scripts/Passenger/Passenger.cs', 'Scripts/LevelManagers/CatHintPlanner.cs',
+    'Scripts/Station/Station.cs', 'Scripts/Passenger/Passenger.cs', 'Scripts/LevelManagers/Hint/CatHintPlanner.cs',
     'Tools/CapacityRegression.cs.txt', 'Tools/HintRegression.cs.txt'
 )
 $hintCode = "using System;`nusing System.Collections;`nusing System.Collections.Generic;`nusing System.Linq;`nusing System.Text;`nusing UnityEngine;`n#pragma warning disable 0649`n"

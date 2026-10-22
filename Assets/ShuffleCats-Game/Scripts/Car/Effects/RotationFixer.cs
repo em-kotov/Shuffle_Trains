@@ -1,12 +1,5 @@
 using UnityEngine;
 
-// Some cats sit "vertically" on the parking grid while their sprite still faces
-// horizontally. Once the cat successfully enters the track it should snap back to
-// a normal horizontal look, so we spin it a quarter turn on the Y axis.
-//
-// Wire both fields manually so this can sit on the root: the spin is routed
-// through SpriteFacingLock (which pins the sprite's world rotation every frame),
-// falling back to rotating _target directly for cats with no facing lock.
 public class RotationFixer : MonoBehaviour
 {
     [Tooltip("Sprite transform to rotate when no SpriteFacingLock is wired (usually CatTexture).")]
@@ -18,31 +11,35 @@ public class RotationFixer : MonoBehaviour
     [Tooltip("Rotate +90 on Y when on, -90 when off.")]
     [SerializeField] private bool _rotateLeft;
 
-    // Set by the level builder from captured per-instance layout data, so a built
-    // cat reproduces the rotation fix it was authored with in the scene.
     public void SetConfig(bool applyRotation, bool rotateLeft)
     {
         _applyRotation = applyRotation;
         _rotateLeft = rotateLeft;
     }
 
-    // Called once when the cat successfully entered the track.
     public void ApplyFix()
     {
         if (_applyRotation == false)
             return;
 
-        float angle = _rotateLeft ? 90f : -90f;
+        float angle;
 
-        // Preferred path: spin the locked facing so the rotation actually shows
-        // (rotating a transform directly is overridden by SpriteFacingLock).
+        if (_rotateLeft)
+        {
+            angle = 90f;
+        }
+        else
+        {
+            angle = -90f;
+        }
+
+        // Direct transform rotation would be overwritten by SpriteFacingLock.
         if (_facingLock != null)
         {
             _facingLock.ApplyRestSpin(angle);
             return;
         }
 
-        // Fallback for cats with no facing lock: rotate the target transform.
         if (_target != null)
         {
             Vector3 euler = _target.localEulerAngles;

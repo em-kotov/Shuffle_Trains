@@ -64,7 +64,6 @@ def main():
             axis = rotate(rest,art)
             movement = (dx,0,dz)
             if length == 1:
-                # New parking lock explicitly applies this flip before display.
                 if dot(axis,movement) < 0:
                     axis = tuple(-a for a in axis)
             assert dot(axis,movement) > .999, (path.name,direction,'parked')

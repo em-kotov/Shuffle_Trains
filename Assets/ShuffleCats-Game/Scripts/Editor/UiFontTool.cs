@@ -7,24 +7,11 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TextCore.LowLevel;
 
-// Eno Black is the primary Latin/Cyrillic UI font. A small baked Nunito fallback
-// supplies the six Turkish letters not present in the original font.
-//
-// It also clears the per-instance font overrides the gameplay scenes carry on
-// the Canvas prefab. Those override both m_fontAsset and m_sharedMaterial and
-// silently beat anything set on the prefab itself, which is why editing the
-// prefab alone appears to do nothing.
-//
-// The atlas is baked here and the asset switched to Static so the WebGL player
-// never rasterizes a glyph at runtime. Re-run after changing the font or the
-// character set.
 public static class UiFontTool
 {
     private const string SourceFontPath = "Assets/ShuffleCats-Game/Resources/Fonts/Eno Black.ttf";
     private const string FontAssetPath = "Assets/ShuffleCats-Game/Resources/Fonts/Eno Black SDF.asset";
-    // Every prefab holding UI text. ShopSection and ShopSlot are instantiated at
-    // runtime by ShopUI, so they are never part of a scene and would be missed
-    // by a scene-only sweep.
+    // Shop prefabs are instantiated at runtime and would be missed by a scene-only sweep.
     private static readonly string[] PrefabPaths =
     {
         "Assets/ShuffleCats-Game/Resources/Prefabs/UI/Canvas.prefab",
@@ -38,7 +25,6 @@ public static class UiFontTool
         "Assets/ShuffleCats-Game/Scenes/Level-1.unity",
     };
 
-    // Printable ASCII covers the English UI and every number the game formats.
     private const string Latin =
         " !\"#$%&'()*+,-./0123456789:;<=>?@" +
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`" +
@@ -49,11 +35,10 @@ public static class UiFontTool
         "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
 
     private const string Punctuation = "«»—…";
-    // Eno supplies these; the remaining Turkish glyphs use the baked fallback.
+    // The remaining Turkish glyphs are supplied by the baked fallback font.
     private const string Turkish = "ÇçÖöÜü";
 
-    // 48pt keeps ~165 glyphs inside a single 1024 atlas. SDF rescales cleanly,
-    // so this is well above what the UI renders at.
+    // 48pt fits the required glyphs in one 1024px atlas.
     private const int SamplingPointSize = 48;
     private const int AtlasPadding = 5;
     private const int AtlasSize = 1024;
@@ -119,12 +104,14 @@ public static class UiFontTool
         font.atlasPopulationMode = AtlasPopulationMode.Static;
         var turkishFallback = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
             "Assets/ShuffleCats-Game/Resources/Fonts/Turkish/Nunito Turkish SDF.asset");
-        if (turkishFallback != null) font.fallbackFontAssetTable.Add(turkishFallback);
+
+        if (turkishFallback != null)
+            font.fallbackFontAssetTable.Add(turkishFallback);
 
         AssetDatabase.DeleteAsset(FontAssetPath);
         AssetDatabase.CreateAsset(font, FontAssetPath);
 
-        // The atlas textures and material only survive as sub-assets of the font.
+        // Atlas textures and material must be sub-assets to survive saving the font.
         foreach (Texture2D atlas in font.atlasTextures)
         {
             atlas.name = font.name + " Atlas";
@@ -141,8 +128,6 @@ public static class UiFontTool
         return AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAssetPath);
     }
 
-    // Eno Black carries Cyrillic itself, so the old font's Cyrillic fallback
-    // is no longer used. The current font keeps its Turkish fallback.
     private static void DropPreviousFallback()
     {
         TMP_FontAsset previous = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(PreviousUiFontPath);
@@ -186,8 +171,7 @@ public static class UiFontTool
         Debug.Log($"UiFontTool - retargeted {changed} label(s) in {Path.GetFileName(prefabPath)}");
     }
 
-    // Reverting rather than re-pointing: with the override gone the prefab is
-    // the single place the UI font is set, so the next font swap needs one edit.
+    // Remove scene overrides so future font changes propagate from the prefab.
     private static void ClearSceneOverrides()
     {
         foreach (string scenePath in ScenePaths)

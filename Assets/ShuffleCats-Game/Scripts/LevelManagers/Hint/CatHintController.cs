@@ -38,7 +38,15 @@ public sealed class CatHintController : MonoBehaviour
         _canvas = canvas;
         _panels = FindObjectsOfType<UIPanel>(true);
         ResponsiveGameUI responsive = canvas.GetComponent<ResponsiveGameUI>();
-        _root = responsive != null ? responsive.SafeRoot : canvas.transform as RectTransform;
+
+        if (responsive != null)
+        {
+            _root = responsive.SafeRoot;
+        }
+        else
+        {
+            _root = canvas.transform as RectTransform;
+        }
 
         _highlight = NewRect("CatHintHighlight", typeof(CanvasGroup), typeof(CatHintGraphic));
         _highlight.SetAsFirstSibling();
@@ -53,7 +61,7 @@ public sealed class CatHintController : MonoBehaviour
         _highlight.gameObject.SetActive(false);
 
         RectTransform button = NewRect("HintButton", typeof(HintLampGraphic), typeof(UnityEngine.UI.Button));
-        button.SetAsFirstSibling(); // All authored modal panels stay above the hint.
+        button.SetAsFirstSibling();
         button.sizeDelta = Vector2.one * 60;
         _button = button.GetComponent<UnityEngine.UI.Button>();
         _button.targetGraphic = button.GetComponent<HintLampGraphic>();
@@ -64,7 +72,9 @@ public sealed class CatHintController : MonoBehaviour
         colors.disabledColor = HintLampGraphic.DisabledTint;
         _button.colors = colors;
         _button.onClick.AddListener(RequestHint);
-        if (responsive != null) responsive.RegisterHintButton(button);
+
+        if (responsive != null)
+            responsive.RegisterHintButton(button);
 
         RectTransform feedback = NewRect("HintFeedback", typeof(TMPro.TextMeshProUGUI));
         feedback.SetAsFirstSibling();
@@ -73,8 +83,14 @@ public sealed class CatHintController : MonoBehaviour
         feedback.anchoredPosition = new Vector2(0, 88);
         feedback.sizeDelta = new Vector2(320, 42);
         _feedback = feedback.GetComponent<TMPro.TMP_Text>();
+
         foreach (TMPro.TMP_Text existing in canvas.GetComponentsInChildren<TMPro.TMP_Text>(true))
-            if (existing != _feedback && existing.font != null) { _feedback.font = existing.font; break; }
+            if (existing != _feedback && existing.font != null)
+            {
+                _feedback.font = existing.font;
+                break;
+            }
+
         _feedback.fontSize = 17;
         _feedback.alignment = TMPro.TextAlignmentOptions.Center;
         _feedback.color = new Color32(92, 66, 49, 255);
@@ -87,13 +103,18 @@ public sealed class CatHintController : MonoBehaviour
         var go = new GameObject(name, typeof(RectTransform));
         var rect = (RectTransform)go.transform;
         rect.SetParent(_root, false);
-        foreach (System.Type component in components) go.AddComponent(component);
+
+        foreach (System.Type component in components)
+            go.AddComponent(component);
+
         return rect;
     }
 
     public void RequestHint()
     {
-        if (!CanShowHints()) return;
+        if (CanShowHints() == false)
+            return;
+
         AudioManager.PlayUIClickStatic();
         ClearHint();
         _requestedFrame = Time.frameCount;
@@ -104,41 +125,51 @@ public sealed class CatHintController : MonoBehaviour
 
     private bool IsGameplayVisible()
     {
-        if (_cats == null) return false;
+        if (_cats == null)
+            return false;
+
         foreach (UIPanel panel in _panels)
-            if (panel != null && panel.BlocksGameplay) return false;
+            if (panel != null && panel.BlocksGameplay)
+                return false;
+
         return true;
     }
 
-    // Canvas focus is not gameplay visibility: WebGL can be ready before its
-    // first click. The SDK already owns browser/background and ad pauses.
-    private bool CanShowHints() => !TutorialActive && HintSettings.Enabled && IsGameplayVisible() && !YandexSdk.IsPaused && Time.timeScale > 0;
+    // Canvas focus may be false before the first WebGL click; browser/SDK signals own pausing.
+    private bool CanShowHints() => TutorialActive == false && HintSettings.Enabled && IsGameplayVisible() && YandexSdk.IsPaused == false && Time.timeScale > 0;
 
-    // The tutorial uses the same read-only solver, regardless of the hints preference.
-    // Wait for real movement/sorting and track reservations before suggesting a launch.
     public Subscriber SuggestTutorialCat()
     {
-        if (_cats == null || _parking.HasMovingCars || !_track.IsCountAllows() || IsInTransition()) return null;
+        if (_cats == null || _parking.HasMovingCars || _track.IsCountAllows() == false || IsInTransition())
+            return null;
+
         return ChooseCat();
     }
 
     private void Update()
     {
-        if (_cats == null) return;
+        if (_cats == null)
+            return;
+
         bool allowed = CanShowHints();
         int waiting = 0;
+
         foreach (Subscriber cat in _cats)
         {
-            if (cat == null || !cat.gameObject.activeInHierarchy) continue;
-            if (cat.Parking.isActiveAndEnabled && !cat.Parking.IsAtBorderCell) waiting++;
-            if (cat.IsOnTrack && !_trackOrder.Contains(cat)) _trackOrder.Add(cat);
+            if (cat == null || cat.gameObject.activeInHierarchy == false)
+                continue;
+
+            if (cat.Parking.isActiveAndEnabled && cat.Parking.IsAtBorderCell == false)
+                waiting++;
+
+            if (cat.IsOnTrack && _trackOrder.Contains(cat) == false)
+                _trackOrder.Add(cat);
         }
-        // The lamp stays in the HUD behind every modal, even when hints are off.
+
         _button.gameObject.SetActive(true);
-        // Only the player's preference changes the lamp's enabled appearance.
-        // Modal backdrops and RequestHint guard interaction separately.
         _button.interactable = HintSettings.Enabled;
-        if (!allowed || waiting == 0)
+
+        if (allowed == false || waiting == 0)
         {
             ClearHint();
             _pendingRequest = false;
@@ -147,7 +178,6 @@ public sealed class CatHintController : MonoBehaviour
             return;
         }
 
-        // Mouse movement does not count as a decision. Presses/touches/keys do.
         if ((Input.anyKeyDown || Input.GetMouseButtonDown(0) || TouchBegan()) && _requestedFrame != Time.frameCount)
         {
             ClearHint();
@@ -155,28 +185,55 @@ public sealed class CatHintController : MonoBehaviour
             _idle = 0;
             _feedback.gameObject.SetActive(false);
         }
+
         _idle += Time.deltaTime;
         _feedback.gameObject.SetActive(Time.unscaledTime < _feedbackUntil);
+
         if (_suggestion != null)
         {
-            if (!_suggestion.Parking.isActiveAndEnabled || _suggestion.Parking.IsMoving ||
+            if (_suggestion.Parking.isActiveAndEnabled == false || _suggestion.Parking.IsMoving ||
                 _suggestion.Parking.IsAtBorderCell || Time.time - _shownAt >= _highlightSeconds ||
                 Revision() != _revision)
             {
                 ClearHint();
                 _idle = 0;
             }
+
             return;
         }
-        if (!_pendingRequest && _idle < (waiting == 1 ? _lastCatIdleSeconds : _idleSeconds)) return;
-        if (Time.time < _nextAttempt) return;
-        _nextAttempt = Time.time + 0.5f;
-        if (_parking.HasMovingCars || !_track.IsCountAllows() || IsInTransition())
+
+        if (_pendingRequest == false)
         {
-            if (_pendingRequest) ShowFeedback("Wait for the cats…");
+            float idleThreshold;
+
+            if (waiting == 1)
+            {
+                idleThreshold = _lastCatIdleSeconds;
+            }
+            else
+            {
+                idleThreshold = _idleSeconds;
+            }
+
+            if (_idle < idleThreshold)
+                return;
+        }
+
+        if (Time.time < _nextAttempt)
+            return;
+
+        _nextAttempt = Time.time + 0.5f;
+
+        if (_parking.HasMovingCars || _track.IsCountAllows() == false || IsInTransition())
+        {
+            if (_pendingRequest)
+                ShowFeedback("Wait for the cats…");
+
             return;
         }
+
         Subscriber next = ChooseCat();
+
         if (next != null)
         {
             _suggestion = next;
@@ -185,7 +242,9 @@ public sealed class CatHintController : MonoBehaviour
             _highlight.gameObject.SetActive(true);
             _feedbackUntil = 0;
         }
-        else if (_pendingRequest) ShowFeedback("No clear hint — try another approach");
+        else if (_pendingRequest)
+            ShowFeedback("No clear hint — try another approach");
+
         _pendingRequest = false;
         _idle = 0;
     }
@@ -193,7 +252,9 @@ public sealed class CatHintController : MonoBehaviour
     private static bool TouchBegan()
     {
         for (int i = 0; i < Input.touchCount; i++)
-            if (Input.GetTouch(i).phase == TouchPhase.Began) return true;
+            if (Input.GetTouch(i).phase == TouchPhase.Began)
+                return true;
+
         return false;
     }
 
@@ -201,43 +262,78 @@ public sealed class CatHintController : MonoBehaviour
     {
         foreach (Subscriber cat in _cats)
         {
-            if (cat == null || !cat.gameObject.activeInHierarchy) continue;
+            if (cat == null || cat.gameObject.activeInHierarchy == false)
+                continue;
+
             if (cat.Sorter.IsSorting || (cat.Parking.enabled && cat.Parking.IsAtBorderCell) ||
-                (!cat.Parking.enabled && !cat.IsOnTrack && !cat.Sorter.IsFinished)) return true;
+                (cat.Parking.enabled == false && cat.IsOnTrack == false && cat.Sorter.IsFinished == false))
+                return true;
         }
+
         return false;
     }
 
     private Subscriber ChooseCat()
     {
-        if (_cats.Count > 63) return null;
+        if (_cats.Count > 63)
+            return null;
+
         var data = new CatHintPlanner.Cat[_cats.Count];
         ulong parked = 0;
+
         for (int i = 0; i < _cats.Count; i++)
         {
             Subscriber cat = _cats[i];
-            data[i] = new CatHintPlanner.Cat { Color = (int)cat.Color, Capacity = cat.SeatCount,
-                Right = cat.Passengers.RightPassengerCount, Wrong = cat.Passengers.CopyWrongPassengerColors() };
-            if (!cat.Parking.isActiveAndEnabled) continue;
+            data[i] = new CatHintPlanner.Cat
+            {
+                Color = (int)cat.Color,
+                Capacity = cat.SeatCount,
+                Right = cat.Passengers.RightPassengerCount,
+                Wrong = cat.Passengers.CopyWrongPassengerColors()
+            };
+
+            if (cat.Parking.isActiveAndEnabled == false)
+                continue;
+
             parked |= 1UL << i;
+
             foreach (ParkingCar blocker in cat.Parking.GetBlockingCars())
                 for (int b = 0; b < _cats.Count; b++)
-                    if (_cats[b].Parking == blocker) data[i].Blockers |= 1UL << b;
+                    if (_cats[b].Parking == blocker)
+                        data[i].Blockers |= 1UL << b;
         }
+
         var active = new List<int>();
+
         foreach (Subscriber cat in _trackOrder)
-            if (cat != null && cat.gameObject.activeInHierarchy && !cat.Sorter.IsFinished)
+            if (cat != null && cat.gameObject.activeInHierarchy && cat.Sorter.IsFinished == false)
                 for (int i = 0; i < _cats.Count; i++)
-                    if (_cats[i] == cat) active.Add(i);
+                    if (_cats[i] == cat)
+                        active.Add(i);
+
         var stations = new CatHintPlanner.StationState[_stations.Count];
+
         for (int s = 0; s < _stations.Count; s++)
         {
             _stations[s].HavePassengers(out int count, out CatColor color);
-            stations[s] = new CatHintPlanner.StationState { Color = (int)color, Count = count,
-                Capacity = count + _stations[s].GetFreeSeats().Count };
+            stations[s] = new CatHintPlanner.StationState
+            {
+                Color = (int)color,
+                Count = count,
+                Capacity = count + _stations[s].GetFreeSeats().Count
+            };
         }
+
         int index = new CatHintPlanner(data, _track.MaxCount).FindNext(parked, active.ToArray(), stations);
-        return index >= 0 ? _cats[index] : null;
+
+        if (index >= 0)
+        {
+            return _cats[index];
+        }
+        else
+        {
+            return null;
+        }
     }
 
     private int Revision()
@@ -245,27 +341,59 @@ public sealed class CatHintController : MonoBehaviour
         unchecked
         {
             int value = _track.CurrentCount;
+
             foreach (Subscriber cat in _cats)
             {
-                value = value * 31 + (cat.Parking.isActiveAndEnabled ? 1 : 0);
-                value = value * 31 + (cat.Parking.IsMoving || cat.Parking.IsAtBorderCell ? 1 : 0);
+                int activeFlag;
+
+                if (cat.Parking.isActiveAndEnabled)
+                {
+                    activeFlag = 1;
+                }
+                else
+                {
+                    activeFlag = 0;
+                }
+
+                value = value * 31 + activeFlag;
+                int movingFlag;
+
+                if (cat.Parking.IsMoving || cat.Parking.IsAtBorderCell)
+                {
+                    movingFlag = 1;
+                }
+                else
+                {
+                    movingFlag = 0;
+                }
+
+                value = value * 31 + movingFlag;
                 value = value * 31 + cat.Passengers.RightPassengerCount;
-                foreach (int color in cat.Passengers.CopyWrongPassengerColors()) value = value * 31 + color + 1;
+
+                foreach (int color in cat.Passengers.CopyWrongPassengerColors())
+                    value = value * 31 + color + 1;
             }
+
             foreach (Station station in _stations)
             {
                 station.HavePassengers(out int count, out CatColor color);
                 value = value * 31 + count * 10 + (int)color;
             }
+
             return value;
         }
     }
 
     private void LateUpdate()
     {
-        if (_suggestion == null || !_highlight.gameObject.activeSelf) return;
+        if (_suggestion == null || _highlight.gameObject.activeSelf == false)
+            return;
+
         Camera camera = Camera.main;
-        if (camera == null) return;
+
+        if (camera == null)
+            return;
+
         float age = Time.time - _shownAt;
         float pulse = 0.5f + 0.5f * Mathf.Sin(age * Mathf.PI * 1.5f);
         _highlightGraphic.Follow(_suggestion.CatSprite, camera, _canvas, age);
@@ -282,13 +410,19 @@ public sealed class CatHintController : MonoBehaviour
     private void ClearHint()
     {
         _suggestion = null;
-        if (_highlight != null) _highlight.gameObject.SetActive(false);
+
+        if (_highlight != null)
+            _highlight.gameObject.SetActive(false);
     }
 
     private void OnDisable()
     {
         ClearHint();
-        if (_button != null) _button.gameObject.SetActive(false);
-        if (_feedback != null) _feedback.gameObject.SetActive(false);
+
+        if (_button != null)
+            _button.gameObject.SetActive(false);
+
+        if (_feedback != null)
+            _feedback.gameObject.SetActive(false);
     }
 }

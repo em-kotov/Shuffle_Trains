@@ -1,15 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Spawns the per-level cats described by a layout's cat list. Cat prefabs are
-// resolved from Resources by naming convention
-// (Resources/Prefabs/Cats/1x{length}/Cat-{length}-{colorCode}), which matches
-// the existing prefab layout, so no per-color inspector wiring is needed.
-//
-// Stations are NOT spawned here: they are level-invariant (same spots/rotation
-// every level) and live in the scene, where LevelManager just toggles which are
-// active. Spawning them from a single prefab loses their per-instance sprite/
-// hold-point offsets, which is why they stay scene-authored.
 public class LevelBuilder : MonoBehaviour
 {
     [Header("Spawn Parent (optional)")]
@@ -20,7 +11,16 @@ public class LevelBuilder : MonoBehaviour
     public List<Subscriber> BuildCats(LevelConfig gridConfig, IReadOnlyList<CatPlacement> cats)
     {
         List<Subscriber> result = new();
-        Transform catsParent = _catsParent != null ? _catsParent : transform;
+        Transform catsParent;
+
+        if (_catsParent != null)
+        {
+            catsParent = _catsParent;
+        }
+        else
+        {
+            catsParent = transform;
+        }
 
         foreach (CatPlacement placement in cats)
         {

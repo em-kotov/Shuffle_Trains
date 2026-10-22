@@ -1,9 +1,7 @@
 using System;
 using UnityEngine;
 
-// The serialized form of the player's progress. JsonUtility turns this straight
-// into the object handed to player.setData(), so the field names are also the
-// keys stored on Yandex's side - renaming one drops that value for existing players.
+// These field names are persisted cloud keys; renaming them requires a save migration.
 [Serializable]
 public class SaveSnapshot
 {
@@ -39,9 +37,6 @@ public class SaveSnapshot
         };
     }
 
-    // Progress only ever moves forward, so the further-along snapshot wins.
-    // Money breaks the tie when both are on the same level - that is the case
-    // of a second device that only spent time in the shop.
     public bool IsAheadOf(SaveSnapshot other)
     {
         if (levelIndex != other.levelIndex)
@@ -61,13 +56,32 @@ public class SaveSnapshot
         PlayerPrefs.SetInt(SaveKeys.Music, music);
         PlayerPrefs.SetInt(SaveKeys.Sfx, sfx);
         // Version 1 did not store volume; missing JSON floats must not mute old saves.
-        PlayerPrefs.SetFloat(SaveKeys.MusicVolume,
-            version >= 2 ? Mathf.Clamp01(musicVolume) : AudioManager.DefaultVolume);
-        PlayerPrefs.SetFloat(SaveKeys.SfxVolume,
-            version >= 2 ? Mathf.Clamp01(sfxVolume) : AudioManager.DefaultVolume);
+        float savedMusicVolume;
 
-        // Only overwrite the shop state when the cloud actually carries one -
-        // an empty string would wipe the locally seeded default skins.
+        if (version >= 2)
+        {
+            savedMusicVolume = Mathf.Clamp01(musicVolume);
+        }
+        else
+        {
+            savedMusicVolume = AudioManager.DefaultVolume;
+        }
+
+        PlayerPrefs.SetFloat(SaveKeys.MusicVolume, savedMusicVolume);
+        float savedSfxVolume;
+
+        if (version >= 2)
+        {
+            savedSfxVolume = Mathf.Clamp01(sfxVolume);
+        }
+        else
+        {
+            savedSfxVolume = AudioManager.DefaultVolume;
+        }
+
+        PlayerPrefs.SetFloat(SaveKeys.SfxVolume, savedSfxVolume);
+
+        // Missing cloud shop data must not erase locally seeded defaults.
         if (string.IsNullOrEmpty(shopOwned) == false)
         {
             PlayerPrefs.SetString(SaveKeys.ShopOwned, shopOwned);

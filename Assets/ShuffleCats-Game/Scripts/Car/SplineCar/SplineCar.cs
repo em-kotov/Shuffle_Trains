@@ -90,9 +90,7 @@ public class SplineCar : MonoBehaviour
 
         yield return new WaitUntil(() => _isMoving == false);
 
-        // Cat is now at the exit-spline target world position. Setting NormalizedTime now
-        // is safe because SplineAnimate's internal UpdateTransform() will evaluate to
-        // exactly this same world position — no visible snap.
+        // Setting NormalizedTime updates the transform; do it only after reaching the exit spline.
         _splineOperator.ApplyNormalizedTime(targetT);
 
         IsOnExit = true;
@@ -110,6 +108,7 @@ public class SplineCar : MonoBehaviour
                                               _searchMax, out _interpolatedSplinePosition);
 
         WaitForSeconds clearanceWait = new WaitForSeconds(0.1f);
+
         while (IsEntryClear() == false)
         {
             yield return clearanceWait;
@@ -120,7 +119,6 @@ public class SplineCar : MonoBehaviour
         _isMoving = true;
         _mover.FinishedMoving -= OnMoverFinishedMove;
         _mover.FinishedMoving += OnMoverFinishedMove;
-        // Capacity is reserved and the physical entrance is clear now.
         TrackEntryStarted?.Invoke();
         _mover.MoveToPercent(_enterPoint, 0.1f, speedMultiplier: TrackEntrySpeedMultiplier);
         _carHead.LookAt(_enterPoint);
@@ -173,6 +171,7 @@ public class SplineCar : MonoBehaviour
 
         if (Physics.Raycast(_enterPoint, worldTangent, forwardExtent + safety, carsMask))
             return false;
+
         if (Physics.Raycast(_enterPoint, -worldTangent, backwardExtent + safety, carsMask))
             return false;
 

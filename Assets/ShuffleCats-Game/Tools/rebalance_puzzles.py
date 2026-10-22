@@ -108,7 +108,6 @@ def solve(cats, deps, station_count, limit):
             return ()
         if len(active) >= limit:
             return None
-        # Prefer cats that collect a visible station color; ties use asset order.
         choices = [i for i, d in enumerate(deps) if not mask >> i & 1 and d & ~mask == 0]
         choices.sort(key=lambda i: -sum(len(s) for s in stations if s and s[0] == cats[i]['color']))
         for i in choices:
@@ -165,8 +164,6 @@ def release_audit(cats, deps, station_count, limit):
     return visit(0,(),((),)*station_count)
 
 def tune_colors(cats, number, stations, limit):
-    # Reassign complete cats to same-size parking footprints. The board shape
-    # and all cat/ball pairings survive; only the color unlock order changes.
     rng = random.Random(260923+number)
     original = [c['pose'] for c in cats]
     groups = [[i for i,c in enumerate(cats) if c['length']==length] for length in (1,2)]
@@ -243,12 +240,8 @@ def generate(cats, number, stations, limit):
         if solution is None:
             continue
         rate = random_success(cats, deps, stations, limit, rng)
-        # Light puzzles: short chains, a forgiving opening, and useful color
-        # choices on later boards where the preserved inventory allows them.
         desired_rate = target_success(number)
         cross = sum(any(poses[i][2]//2 != poses[j][2]//2 for j in range(n) if deps[i] >> j & 1) for i in range(n))
-        # Reward noticing a color partner behind a blocker, rather than making
-        # every useful color immediately accessible at the edge of the board.
         color_unlocks = sum(any(deps[j] == 1 << i and cats[j]['color'] in cats[i]['balls']
                                 for j in range(n)) for i in waves[0])
         center = sum(abs(x-1.5)+abs(y-1.5) for x,y,d in poses)

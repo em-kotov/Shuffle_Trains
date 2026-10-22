@@ -2,14 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Eye-candy coin rain played when a level is won. Subscribes to AutoWin.WinLevel
-// and spawns a burst of UI coin Images that fall from just above the top of the
-// spawn area down past the bottom, with a little horizontal drift and spin.
-//
-// Setup: put this on a full-screen (stretched) RectTransform under the Canvas,
-// assign the AutoWin in the scene. The coin sprite auto-loads from
-// Resources/Textures/Icons/coin-icon-1, or assign an override below.
-// Coins are pure decoration: raycastTarget is off, so they never block the Win UI.
 [RequireComponent(typeof(RectTransform))]
 public class CoinRainEffect : MonoBehaviour
 {
@@ -70,7 +62,6 @@ public class CoinRainEffect : MonoBehaviour
             _autoWin.WinLevel -= Play;
     }
 
-    // Public so it can also be fired from the inspector/other scripts or for testing.
     public void Play()
     {
         if (_coinSprite == null)
@@ -89,7 +80,16 @@ public class CoinRainEffect : MonoBehaviour
     {
         float halfWidth = _spawnArea.rect.width * 0.5f;
         float halfHeight = _spawnArea.rect.height * 0.5f;
-        float gap = _coinCount > 1 ? _spawnDuration / (_coinCount - 1) : 0f;
+        float gap;
+
+        if (_coinCount > 1)
+        {
+            gap = _spawnDuration / (_coinCount - 1);
+        }
+        else
+        {
+            gap = 0f;
+        }
 
         for (int i = 0; i < _coinCount; i++)
         {
@@ -112,17 +112,28 @@ public class CoinRainEffect : MonoBehaviour
 
         var image = go.GetComponent<Image>();
         image.sprite = _coinSprite;
-        image.raycastTarget = false; // decoration only — never intercept clicks on the Win UI
+        image.raycastTarget = false;
         image.preserveAspect = true;
 
-        // Start just above the top edge at a random column; fall to just below the bottom.
         float startX = Random.Range(-halfWidth, halfWidth);
         float startY = halfHeight + size;
         float endY = -halfHeight - size;
         rect.anchoredPosition = new Vector2(startX, startY);
 
         float fallSpeed = Random.Range(_fallSpeedRange.x, _fallSpeedRange.y);
-        float spin = Random.Range(_spinSpeedRange.x, _spinSpeedRange.y) * (Random.value < 0.5f ? -1f : 1f);
+        float spinSpeed = Random.Range(_spinSpeedRange.x, _spinSpeedRange.y);
+        float spinDirection;
+
+        if (Random.value < 0.5f)
+        {
+            spinDirection = -1f;
+        }
+        else
+        {
+            spinDirection = 1f;
+        }
+
+        float spin = spinSpeed * spinDirection;
         float driftPhase = Random.Range(0f, Mathf.PI * 2f);
 
         StartCoroutine(FallRoutine(rect, startX, startY, endY, fallSpeed, spin, driftPhase));

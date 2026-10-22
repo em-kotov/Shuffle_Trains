@@ -2,18 +2,13 @@ using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Receiving end of the jslib bridge: the JS side reaches Unity through
-// SendMessage("YandexGamesBridge", ...), so the object name and every public
-// method name below are part of that contract - keep them in sync with
-// Plugins/WebGL/YandexGames.jslib.
+// The GameObject and callback names must match SendMessage calls in Plugins/WebGL/YandexGames.jslib.
 public class YandexBridge : MonoBehaviour
 {
     public const string ObjectName = "YandexGamesBridge";
 
     private static YandexBridge _instance;
 
-    // Raised with the raw JSON returned by player.getData(), or an empty string
-    // when there is nothing stored (or no SDK at all).
     public static event Action<string> DataLoaded;
 
     public static YandexBridge Create()
@@ -51,9 +46,7 @@ public class YandexBridge : MonoBehaviour
         YandexLeaderboard.Tick();
     }
 
-    // Covers the editor and standalone players. On WebGL browser/SDK
-    // signals are authoritative - canvas focus is also lost to
-    // the ad overlay, which must not be treated as the player leaving.
+    // On WebGL, canvas focus can move to an ad; only browser/SDK signals should suspend gameplay.
     private void OnApplicationFocus(bool focused)
     {
         YandexSdk.HandleApplicationFocus(focused);
@@ -97,8 +90,7 @@ public class YandexBridge : MonoBehaviour
 
     public void OnAdvOpened(string _)
     {
-        // The pause is applied when the ad is requested, so there is nothing to
-        // do here - the callback exists so the JS side never calls into nothing.
+        // The JS bridge requires this callback; the pause is already applied when requesting the ad.
     }
 
     public void OnAdvClosed(string _)
@@ -125,10 +117,6 @@ public class YandexBridge : MonoBehaviour
         YandexSdk.HandleBrowserFocus(focused == "1");
     }
 
-    // Opens a gameplay section on every level (re)load. This also fires for the
-    // boot scene, before the SDK has resolved and before Game Ready has gone
-    // out - GameplayStart drops those, and Bootstrap opens the first section
-    // itself once the gameplay scene is up.
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         YandexSdk.GameplayStart();

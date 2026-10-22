@@ -2,9 +2,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-// Uses the existing HUD and panels, including their event wiring and theme colors.
-// Layout is based on the available viewport, so WebGL iframe resizing and device
-// rotation use the same path. No level reload or orientation lock is needed.
 [DefaultExecutionOrder(200)]
 [RequireComponent(typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler))]
 public class ResponsiveGameUI : MonoBehaviour
@@ -39,29 +36,38 @@ public class ResponsiveGameUI : MonoBehaviour
     {
         _rects["HintButton"] = button;
         _original[button] = new RectState(button);
-        // Registration runs inside LevelManager.Awake. Defer fitting until all
-        // camera/station Awake methods have captured their authored transforms.
+        // Defer fitting until camera/station Awake methods have captured their authored transforms.
         _width = _height = 0;
     }
 
     private void Awake()
     {
         _scaler = GetComponent<UnityEngine.UI.CanvasScaler>();
-        _cameraFitter = Camera.main != null ? Camera.main.GetComponent<CameraFitter>() : null;
+
+        if (Camera.main != null)
+        {
+            _cameraFitter = Camera.main.GetComponent<CameraFitter>();
+        }
+        else
+        {
+            _cameraFitter = null;
+        }
+
         _stations = FindObjectsOfType<Station>(true);
 
         var children = new List<Transform>();
+
         foreach (Transform child in transform)
             children.Add(child);
 
         _safeRoot = new GameObject("SafeArea", typeof(RectTransform)).GetComponent<RectTransform>();
         _safeRoot.SetParent(transform, false);
         Stretch(_safeRoot);
+
         foreach (Transform child in children)
             child.SetParent(_safeRoot, false);
 
-        // Cache before the first layout; subsequent rotations restore the authored
-        // values first rather than accumulating offsets or scale changes.
+        // Restore the authored layout first so repeated rotations do not accumulate offsets or scale.
         string[] paths = {
             "LevelCounter", "CatsCounterPanel/Counter", "WalletPanel/Total", "WalletPanel/Bonus",
             "Options", "Options/OptionsButton", "Options/OptionsButtonShadow",
@@ -71,10 +77,14 @@ public class ResponsiveGameUI : MonoBehaviour
             "ShopPanel/Scroll View", "ShopPanel/Scroll View/Viewport",
             "OptionsPanel/CloseButton", "OptionsPanel/CloseButtonShadow"
         };
+
         foreach (string path in paths)
         {
             var rect = _safeRoot.Find(path) as RectTransform;
-            if (rect == null) continue;
+
+            if (rect == null)
+                continue;
+
             _rects.Add(path, rect);
             _original.Add(rect, new RectState(rect));
         }
@@ -87,20 +97,24 @@ public class ResponsiveGameUI : MonoBehaviour
 
         LanguageCardGraphic.WindowBackground(Get("ShopPanel/BgImage"));
         LanguageCardGraphic.WindowBackground(Get("ShopPanel/BgImageShadow"), true);
+
         foreach (string panel in new[] { "WinPanel", "LoosePanel", "LastLevelPanel" })
         {
             LanguageCardGraphic.WindowBackground(_safeRoot.Find(panel + "/Bg-Image") as RectTransform);
             LanguageCardGraphic.WindowBackground(_safeRoot.Find(panel + "/Bg-ImageShadow") as RectTransform, true);
         }
+
         _settingsTitle = _safeRoot.Find("OptionsPanel/Title")?.GetComponent<TMP_Text>();
         _shopTitle = Get("ShopPanel/Title")?.GetComponent<TMP_Text>();
         _shopTitleShadow = Get("ShopPanel/TitleShadow")?.GetComponent<TMP_Text>();
 
-        // Display-only badges must not intercept gameplay or menu clicks.
         foreach (string path in new[] { "LevelCounter", "CatsCounterPanel/Counter", "WalletPanel/Total", "WalletPanel/Bonus" })
         {
             var badge = Get(path);
-            if (badge == null) continue;
+
+            if (badge == null)
+                continue;
+
             foreach (var graphic in badge.GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
                 graphic.raycastTarget = false;
         }
@@ -110,16 +124,30 @@ public class ResponsiveGameUI : MonoBehaviour
         bool bonus = false)
     {
         var badge = Get(path);
-        if (badge == null) return;
 
-        // The old pills use three rotated, stretched copies of a 64px bitmap.
-        // Keep the existing objects/references, but use the same crisp frame as
-        // the settings, shop and leaderboard at the artwork's visible bounds.
+        if (badge == null)
+            return;
+
         var contour = badge.Find("BgIconContour")?.GetComponent<UnityEngine.UI.Image>();
-        if (contour != null) contour.enabled = false;
-        StyleHudLayer(badge.Find(bonus ? "BonusBgIconSecondary" : "BgIconPrimary") as RectTransform,
+
+        if (contour != null)
+            contour.enabled = false;
+
+        string backgroundName;
+
+        if (bonus)
+        {
+            backgroundName = "BonusBgIconSecondary";
+        }
+        else
+        {
+            backgroundName = "BgIconPrimary";
+        }
+
+        StyleHudLayer(badge.Find(backgroundName) as RectTransform,
             anchor, position, size, false, bonus);
-        if (!bonus)
+
+        if (bonus == false)
             StyleHudLayer(badge.Find("BgIconShadow") as RectTransform,
                 anchor, position + new Vector2(0, -3), size, true, false);
     }
@@ -127,7 +155,9 @@ public class ResponsiveGameUI : MonoBehaviour
     private static void StyleHudLayer(RectTransform rect, Vector2 anchor, Vector2 position,
         Vector2 size, bool shadow, bool bonus)
     {
-        if (rect == null) return;
+        if (rect == null)
+            return;
+
         rect.localRotation = Quaternion.identity;
         rect.localScale = Vector3.one;
         rect.anchorMin = rect.anchorMax = anchor;
@@ -136,12 +166,26 @@ public class ResponsiveGameUI : MonoBehaviour
         rect.sizeDelta = size;
         var card = LanguageCardGraphic.WindowBackground(rect, shadow);
         card.Radius = size.y * 0.5f;
-        card.BorderWidth = shadow ? 0 : bonus ? 1.25f : 2;
+
+        if (shadow)
+        {
+            card.BorderWidth = 0;
+        }
+        else if (bonus)
+        {
+            card.BorderWidth = 1.25f;
+        }
+        else
+        {
+            card.BorderWidth = 2;
+        }
+
         if (bonus)
         {
             card.color = new Color32(240, 246, 229, 255);
             card.BorderColor = new Color32(163, 184, 139, 255);
         }
+
         card.SetVerticesDirty();
     }
 
@@ -149,6 +193,7 @@ public class ResponsiveGameUI : MonoBehaviour
     {
         if (_width == Screen.width && _height == Screen.height && _safeArea == Screen.safeArea)
             return;
+
         RefreshLayout();
     }
 
@@ -157,18 +202,35 @@ public class ResponsiveGameUI : MonoBehaviour
         _width = Screen.width;
         _height = Screen.height;
         _safeArea = Screen.safeArea;
-        if (_width <= 0 || _height <= 0) return;
 
-        Rect safe = _safeArea.width > 0 && _safeArea.height > 0
-            ? _safeArea : new Rect(0, 0, _width, _height);
-        bool portrait = safe.height > safe.width;
+        if (_width <= 0 || _height <= 0)
+            return;
+
+        Rect safe;
+
+        if (_safeArea.width > 0 && _safeArea.height > 0)
+        {
+            safe = _safeArea;
+        }
+        else
+        {
+            safe = new Rect(0, 0, _width, _height);
+        }
+
+        bool portrait;
+
+        if (safe.height > safe.width)
+        {
+            portrait = true;
+        }
+        else
+        {
+            portrait = false;
+        }
 
         foreach (var pair in _original)
             pair.Value.Restore(pair.Key);
 
-        // Expand chooses the smaller scale continuously. A pixel-height cutoff
-        // switches layouts on window resize (and on high-DPI phones), bringing
-        // the old side buttons into the header in wide, shallow windows.
         _scaler.referenceResolution = new Vector2(480, 450);
         _scaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.Expand;
 
@@ -176,14 +238,32 @@ public class ResponsiveGameUI : MonoBehaviour
         _safeRoot.anchorMax = new Vector2(safe.xMax / _width, safe.yMax / _height);
         _safeRoot.offsetMin = _safeRoot.offsetMax = Vector2.zero;
 
-        // CanvasScaler updates in Update; explicitly calculate its scale here so
-        // the first frame after rotation does not use the previous orientation.
+        // CanvasScaler updates later; calculate the scale now to avoid one frame at the old orientation.
         float scale = Mathf.Min(_width / _scaler.referenceResolution.x,
             _height / _scaler.referenceResolution.y);
         float logicalWidth = safe.width / scale;
         float logicalHeight = safe.height / scale;
-        bool stackedHeader = logicalWidth < 640;
-        float trackTop = stackedHeader ? 68 : 4;
+        bool stackedHeader;
+
+        if (logicalWidth < 640)
+        {
+            stackedHeader = true;
+        }
+        else
+        {
+            stackedHeader = false;
+        }
+
+        float trackTop;
+
+        if (stackedHeader)
+        {
+            trackTop = 68;
+        }
+        else
+        {
+            trackTop = 4;
+        }
 
         Place("LevelCounter", new Vector2(0, 1), new Vector2(100, -38), new Vector2(100, 100));
         Place("WalletPanel/Total", new Vector2(1, 1), new Vector2(-12, -8), new Vector2(100, 100), new Vector2(1, 1));
@@ -193,46 +273,136 @@ public class ResponsiveGameUI : MonoBehaviour
 
         Stretch(Get("Options"));
         Stretch(Get("Shop"));
-        // Portrait keeps both controls within thumb reach. Landscape anchors
-        // them below the header, rather than offsetting from the screen centre.
-        Vector2 menuAnchor = portrait ? Vector2.zero : new Vector2(0, 1);
-        Vector2 optionsPosition = portrait ? new Vector2(20, 20) : new Vector2(24, -90);
-        Vector2 shopPosition = portrait ? new Vector2(92, 20) : new Vector2(24, -164);
+        Vector2 menuAnchor;
+
+        if (portrait)
+        {
+            menuAnchor = Vector2.zero;
+        }
+        else
+        {
+            menuAnchor = new Vector2(0, 1);
+        }
+
+        Vector2 optionsPosition;
+
+        if (portrait)
+        {
+            optionsPosition = new Vector2(20, 20);
+        }
+        else
+        {
+            optionsPosition = new Vector2(24, -90);
+        }
+
+        Vector2 shopPosition;
+
+        if (portrait)
+        {
+            shopPosition = new Vector2(92, 20);
+        }
+        else
+        {
+            shopPosition = new Vector2(24, -164);
+        }
+
         Vector2 menuSize = Vector2.one * 60;
         Place("Options/OptionsButton", menuAnchor, optionsPosition, menuSize, menuAnchor);
         Place("Options/OptionsButtonShadow", menuAnchor, optionsPosition + new Vector2(1, -2), menuSize, menuAnchor);
         Place("Shop/ShopButton", menuAnchor, shopPosition, menuSize, menuAnchor);
         Place("Shop/ShopButtonShadow", menuAnchor, shopPosition + new Vector2(1, -2), menuSize, menuAnchor);
-        Vector2 hintAnchor = portrait ? new Vector2(1, 0) : new Vector2(0, 1);
-        Place("HintButton", hintAnchor, portrait ? new Vector2(-20, 20) : new Vector2(24, -238),
-            menuSize, hintAnchor);
-        // The incoming-money badge reaches 97 units below the safe-area top.
-        // Leave a gap before the trophy's full hit area, not just its artwork.
-        Place("LeaderboardButton", portrait ? Vector2.zero : new Vector2(1, 1),
-            portrait ? new Vector2(164, 20) : new Vector2(-24, -112), menuSize,
-            portrait ? Vector2.zero : new Vector2(1, 1));
+        Vector2 hintAnchor;
+
+        if (portrait)
+        {
+            hintAnchor = new Vector2(1, 0);
+        }
+        else
+        {
+            hintAnchor = new Vector2(0, 1);
+        }
+
+        Vector2 hintPosition;
+
+        if (portrait)
+        {
+            hintPosition = new Vector2(-20, 20);
+        }
+        else
+        {
+            hintPosition = new Vector2(24, -238);
+        }
+
+        Place("HintButton", hintAnchor, hintPosition, menuSize, hintAnchor);
+        Vector2 leaderboardAnchor;
+
+        if (portrait)
+        {
+            leaderboardAnchor = Vector2.zero;
+        }
+        else
+        {
+            leaderboardAnchor = new Vector2(1, 1);
+        }
+
+        Vector2 leaderboardPosition;
+
+        if (portrait)
+        {
+            leaderboardPosition = new Vector2(164, 20);
+        }
+        else
+        {
+            leaderboardPosition = new Vector2(-24, -112);
+        }
+
+        Place("LeaderboardButton", leaderboardAnchor, leaderboardPosition, menuSize, leaderboardAnchor);
         Place("OptionsPanel/CloseButton", Vector2.one * 0.5f, new Vector2(145, 177), new Vector2(50, 50));
         Place("OptionsPanel/CloseButtonShadow", Vector2.one * 0.5f, new Vector2(145, 174), new Vector2(50, 50));
 
-        LayoutShop(Mathf.Min(500, logicalWidth - 24),
-            portrait ? Mathf.Min(600, logicalHeight - 72) : Mathf.Min(380, logicalHeight - 24), 50);
+        float shopWidth = Mathf.Min(500, logicalWidth - 24);
+        float shopHeight;
+
+        if (portrait)
+        {
+            shopHeight = Mathf.Min(600, logicalHeight - 72);
+        }
+        else
+        {
+            shopHeight = Mathf.Min(380, logicalHeight - 24);
+        }
+
+        LayoutShop(shopWidth, shopHeight, 50);
 
         Rect gameplay = safe;
-        // The track badge and its shadow extend about 66 units below its top
-        // anchor. Reserve that band plus a gap in both orientations, including
-        // narrow landscape windows where the header uses a second row.
         gameplay.yMax -= (trackTop + 76) * scale;
+
         if (portrait)
         {
             gameplay.yMin += 96 * scale;
         }
+
         foreach (Station station in _stations)
-            if (station != null) station.SetPortraitPresentation(portrait);
+            if (station != null)
+                station.SetPortraitPresentation(portrait);
 
         if (_cameraFitter != null)
-            _cameraFitter.SetGameplayArea(new Rect(gameplay.x / _width, gameplay.y / _height,
-                gameplay.width / _width, Mathf.Max(1, gameplay.height) / _height),
-                portrait ? 0.15f : 0.5f);
+        {
+            Rect gameplayArea = new Rect(gameplay.x / _width, gameplay.y / _height,
+                gameplay.width / _width, Mathf.Max(1, gameplay.height) / _height);
+            float verticalAlignment;
+
+            if (portrait)
+            {
+                verticalAlignment = 0.15f;
+            }
+            else
+            {
+                verticalAlignment = 0.5f;
+            }
+
+            _cameraFitter.SetGameplayArea(gameplayArea, verticalAlignment);
+        }
     }
 
     private void LayoutShop(float width, float height, float closeSize)
@@ -254,13 +424,13 @@ public class ResponsiveGameUI : MonoBehaviour
         var viewport = Get("ShopPanel/Scroll View/Viewport");
         Stretch(viewport);
         var scroll = Get("ShopPanel/Scroll View")?.GetComponent<UnityEngine.UI.ScrollRect>();
+
         if (scroll != null)
         {
-            // Keep the card grid centered. The slim scrollbar sits in the outer
-            // margin and does not change the viewport width as content grows.
             scroll.verticalScrollbarVisibility = UnityEngine.UI.ScrollRect.ScrollbarVisibility.AutoHide;
             scroll.scrollSensitivity = 24;
             scroll.movementType = UnityEngine.UI.ScrollRect.MovementType.Clamped;
+
             if (scroll.verticalScrollbar != null)
             {
                 var bar = (RectTransform)scroll.verticalScrollbar.transform;
@@ -272,9 +442,22 @@ public class ResponsiveGameUI : MonoBehaviour
                 scroll.verticalScrollbar.interactable = true;
                 var slidingArea = bar.Find("Sliding Area") as RectTransform;
                 Stretch(slidingArea);
-                var oldShadow = slidingArea != null ? slidingArea.Find("HandleShadow") : null;
-                if (oldShadow != null) oldShadow.gameObject.SetActive(false);
+                Transform oldShadow;
+
+                if (slidingArea != null)
+                {
+                    oldShadow = slidingArea.Find("HandleShadow");
+                }
+                else
+                {
+                    oldShadow = null;
+                }
+
+                if (oldShadow != null)
+                    oldShadow.gameObject.SetActive(false);
+
                 var track = bar.GetComponent<UnityEngine.UI.Image>();
+
                 if (track != null)
                 {
                     track.enabled = true;
@@ -282,13 +465,16 @@ public class ResponsiveGameUI : MonoBehaviour
                     track.type = UnityEngine.UI.Image.Type.Simple;
                     track.color = new Color32(235, 219, 191, 255);
                 }
+
                 var handle = scroll.verticalScrollbar.handleRect;
+
                 if (handle != null)
                 {
                     handle.localScale = Vector3.one;
                     handle.sizeDelta = Vector2.zero;
                     handle.anchoredPosition = Vector2.zero;
                     var graphic = handle.GetComponent<UnityEngine.UI.Image>();
+
                     if (graphic != null)
                     {
                         graphic.enabled = true;
@@ -305,19 +491,41 @@ public class ResponsiveGameUI : MonoBehaviour
     public static void StyleWindowTitle(TMP_Text title, TMP_Text settingsTitle, float windowWidth,
         bool shadow = false)
     {
-        if (title == null) return;
+        if (title == null)
+            return;
+
         float settingsSize = 42;
+
         if (settingsTitle != null)
         {
             title.font = settingsTitle.font;
-            // Use the font asset's current material: hidden prefab text can
-            // retain an obsolete material reference after the atlas is rebuilt.
+            // Hidden prefab text may retain a stale material after the font atlas is rebuilt.
             title.fontSharedMaterial = settingsTitle.font.material;
             title.fontStyle = settingsTitle.fontStyle;
-            settingsSize = settingsTitle.enableAutoSizing ? settingsTitle.fontSizeMax : settingsTitle.fontSize;
+
+            if (settingsTitle.enableAutoSizing)
+            {
+                settingsSize = settingsTitle.fontSizeMax;
+            }
+            else
+            {
+                settingsSize = settingsTitle.fontSize;
+            }
         }
-        title.color = shadow ? new Color32(72, 72, 72, 112) :
-            settingsTitle != null ? settingsTitle.color : new Color32(114, 194, 83, 255);
+
+        if (shadow)
+        {
+            title.color = new Color32(72, 72, 72, 112);
+        }
+        else if (settingsTitle != null)
+        {
+            title.color = (Color32)settingsTitle.color;
+        }
+        else
+        {
+            title.color = new Color32(114, 194, 83, 255);
+        }
+
         title.fontSizeMax = settingsSize * Mathf.Clamp(windowWidth / 360f, 0.85f, 1.1f);
         title.fontSizeMin = 18;
         title.fontSize = title.fontSizeMax;
@@ -327,18 +535,33 @@ public class ResponsiveGameUI : MonoBehaviour
         title.raycastTarget = false;
     }
 
-    private RectTransform Get(string path) => _rects.TryGetValue(path, out var rect) ? rect : null;
+    private RectTransform Get(string path)
+    {
+        if (_rects.TryGetValue(path, out var rect))
+        {
+            return rect;
+        }
+        else
+        {
+            return null;
+        }
+    }
 
     private void Resize(string path, Vector2 size)
     {
         var rect = Get(path);
-        if (rect != null) rect.sizeDelta = size;
+
+        if (rect != null)
+            rect.sizeDelta = size;
     }
 
     private void Place(string path, Vector2 anchor, Vector2 position, Vector2 size, Vector2? pivot = null)
     {
         var rect = Get(path);
-        if (rect == null) return;
+
+        if (rect == null)
+            return;
+
         rect.anchorMin = rect.anchorMax = anchor;
         rect.pivot = pivot ?? Vector2.one * 0.5f;
         rect.anchoredPosition = position;
@@ -347,7 +570,9 @@ public class ResponsiveGameUI : MonoBehaviour
 
     private static void Stretch(RectTransform rect)
     {
-        if (rect == null) return;
+        if (rect == null)
+            return;
+
         rect.anchorMin = Vector2.zero;
         rect.anchorMax = Vector2.one;
         rect.pivot = Vector2.one * 0.5f;

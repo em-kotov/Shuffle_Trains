@@ -1,13 +1,11 @@
 using UnityEngine;
 
-// Resolution-independent cup icon: no emoji/font glyph dependency in WebGL.
 [RequireComponent(typeof(CanvasRenderer))]
 public sealed class CupGraphic : UnityEngine.UI.MaskableGraphic
 {
     protected override void OnPopulateMesh(UnityEngine.UI.VertexHelper mesh)
     {
         mesh.Clear();
-        // Same warm palette as HintLamp.shader and the shop/options artwork.
         Color brown = new Color32(148, 103, 64, 255);
         Color gold = new Color32(255, 209, 91, 255);
         Color light = new Color32(255, 244, 216, 255);
@@ -16,8 +14,6 @@ public sealed class CupGraphic : UnityEngine.UI.MaskableGraphic
         Disc(mesh, Vector2.one * 0.5f, 0.42f, new Color32(255, 244, 216, 255));
         Ring(mesh, new Vector2(0.29f, 0.61f), 0.13f, 0.074f, brown);
         Ring(mesh, new Vector2(0.71f, 0.61f), 0.13f, 0.074f, brown);
-        // Roughly 1.2-pixel brown strokes at the HUD's 60-pixel button size,
-        // matching the lighter line weight of the shop/options pictograms.
         Ring(mesh, new Vector2(0.29f, 0.61f), 0.116f, 0.088f, gold);
         Ring(mesh, new Vector2(0.71f, 0.61f), 0.116f, 0.088f, gold);
         Polygon(mesh, brown, new Vector2(0.45f, 0.25f), new Vector2(0.55f, 0.25f),
@@ -48,19 +44,25 @@ public sealed class CupGraphic : UnityEngine.UI.MaskableGraphic
     private void Polygon(UnityEngine.UI.VertexHelper mesh, Color tint, params Vector2[] points)
     {
         int first = mesh.currentVertCount;
-        foreach (Vector2 point in points) mesh.AddVert(Point(point), tint * color, Vector2.zero);
-        for (int i = 1; i < points.Length - 1; i++) mesh.AddTriangle(first, first + i, first + i + 1);
+
+        foreach (Vector2 point in points)
+            mesh.AddVert(Point(point), tint * color, Vector2.zero);
+
+        for (int i = 1; i < points.Length - 1; i++)
+            mesh.AddTriangle(first, first + i, first + i + 1);
     }
 
     private void Disc(UnityEngine.UI.VertexHelper mesh, Vector2 center, float radius, Color tint)
     {
         const int segments = 48;
         var points = new Vector2[segments];
+
         for (int i = 0; i < segments; i++)
         {
             float angle = i * Mathf.PI * 2 / segments;
             points[i] = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
         }
+
         Polygon(mesh, tint, points);
     }
 

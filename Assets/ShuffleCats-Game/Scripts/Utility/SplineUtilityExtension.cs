@@ -18,13 +18,13 @@ public static class SplineUtilityExtension
         nearest = float.PositiveInfinity;
         searchMin = math.max(0, math.min(searchMin, 1));
         searchMax = math.max(searchMin, math.min(searchMax, 1));
-        float2 segment = new float2(searchMin, math.max(0, searchMax - searchMin)); //  new float2(searchMin, searchMax)
+        float2 segment = new float2(searchMin, math.max(0, searchMax - searchMin));
         t = 0f;
         int res = math.min(math.max(SplineUtility.PickResolutionMin, resolution), SplineUtility.PickResolutionMax);
 
         for (int i = 0, c = math.min(10, iterations); i < c; i++)
         {
-            int segments = SplineUtility.GetSubdivisionCount(spline.GetLength() * segment.y, res); // without * segment.y
+            int segments = SplineUtility.GetSubdivisionCount(spline.GetLength() * segment.y, res);
             segment = GetNearestPointInternal(spline, point, segment, out distance, out nearest, out t, segments);
         }
 

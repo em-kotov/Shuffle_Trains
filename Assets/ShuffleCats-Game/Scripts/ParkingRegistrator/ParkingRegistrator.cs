@@ -7,9 +7,25 @@ public class ParkingRegistrator : MonoBehaviour
     [Tooltip("Additional track speed multiplier after the final cat leaves parking.")]
     [SerializeField, Min(1f)] private float _finalCatsSpeedMultiplier = 2.7f / 1.7f;
 
-    public float TrackSpeedMultiplier => Mathf.Max(1f, _normalTrackSpeedMultiplier)
-        * (_parkingCars != null && _parkingCars.Count == 0
-            ? Mathf.Max(1f, _finalCatsSpeedMultiplier) : 1f);
+    public float TrackSpeedMultiplier
+    {
+        get
+        {
+            float normalMultiplier = Mathf.Max(1f, _normalTrackSpeedMultiplier);
+            float finalMultiplier;
+
+            if (_parkingCars != null && _parkingCars.Count == 0)
+            {
+                finalMultiplier = Mathf.Max(1f, _finalCatsSpeedMultiplier);
+            }
+            else
+            {
+                finalMultiplier = 1f;
+            }
+
+            return normalMultiplier * finalMultiplier;
+        }
+    }
 
     private GridCalculator _gridCalculator;
     private ParkingCar[,] _gridCells;
@@ -23,6 +39,7 @@ public class ParkingRegistrator : MonoBehaviour
             foreach (ParkingCar car in _parkingCars)
                 if (car.IsMoving)
                     return true;
+
             return false;
         }
     }
@@ -54,10 +71,7 @@ public class ParkingRegistrator : MonoBehaviour
             _parkingCars.Add(car);
     }
 
-    // Claims the destination head + tail cells at the START of a move, without
-    // snapping the transform, so a second car can't path into the same cell
-    // while this one is still sliding toward it. The move-end RegisterCar then
-    // finds the cell already owned and is a harmless no-op.
+    // Reserve destination cells before motion so another cat cannot enter during the slide.
     public void ReserveCells(Vector3 targetPosition, ParkingCar car,
                         CarOrientation orientation, float sign, int length)
     {
@@ -153,19 +167,20 @@ public class ParkingRegistrator : MonoBehaviour
         return _gridCells[gridX, gridY];
     }
 
-    // Read the entire exit lane, including blockers hidden behind the first cat.
-    // Hints simulate removing these cats without changing real cell reservations.
     public List<ParkingCar> GetBlockingCars(ParkingCar car, CarOrientation orientation, float sign)
     {
         var blockers = new List<ParkingCar>();
         Vector3 target = _gridCalculator.CalculateTargetPosition(car.transform.position,
             orientation, sign, (_gridCells.GetLength(0) + _gridCells.GetLength(1)) * _cellSize);
+
         foreach (Vector2Int cell in _gridCalculator.GetVisitedCells(target, car.transform.position))
         {
             ParkingCar occupant = _gridCells[cell.x, cell.y];
-            if (occupant != null && occupant != car && !blockers.Contains(occupant))
+
+            if (occupant != null && occupant != car && blockers.Contains(occupant) == false)
                 blockers.Add(occupant);
         }
+
         return blockers;
     }
 

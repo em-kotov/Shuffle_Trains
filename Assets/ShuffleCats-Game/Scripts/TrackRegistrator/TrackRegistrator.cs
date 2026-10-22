@@ -30,17 +30,14 @@ public class TrackRegistrator : MonoBehaviour
         return _counter.CurrentCount < _counter.MaxCount;
     }
 
-    // Claims a track slot against the limit. Called at the border-arrival
-    // decision point, synchronously with IsCountAllows(), so the count is never
-    // stale between check and claim. Balanced by Unregister() on track exit.
+    // Reserve synchronously with the capacity check; Unregister releases the claim on exit.
     public void Reserve()
     {
         _counter.Add();
         _counter.ShowCurrent();
     }
 
-    // Records the head once the cat has physically reached the track. The slot
-    // was already claimed by Reserve(), so this no longer touches the counter.
+    // Reserve already counted this cat; registering its physical entry must not count it again.
     public void Register(Transform carHead)
     {
         _carHeads.Add(carHead);

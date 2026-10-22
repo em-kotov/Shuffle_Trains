@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-// Runs after SpriteFacingLock so the smoke always fits the visible body.
 [DefaultExecutionOrder(200)]
 public sealed class CatRunningTrail : MonoBehaviour
 {
@@ -35,9 +34,11 @@ public sealed class CatRunningTrail : MonoBehaviour
         _previousPosition = head.position;
         _active = false;
         _visibility = 0f;
+
         if (_renderer == null)
         {
             Shader shader = Resources.Load<Shader>("CatRunningSmoke");
+
             if (shader == null)
             {
                 Debug.LogWarning("Cat running smoke shader is missing.", this);
@@ -53,25 +54,31 @@ public sealed class CatRunningTrail : MonoBehaviour
             _mesh.MarkDynamic();
             _mesh.vertices = _vertices;
             int[] triangles = new int[TrailSegments * 12];
+
             for (int line = 0; line < 2; line++)
             {
-              int vertexOffset = line * (TrailSegments + 1) * 2;
-              for (int i = 0; i <= TrailSegments; i++)
-              {
-                float progress = (float)i / TrailSegments;
-                _uv[vertexOffset + i * 2] = new Vector2(progress, 0);
-                _uv[vertexOffset + i * 2 + 1] = new Vector2(progress, 1);
-                if (i == TrailSegments) continue;
-                int vertex = vertexOffset + i * 2;
-                int index = (line * TrailSegments + i) * 6;
-                triangles[index] = vertex;
-                triangles[index + 1] = vertex + 1;
-                triangles[index + 2] = vertex + 2;
-                triangles[index + 3] = vertex + 2;
-                triangles[index + 4] = vertex + 1;
-                triangles[index + 5] = vertex + 3;
-              }
+                int vertexOffset = line * (TrailSegments + 1) * 2;
+
+                for (int i = 0; i <= TrailSegments; i++)
+                {
+                    float progress = (float)i / TrailSegments;
+                    _uv[vertexOffset + i * 2] = new Vector2(progress, 0);
+                    _uv[vertexOffset + i * 2 + 1] = new Vector2(progress, 1);
+
+                    if (i == TrailSegments)
+                        continue;
+
+                    int vertex = vertexOffset + i * 2;
+                    int index = (line * TrailSegments + i) * 6;
+                    triangles[index] = vertex;
+                    triangles[index + 1] = vertex + 1;
+                    triangles[index + 2] = vertex + 2;
+                    triangles[index + 3] = vertex + 2;
+                    triangles[index + 4] = vertex + 1;
+                    triangles[index + 5] = vertex + 3;
+                }
             }
+
             _mesh.uv = _uv;
             _mesh.triangles = triangles;
             visual.GetComponent<MeshFilter>().sharedMesh = _mesh;
@@ -90,7 +97,6 @@ public sealed class CatRunningTrail : MonoBehaviour
         enabled = true;
     }
 
-    // Remain marked through sorting and the exit path, until the cat is disabled.
     public void Begin() => _active = true;
 
     private void LateUpdate()
@@ -102,14 +108,13 @@ public sealed class CatRunningTrail : MonoBehaviour
         _previousPosition = _head.position;
         Vector3 normal = _cat.transform.forward;
         Vector3 planarDelta = Vector3.ProjectOnPlane(delta, normal);
-        // Retain the last heading at stations and while waiting for track capacity.
+
         if (planarDelta.sqrMagnitude > 0.000001f)
             _direction = planarDelta.normalized;
 
-        // World-space positions keep the lines on the route actually travelled.
-        // Distance sampling preserves the path while stopped and at different speeds.
         if (delta.sqrMagnitude > 100f)
             ResetPath(_head.position);
+
         if ((_head.position - _path[_newestPathIndex]).sqrMagnitude >= PathSampleSpacing * PathSampleSpacing)
         {
             _newestPathIndex = (_newestPathIndex + 1) % PathCapacity;
@@ -117,58 +122,107 @@ public sealed class CatRunningTrail : MonoBehaviour
             _pathCount = Mathf.Min(_pathCount + 1, PathCapacity);
         }
 
-        _visibility = Mathf.MoveTowards(_visibility, _active ? 1f : 0f, Time.deltaTime * 6f);
-        _renderer.enabled = _visibility > 0.001f && _cat.enabled && _cat.gameObject.activeInHierarchy;
-        if (!_renderer.enabled)
+        float targetVisibility;
+
+        if (_active)
+        {
+            targetVisibility = 1f;
+        }
+        else
+        {
+            targetVisibility = 0f;
+        }
+
+        _visibility = Mathf.MoveTowards(_visibility, targetVisibility, Time.deltaTime * 6f);
+
+        if (_visibility > 0.001f && _cat.enabled && _cat.gameObject.activeInHierarchy)
+        {
+            _renderer.enabled = true;
+        }
+        else
+        {
+            _renderer.enabled = false;
+        }
+
+        if (_renderer.enabled == false)
             return;
 
         Vector3 forward = Vector3.ProjectOnPlane(_direction, normal).normalized;
         Vector3 side = Vector3.Cross(normal, forward).normalized;
 
-        // Project the sprite's own rectangle, rather than its world AABB: this
-        // keeps the rear edge and full width correct for vertical and long cats.
+        // World bounds lose the sprite orientation; use its own rectangle to find the rear edge.
         Vector3 extents = _cat.sprite.bounds.extents;
         Vector3 spriteX = _cat.transform.TransformVector(Vector3.right * extents.x);
         Vector3 spriteY = _cat.transform.TransformVector(Vector3.up * extents.y);
         float halfLength = Mathf.Abs(Vector3.Dot(spriteX, forward)) + Mathf.Abs(Vector3.Dot(spriteY, forward));
         float halfWidth = Mathf.Abs(Vector3.Dot(spriteX, side)) + Mathf.Abs(Vector3.Dot(spriteY, side));
         halfWidth = Mathf.Max(0.1f, halfWidth * 0.72f);
-        // The hidden section under the body must not consume the visible length
-        // or its fade, especially when a long cat travels horizontally.
+        // The section hidden beneath the body must not consume the visible trail length or fade.
         float visibleLength = halfWidth * 4f / (1.5f * 1.2f);
         float length = halfLength + visibleLength;
         Vector3 spriteOffset = _cat.bounds.center - _head.position;
         float roundingRadius = halfWidth * 2f;
         Vector3 anchorCorrection = _head.position - SampleRoundedPath(0f, roundingRadius);
+
         for (int i = 0; i <= TrailSegments; i++)
         {
             float progress = (float)i / TrailSegments;
-            // Start underneath the current cat, not at an older rear-distance
-            // sample. The sprite hides the overlap; corners cannot open a gap.
             float distance = progress * length;
-            // Spatial rounding removes entry kinks without a time-based follow
-            // delay. Pin the newest point exactly to the cat this frame.
             Vector3 pathPosition = SampleRoundedPath(distance, roundingRadius) +
                 anchorCorrection * Mathf.Exp(-distance / roundingRadius);
             _centers[i] = _head.position + spriteOffset + Vector3.ProjectOnPlane(pathPosition - _head.position, normal);
         }
 
-        // Separate narrow strips avoid folded UVs from painting two strokes on
-        // one wide ribbon. Shared miter joins keep both edges connected at entry.
+        // Separate strips avoid folded UVs; shared miter joins prevent gaps at corners.
         float lineHalfWidth = halfWidth * 0.055f * 1.5f * 1.7f;
+
         for (int i = 0; i <= TrailSegments; i++)
         {
-            Vector3 incoming = i > 0 ? (_centers[i - 1] - _centers[i]).normalized :
-                (_centers[0] - _centers[1]).normalized;
-            Vector3 outgoing = i < TrailSegments ? (_centers[i] - _centers[i + 1]).normalized : incoming;
+            Vector3 incoming;
+
+            if (i > 0)
+            {
+                incoming = (_centers[i - 1] - _centers[i]).normalized;
+            }
+            else
+            {
+                incoming = (_centers[0] - _centers[1]).normalized;
+            }
+
+            Vector3 outgoing;
+
+            if (i < TrailSegments)
+            {
+                outgoing = (_centers[i] - _centers[i + 1]).normalized;
+            }
+            else
+            {
+                outgoing = incoming;
+            }
+
             Vector3 incomingSide = Vector3.Cross(normal, incoming).normalized;
             Vector3 outgoingSide = Vector3.Cross(normal, outgoing).normalized;
             Vector3 join = (incomingSide + outgoingSide).normalized;
-            if (join.sqrMagnitude < 0.001f) join = incomingSide;
+
+            if (join.sqrMagnitude < 0.001f)
+                join = incomingSide;
+
             join /= Mathf.Max(0.5f, Vector3.Dot(join, incomingSide));
+
             for (int line = 0; line < 2; line++)
             {
-                float offset = (line == 0 ? -1f : 1f) * halfWidth * 0.3f;
+                float lineSide;
+
+                if (line == 0)
+                {
+                    lineSide = -1f;
+                }
+                else
+                {
+                    lineSide = 1f;
+                }
+
+                float offset = lineSide * halfWidth * 0.3f;
                 int vertex = line * (TrailSegments + 1) * 2 + i * 2;
                 float distance = (float)i / TrailSegments * length;
                 float fadeProgress = Mathf.Clamp01((distance - halfLength) / visibleLength);
@@ -178,6 +232,7 @@ public sealed class CatRunningTrail : MonoBehaviour
                 _vertices[vertex + 1] = _visual.InverseTransformPoint(_centers[i] + join * (offset + lineHalfWidth));
             }
         }
+
         _mesh.vertices = _vertices;
         _mesh.uv = _uv;
         _mesh.RecalculateBounds();
@@ -206,25 +261,30 @@ public sealed class CatRunningTrail : MonoBehaviour
     {
         if (distance <= 0f)
             return _head.position - _direction * distance;
+
         Vector3 newer = _head.position;
         Vector3 backward = -_direction;
+
         for (int i = 0; i < _pathCount; i++)
         {
             int index = (_newestPathIndex - i + PathCapacity) % PathCapacity;
             Vector3 older = _path[index];
             Vector3 segment = older - newer;
             float segmentLength = segment.magnitude;
+
             if (segmentLength > 0.00001f)
             {
                 backward = segment / segmentLength;
+
                 if (distance <= segmentLength)
                     return newer + backward * distance;
+
                 distance -= segmentLength;
             }
+
             newer = older;
         }
 
-        // Before enough movement has been recorded, extend the oldest heading.
         return newer + backward * distance;
     }
 
@@ -236,8 +296,13 @@ public sealed class CatRunningTrail : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_mesh != null) Destroy(_mesh);
-        if (_material != null) Destroy(_material);
-        if (_visual != null) Destroy(_visual.gameObject);
+        if (_mesh != null)
+            Destroy(_mesh);
+
+        if (_material != null)
+            Destroy(_material);
+
+        if (_visual != null)
+            Destroy(_visual.gameObject);
     }
 }

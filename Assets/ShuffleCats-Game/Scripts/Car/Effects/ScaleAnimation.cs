@@ -32,7 +32,8 @@ public class ScaleAnimation : MonoBehaviour
 
     public void Activate(Transform target)
     {
-        if (_isActive) Deactivate();
+        if (_isActive)
+            Deactivate();
 
         _target = target;
         _restScale = _target.localScale;
@@ -46,8 +47,11 @@ public class ScaleAnimation : MonoBehaviour
 
     public void Deactivate()
     {
-        if (!_isActive) return;
+        if (_isActive == false)
+            return;
+
         _isActive = false;
+
         if (_target != null)
         {
             _target.localScale = _restScale;
@@ -56,13 +60,13 @@ public class ScaleAnimation : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!_isActive || _target == null) return;
+        if (_isActive == false || _target == null)
+            return;
 
         float cycle = Mathf.Repeat(Time.time * _frequency * _freqMul + _phaseOffset, 1f);
         float s = _breathCurve.Evaluate(cycle);
         float amp = _squashAmount * _ampMul;
 
-        // Volume-preserving feel: when X squishes, Y stretches, and vice versa.
         float sx = 1f - s * amp;
         float sy = 1f + s * amp;
         _target.localScale = new Vector3(_restScale.x * sx, _restScale.y * sy, _restScale.z);

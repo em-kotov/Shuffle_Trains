@@ -55,7 +55,16 @@ public class ParkingCar : MonoBehaviour
         Vector3 furthestSlotToMoveIn = DetermineNextSlot(out CellOccupancy cellOccupancy, out ParkingCar bumpedCar);
 
         _pendingBumpedCar = null;
-        bool willMove = (furthestSlotToMoveIn - _carPosition).sqrMagnitude > 0.0001f;
+        bool willMove;
+
+        if ((furthestSlotToMoveIn - _carPosition).sqrMagnitude > 0.0001f)
+        {
+            willMove = true;
+        }
+        else
+        {
+            willMove = false;
+        }
 
         if (cellOccupancy == CellOccupancy.Car)
         {
@@ -63,9 +72,16 @@ public class ParkingCar : MonoBehaviour
 
             if (bumpedCar != null)
             {
-                Vector2 impactDir = _orientation == CarOrientation.Horizontal
-                    ? new Vector2(_signDirection, 0f)
-                    : new Vector2(0f, _signDirection);
+                Vector2 impactDir;
+
+                if (_orientation == CarOrientation.Horizontal)
+                {
+                    impactDir = new Vector2(_signDirection, 0f);
+                }
+                else
+                {
+                    impactDir = new Vector2(0f, _signDirection);
+                }
 
                 if (willMove)
                 {
@@ -83,8 +99,6 @@ public class ParkingCar : MonoBehaviour
         if (cellOccupancy == CellOccupancy.Border)
         {
             _isAtBorderCell = true;
-            // The whole parking route is clear. Signal before the first move,
-            // including cats already in a border cell and automatic departures.
             DepartureStarted?.Invoke();
 
             if (willMove == false)
@@ -117,10 +131,7 @@ public class ParkingCar : MonoBehaviour
 
         if (_isAtBorderCell)
         {
-            // Reserve the border cell while the cat waits for the track. Without
-            // this, a full track leaves the cat lingering on a cell the grid
-            // thinks is free, so other cats path into / overlap it. Deactivate()
-            // releases the cell once the cat actually leaves for the track.
+            // Keep the border cell reserved while waiting, or another cat can move into it.
             _parkingRegistrator.RegisterCar(transform.position, this);
             _parkingRegistrator.RegisterTail(this, transform.position,
                                 _orientation, _signDirection, _length);

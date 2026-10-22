@@ -16,7 +16,11 @@ public class Shop : MonoBehaviour
     private void Awake()
     {
         _repository = new ShopRepository(_catalog);
-        _wallet = FindObjectOfType<Wallet>();
+    }
+
+    public void Initialize(IWalletSpender wallet)
+    {
+        _wallet = wallet;
     }
 
     public SlotStatus GetStatus(Theme theme)
@@ -51,7 +55,7 @@ public class Shop : MonoBehaviour
             return false;
         }
 
-        if (!_wallet.TrySpend(theme.Price))
+        if (_wallet.TrySpend(theme.Price) == false)
         {
             return false;
         }
@@ -63,7 +67,7 @@ public class Shop : MonoBehaviour
 
     public void Equip(Theme theme)
     {
-        if (theme == null || !_repository.IsOwned(theme.Id))
+        if (theme == null || _repository.IsOwned(theme.Id) == false)
         {
             return;
         }

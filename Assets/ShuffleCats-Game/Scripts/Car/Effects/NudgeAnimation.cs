@@ -25,17 +25,26 @@ public class NudgeAnimation : MonoBehaviour
 
     public void Activate(Transform target, Vector2 impactDir)
     {
-        if (_isActive) Deactivate();
+        if (_isActive)
+            Deactivate();
 
         _target = target;
         _restPos = _target.localPosition;
 
-        if (impactDir.sqrMagnitude > 1e-6f) impactDir.Normalize();
-        // impactDir is on the grid plane: x = world X, y = world Z.
+        if (impactDir.sqrMagnitude > 1e-6f)
+            impactDir.Normalize();
+
+        // impactDir uses the grid plane: x = world X, y = world Z.
         Vector3 worldDir = new Vector3(impactDir.x, 0f, impactDir.y);
-        _offsetDir = _target.parent != null
-            ? _target.parent.InverseTransformDirection(worldDir)
-            : worldDir;
+
+        if (_target.parent != null)
+        {
+            _offsetDir = _target.parent.InverseTransformDirection(worldDir);
+        }
+        else
+        {
+            _offsetDir = worldDir;
+        }
 
         _elapsed = 0f;
         _isActive = true;
@@ -43,8 +52,11 @@ public class NudgeAnimation : MonoBehaviour
 
     public void Deactivate()
     {
-        if (!_isActive) return;
+        if (_isActive == false)
+            return;
+
         _isActive = false;
+
         if (_target != null)
         {
             _target.localPosition = _restPos;
@@ -53,10 +65,12 @@ public class NudgeAnimation : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!_isActive || _target == null) return;
+        if (_isActive == false || _target == null)
+            return;
 
         _elapsed += Time.deltaTime;
         float t = _elapsed / _duration;
+
         if (t >= 1f)
         {
             _target.localPosition = _restPos;

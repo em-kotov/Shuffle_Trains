@@ -30,10 +30,4 @@ public class LooseUI : UIPanel
         _restartButton.interactable = false;
         base.Hide();
     }
-
-    // private void ShowText(string author)
-    // {
-    //     _currentText.text = $"Auto loose - Seems you're stuck. " +
-    //                         $"Click to restart - {author}";
-    // }
 }

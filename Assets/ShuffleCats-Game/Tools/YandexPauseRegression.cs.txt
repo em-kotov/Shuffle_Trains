@@ -335,7 +335,6 @@ public static class YandexPauseRegression
 
     private static void CheckMusicReload()
     {
-        // A reload must apply the persisted toggle without requiring UI input.
         Reset();
         PlayerPrefs.SetInt(SaveKeys.Music, 0);
         PlayerPrefs.SetFloat(SaveKeys.MusicVolume, 0.6f);
@@ -371,7 +370,6 @@ public static class YandexPauseRegression
         audio.SfxOn = false;
         Check(music.audible && AudioListener.volume == 0f, "Music no longer works independently from SFX");
 
-        // Also keep a deferred play silent if the SDK pauses before it starts.
         audio.MusicOn = false;
         music.contextSuspended = true;
         audio.MusicOn = true;

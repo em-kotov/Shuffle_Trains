@@ -5,8 +5,6 @@ using UnityEngine.SceneManagement;
 
 public class Bootstrap : MonoBehaviour
 {
-    // Neither wait should ever be hit: they only keep a silent SDK from holding
-    // the game hostage on the boot screen.
     private const float SdkTimeout = 8f;
     private const float CloudSaveTimeout = 5f;
 
@@ -20,15 +18,11 @@ public class Bootstrap : MonoBehaviour
         StartCoroutine(LoadFirstLevel());
     }
 
-    // The cloud snapshot has to land before the first level reads
-    // LevelProgress, otherwise the player would start on the wrong level and
-    // then have it swapped underneath them.
+    // Apply cloud progress before loading the first level, which reads the saved index.
     private IEnumerator LoadFirstLevel()
     {
         yield return WaitUntilOrTimeout(() => YandexSdk.IsResolved, SdkTimeout);
 
-        // Auto uses the SDK language; a saved manual choice takes precedence.
-        // Load tables asynchronously before UI is created (safe for WebGL).
         yield return Localization.Initialize();
         LocalizationBinder.Create();
 
@@ -41,9 +35,7 @@ public class Bootstrap : MonoBehaviour
 
         yield return SceneManager.LoadSceneAsync(_firstLevelIndex, LoadSceneMode.Single);
 
-        // Requirement 1.19.2: the player can interact from here. Game Ready has
-        // to precede the first gameplay section, so both are raised here rather
-        // than from YandexBridge's scene hook, which also sees the boot scene.
+        // Game Ready must precede GameplayStart; the bridge also sees the non-playable boot scene.
         YandexSdk.GameReady();
         YandexSdk.GameplayStart();
     }

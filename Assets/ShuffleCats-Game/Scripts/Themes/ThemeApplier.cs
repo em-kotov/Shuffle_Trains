@@ -54,9 +54,6 @@ public class ThemeApplier : MonoBehaviour
     private bool _playAreaBaseCached;
     private Vector2 _backgroundBaseSize;
 
-    // Used when stations are spawned at runtime (LevelBuilder) instead of being
-    // hand-placed: the serialized _stations list points at the old scene
-    // stations, so it must be rebuilt to target the freshly spawned ones.
     public void ClearStations()
     {
         _stations.Clear();
@@ -78,14 +75,23 @@ public class ThemeApplier : MonoBehaviour
     {
         foreach (Station station in stations)
         {
-            SpriteRenderer target = station != null ? station.ThemeTarget : null;
+            SpriteRenderer target;
+
+            if (station != null)
+            {
+                target = station.ThemeTarget;
+            }
+            else
+            {
+                target = null;
+            }
+
             if (target == null || _stations.Exists(entry => entry != null && entry.Target == target))
             {
                 continue;
             }
 
-            // Unlisted scene stations use the station prefab's A variant.
-            // Keep their authored flips; upper stations retain explicit overrides.
+            // Unlisted stations use variant A but retain authored flips.
             AddStation(target, StationSpriteVariant.A, target.flipX, target.flipY);
         }
     }
@@ -130,6 +136,7 @@ public class ThemeApplier : MonoBehaviour
     private void Apply()
     {
         Theme theme = ThemeResolver.GetEquipped(_catalog);
+
         if (theme == null)
         {
             return;
@@ -169,22 +176,27 @@ public class ThemeApplier : MonoBehaviour
         FitBackgroundToCamera(Camera.main);
     }
 
-    // Extend the tiled background instead of stretching the artwork or exposing
-    // the camera clear color above/below the board on tall browser viewports.
     public void FitBackgroundToCamera(Camera camera)
     {
-        if (_backgroundTarget == null || camera == null || !camera.orthographic) return;
+        if (_backgroundTarget == null || camera == null || camera.orthographic == false)
+            return;
+
         Transform background = _backgroundTarget.transform;
         var plane = new Plane(background.forward, background.position);
         Vector2 size = _backgroundBaseSize;
+
         for (int corner = 0; corner < 4; corner++)
         {
             Ray ray = camera.ViewportPointToRay(new Vector3(corner % 2, corner / 2, 0));
-            if (!plane.Raycast(ray, out float distance)) continue;
+
+            if (plane.Raycast(ray, out float distance) == false)
+                continue;
+
             Vector3 local = background.InverseTransformPoint(ray.GetPoint(distance));
             size.x = Mathf.Max(size.x, Mathf.Abs(local.x) * 2.02f);
             size.y = Mathf.Max(size.y, Mathf.Abs(local.y) * 2.02f);
         }
+
         _backgroundTarget.size = size;
     }
 
@@ -197,9 +209,15 @@ public class ThemeApplier : MonoBehaviour
                 continue;
             }
 
-            entry.Target.sprite = entry.Sprite == StationSpriteVariant.B
-                ? theme.StationSpriteB
-                : theme.StationSpriteA;
+            if (entry.Sprite == StationSpriteVariant.B)
+            {
+                entry.Target.sprite = theme.StationSpriteB;
+            }
+            else
+            {
+                entry.Target.sprite = theme.StationSpriteA;
+            }
+
             entry.Target.flipX = entry.FlipX;
             entry.Target.flipY = entry.FlipY;
             entry.Target.transform.localScale = theme.StationSpriteScale;
@@ -213,7 +231,7 @@ public class ThemeApplier : MonoBehaviour
             return;
         }
 
-        if (!_playAreaBaseCached)
+        if (_playAreaBaseCached == false)
         {
             _playAreaBaseRotation = _playAreaTarget.transform.localRotation;
             _playAreaBaseCached = true;

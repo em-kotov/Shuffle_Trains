@@ -19,6 +19,7 @@ public class ShopCatalog : ScriptableObject
                 return theme;
             }
         }
+
         return null;
     }
 
@@ -31,6 +32,7 @@ public class ShopCatalog : ScriptableObject
                 return theme;
             }
         }
+
         return null;
     }
 }

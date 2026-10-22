@@ -68,13 +68,29 @@ public class Scanner : MonoBehaviour
     private void ScanForCars(Vector3 origin, Vector3 direction)
     {
         bool carBlocking = false;
-        float threshold = _isBlockedByCar ? _clearedDistance : _bumpedDistance;
+        float threshold;
+
+        if (_isBlockedByCar)
+        {
+            threshold = _clearedDistance;
+        }
+        else
+        {
+            threshold = _bumpedDistance;
+        }
 
         if (Physics.Raycast(origin, direction, out RaycastHit hit, _clearedDistance, _carsDetectLayer))
         {
             if (hit.transform.gameObject.layer == LayerMask.NameToLayer(_carsLayerName))
             {
-                carBlocking = hit.distance <= threshold;
+                if (hit.distance <= threshold)
+                {
+                    carBlocking = true;
+                }
+                else
+                {
+                    carBlocking = false;
+                }
             }
         }
 
@@ -83,14 +99,13 @@ public class Scanner : MonoBehaviour
 
     private void ScanForStations(Vector3 origin, Vector3 direction)
     {
-        // Start the sweep slightly behind the origin so the sphere never begins
-        // already overlapping a station ahead (SphereCast ignores start-overlap).
-        // Extend the distance by the same offset so forward reach is unchanged.
+        // SphereCast ignores initial overlaps. Offset its origin backward and extend its reach equally.
         float backOffset = _sphereCastRadius + 0.05f;
         Vector3 castOrigin = origin - (direction * backOffset);
         float castDistance = _clearedDistance + backOffset;
 
-        if (Physics.SphereCast(castOrigin, _sphereCastRadius, direction, out RaycastHit hit, castDistance, _stationsDetectLayer))
+        if (Physics.SphereCast(castOrigin, _sphereCastRadius, direction,
+            out RaycastHit hit, castDistance, _stationsDetectLayer))
         {
             int hitLayer = hit.transform.gameObject.layer;
 
@@ -146,9 +161,6 @@ public class Scanner : MonoBehaviour
         Gizmos.DrawRay(_backwardOrigin.position, _backwardOrigin.forward *
                      _clearedDistance);
 
-        // Visualize the station SphereCast volume: spheres at the swept cast's
-        // start and end, matching the back-offset and distance used in
-        // ScanForStations.
         float backOffset = _sphereCastRadius + 0.05f;
         Vector3 sphereStart = _backwardOrigin.position -
                             (_backwardOrigin.forward * backOffset);

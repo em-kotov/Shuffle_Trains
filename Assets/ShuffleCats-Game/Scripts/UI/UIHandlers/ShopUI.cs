@@ -75,7 +75,12 @@ public class ShopUI : UIPanel
 
         _sections.Add(sectionUI);
         var scroll = _sectionsParent.GetComponentInParent<ScrollRect>();
-        if (scroll != null) { scroll.StopMovement(); scroll.verticalNormalizedPosition = 1; }
+
+        if (scroll != null)
+        {
+            scroll.StopMovement();
+            scroll.verticalNormalizedPosition = 1;
+        }
     }
 
     private void RefreshAllSlots()

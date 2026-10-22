@@ -8,7 +8,6 @@ using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-// The package owns the selected locale; existing code keeps using English keys.
 public static class Localization
 {
     public const string TableName = "Game UI";
@@ -31,8 +30,11 @@ public static class Localization
     private static void Reset()
     {
         LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+
         foreach (var handle in Handles)
-            if (handle.IsValid()) Addressables.Release(handle);
+            if (handle.IsValid())
+                Addressables.Release(handle);
+
         Handles.Clear();
         Tables.Clear();
         IsReady = false;
@@ -41,23 +43,28 @@ public static class Localization
 
     public static IEnumerator Initialize()
     {
-        if (IsReady) yield break;
+        if (IsReady)
+            yield break;
+
         yield return LocalizationSettings.InitializationOperation;
+
         foreach (Locale locale in LocalizationSettings.AvailableLocales.Locales)
         {
             var handle = LocalizationSettings.StringDatabase.GetTableAsync(TableName, locale);
             yield return handle;
+
             if (handle.Status != AsyncOperationStatus.Succeeded || handle.Result == null)
             {
                 Debug.LogError("Could not load UI translations for " + locale.Identifier.Code);
                 continue;
             }
-            // Retain these tiny tables across locale changes, keeping immediate
-            // game messages safe on WebGL without WaitForCompletion.
+
+            // Retain loaded tables so immediate WebGL lookups never need WaitForCompletion.
             Addressables.ResourceManager.Acquire(handle);
             Handles.Add(handle);
             Tables[locale.Identifier.Code] = handle.Result;
         }
+
         IsReady = true;
         LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
         LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
@@ -71,17 +78,26 @@ public static class Localization
         PlayerPrefs.Save();
         var previous = LocalizationSettings.SelectedLocale;
         ApplyPreference();
+
         // Auto and a manual choice can resolve to the same locale.
-        if (previous == LocalizationSettings.SelectedLocale) Changed?.Invoke();
+        if (previous == LocalizationSettings.SelectedLocale)
+            Changed?.Invoke();
     }
 
     private static void ApplyPreference()
     {
-        if (!IsReady) return;
+        if (IsReady == false)
+            return;
+
         string code = Preference;
-        if (code == Auto) code = DetectLanguageCode();
+
+        if (code == Auto)
+            code = DetectLanguageCode();
+
         var locale = LocalizationSettings.AvailableLocales.GetLocale(Code(Resolve(code)));
-        if (locale != null) LocalizationSettings.SelectedLocale = locale;
+
+        if (locale != null)
+            LocalizationSettings.SelectedLocale = locale;
     }
 
     private static string DetectLanguageCode()
@@ -89,35 +105,87 @@ public static class Localization
 #if UNITY_EDITOR
         return UnityEditor.EditorPrefs.GetString(EditorLanguageKey, "ru");
 #else
-        if (YandexSdk.IsInitialized) return YandexSdk.Language;
+        if (YandexSdk.IsInitialized)
+            return YandexSdk.Language;
+
         switch (Application.systemLanguage)
         {
-            case SystemLanguage.Turkish: return "tr";
-            case SystemLanguage.Russian: return "ru";
-            case SystemLanguage.Ukrainian: return "uk";
-            case SystemLanguage.Belarusian: return "be";
-            default: return "en";
+            case SystemLanguage.Turkish:
+                return "tr";
+            case SystemLanguage.Russian:
+                return "ru";
+            case SystemLanguage.Ukrainian:
+                return "uk";
+            case SystemLanguage.Belarusian:
+                return "be";
+            default:
+                return "en";
         }
 #endif
     }
 
     public static string Get(string english)
     {
-        if (string.IsNullOrEmpty(english)) return english;
-        return Tables.TryGetValue(Code(Current), out var table)
-            ? table.GetEntry(english)?.LocalizedValue ?? english : english;
+        if (string.IsNullOrEmpty(english))
+            return english;
+
+        if (Tables.TryGetValue(Code(Current), out var table))
+        {
+            return table.GetEntry(english)?.LocalizedValue ?? english;
+        }
+        else
+        {
+            return english;
+        }
     }
 
-    public static bool HasKey(string english) => !string.IsNullOrEmpty(english)
+    public static bool HasKey(string english) => string.IsNullOrEmpty(english) == false
         && Tables.TryGetValue("en", out var table) && table.GetEntry(english) != null;
     public static string Format(string english, params object[] arguments) => string.Format(Get(english), arguments);
     private static void OnLocaleChanged(Locale locale) => Changed?.Invoke();
-    public static string NormalizePreference(string value) => value == "en" || value == "ru" || value == "tr" ? value : Auto;
-    public static string Code(Language language) => language == Language.Turkish ? "tr" : language == Language.Russian ? "ru" : "en";
+    public static string NormalizePreference(string value)
+    {
+        if (value == "en" || value == "ru" || value == "tr")
+        {
+            return value;
+        }
+        else
+        {
+            return Auto;
+        }
+    }
+
+    public static string Code(Language language)
+    {
+        if (language == Language.Turkish)
+        {
+            return "tr";
+        }
+        else if (language == Language.Russian)
+        {
+            return "ru";
+        }
+        else
+        {
+            return "en";
+        }
+    }
 
     public static Language Resolve(string languageCode)
     {
         string code = (languageCode ?? string.Empty).Trim().ToLowerInvariant().Split('-', '_')[0];
-        return code == "tr" ? Language.Turkish : RussianCodes.Contains(code) ? Language.Russian : Language.English;
+
+        if (code == "tr")
+        {
+            return Language.Turkish;
+        }
+        else if (RussianCodes.Contains(code))
+        {
+            return Language.Russian;
+        }
+        else
+        {
+            return Language.English;
+        }
     }
 }

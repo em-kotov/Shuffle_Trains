@@ -49,6 +49,7 @@ public class SpriteRendererSkinApplier : MonoBehaviour
     private void Apply()
     {
         SkinItem equipped = SkinResolver.GetEquipped(_catalog, _category);
+
         if (equipped == null)
         {
             return;
@@ -58,6 +59,7 @@ public class SpriteRendererSkinApplier : MonoBehaviour
         {
             _target.sprite = equipped.AppliedSprite;
         }
+
         _target.color = equipped.Tint;
     }
 }

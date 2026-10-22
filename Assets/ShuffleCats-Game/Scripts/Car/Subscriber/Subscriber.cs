@@ -69,8 +69,6 @@ public class Subscriber : MonoBehaviour
         _clickDetector.Initialize(_raycaster);
     }
 
-    // Applies the per-level placement data that varies between instances of the
-    // same cat prefab. Body color and length come from the prefab itself.
     public void Configure(CarOrientation orientation, float signDirection,
                         bool invertFlip, bool trackFlipSeparate, bool invertFlipTrack,
                         bool applyRotationFix, bool rotateFixLeft,
@@ -78,27 +76,53 @@ public class Subscriber : MonoBehaviour
     {
         _orientation = orientation;
         _signDirection = signDirection;
-        _colors = passengers != null ? new List<CatColor>(passengers) : new List<CatColor>();
+
+        if (passengers != null)
+        {
+            _colors = new List<CatColor>(passengers);
+        }
+        else
+        {
+            _colors = new List<CatColor>();
+        }
+
         _totalPassengersCount = _colors.Count;
 
-        // Prefer the manually-wired reference (lets the lock live on the root);
-        // fall back to the legacy lookup on the sprite for older prefabs.
-        SpriteFacingLock facingLock = _spriteFacingLock != null
-            ? _spriteFacingLock
-            : (_catTexture != null ? _catTexture.GetComponent<SpriteFacingLock>() : null);
+        SpriteFacingLock facingLock;
+
+        if (_spriteFacingLock != null)
+        {
+            facingLock = _spriteFacingLock;
+        }
+        else if (_catTexture != null)
+        {
+            facingLock = _catTexture.GetComponent<SpriteFacingLock>();
+        }
+        else
+        {
+            facingLock = null;
+        }
 
         if (facingLock != null)
         {
             _spriteFacingLock = facingLock;
             facingLock.SetInvertFlip(invertFlip);
             facingLock.SetTrackFlip(trackFlipSeparate, invertFlipTrack);
+
             if (_length == 1)
             {
-                Vector3 direction = orientation == CarOrientation.Horizontal
-                    ? Vector3.right * signDirection
-                    : Vector3.forward * signDirection;
-                // The green single-cell texture is drawn facing right; all
-                // other single-cell textures face left.
+                Vector3 direction;
+
+                if (orientation == CarOrientation.Horizontal)
+                {
+                    direction = Vector3.right * signDirection;
+                }
+                else
+                {
+                    direction = Vector3.forward * signDirection;
+                }
+
+                // The green single-cell texture faces right; the other single-cell textures face left.
                 facingLock.SetParkingDirection(direction, _carColor == CatColor.Green);
             }
         }
@@ -134,18 +158,49 @@ public class Subscriber : MonoBehaviour
 
         _scaleAnimation.Activate(_catTexture.transform);
         _runningTrail = GetComponent<CatRunningTrail>();
+
         if (_runningTrail == null)
             _runningTrail = gameObject.AddComponent<CatRunningTrail>();
-        Vector3 parkingDirection = _orientation == CarOrientation.Horizontal
-            ? Vector3.right * _signDirection : Vector3.forward * _signDirection;
+
+        Vector3 parkingDirection;
+
+        if (_orientation == CarOrientation.Horizontal)
+        {
+            parkingDirection = Vector3.right * _signDirection;
+        }
+        else
+        {
+            parkingDirection = Vector3.forward * _signDirection;
+        }
+
         _runningTrail.Initialize(_catTexture, _carHead, _carColor, parkingDirection);
         _trackIndicator = GetComponent<CatTrackIndicator>();
+
         if (_trackIndicator == null)
             _trackIndicator = gameObject.AddComponent<CatTrackIndicator>();
-        // Normalized face locations in the source art. Long cats have their face
-        // near the top; the green short cat is the one drawn facing right.
-        Vector2 faceAnchor = _length > 1 ? new Vector2(0.53f, 0.68f) :
-            new Vector2(_carColor == CatColor.Green ? 0.65f : 0.38f, 0.55f);
+
+        Vector2 faceAnchor;
+
+        if (_length > 1)
+        {
+            faceAnchor = new Vector2(0.53f, 0.68f);
+        }
+        else
+        {
+            float faceX;
+
+            if (_carColor == CatColor.Green)
+            {
+                faceX = 0.65f;
+            }
+            else
+            {
+                faceX = 0.38f;
+            }
+
+            faceAnchor = new Vector2(faceX, 0.55f);
+        }
+
         _trackIndicator.Initialize(_catTexture, faceAnchor);
     }
 
@@ -160,9 +215,7 @@ public class Subscriber : MonoBehaviour
             canEnterTrack = _trackRegistrator.IsCountAllows();
         }
 
-        // Reserve the slot synchronously with the passing check above — there is
-        // no yield between IsCountAllows() and Reserve(), so concurrent border
-        // arrivals can't all slip past a stale count and overflow the limit.
+        // Do not yield between checking capacity and reserving it; simultaneous arrivals can overbook.
         _trackRegistrator.Reserve();
         DeactivateParkingCar();
         ActivateSplineCar();
@@ -170,8 +223,7 @@ public class Subscriber : MonoBehaviour
 
     private void OnBorderArrival()
     {
-        // Guard re-clicks while already queued for the track: a second routine
-        // would double-reserve the slot and double-activate the spline car.
+        // A second queued routine would reserve the same cat twice.
         if (_isWaitingForTrack)
             return;
 
@@ -221,8 +273,7 @@ public class Subscriber : MonoBehaviour
 
     private void OnParkingDepartureStarted()
     {
-        // A repeated click at a full track must keep the waiting dots visible.
-        if (!_isWaitingForTrack)
+        if (_isWaitingForTrack == false)
             _trackIndicator?.ShowReady();
     }
 
@@ -296,7 +347,6 @@ public class Subscriber : MonoBehaviour
         if (_sorterCar.IsFinished)
             return;
 
-        //Debug.Log("Subscriber - on reset found");
         _sorterCar.TryResetStationProgress();
     }
 
@@ -348,9 +398,7 @@ public class Subscriber : MonoBehaviour
 
         _scaleAnimation.Deactivate();
 
-        // The exit endpoint can be visible in wide or zoomed-out viewports.
-        // Stop rendering the whole completed cat, including its passengers and
-        // running trail, instead of relying on the endpoint being off camera.
+        // The exit endpoint can be visible in wide viewports; hide the cat instead of relying on framing.
         gameObject.SetActive(false);
         ReachedEnd?.Invoke(this);
     }

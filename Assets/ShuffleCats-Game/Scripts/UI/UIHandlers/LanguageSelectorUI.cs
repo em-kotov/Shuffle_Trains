@@ -1,7 +1,6 @@
 using TMPro;
 using UnityEngine;
 
-// Built inside the shared options panel, like the runtime leaderboard/hint UI.
 public sealed class LanguageSelectorUI : MonoBehaviour
 {
     private static readonly string[] Codes = { Localization.Auto, "ru", "en", "tr" };
@@ -13,7 +12,9 @@ public sealed class LanguageSelectorUI : MonoBehaviour
 
     public static void Attach(Transform panel)
     {
-        if (panel == null || panel.Find("LanguageSelector") != null) return;
+        if (panel == null || panel.Find("LanguageSelector") != null)
+            return;
+
         var root = Rect("LanguageSelector", panel, new Vector2(0, -59), new Vector2(310, 102));
         root.gameObject.AddComponent<LanguageSelectorUI>().Build(panel);
     }
@@ -22,22 +23,40 @@ public sealed class LanguageSelectorUI : MonoBehaviour
     {
         _font = Resources.Load<TMP_FontAsset>("Fonts/Eno Black SDF");
 
-        // Make room for the selector while keeping the whole card within the
-        // existing 450-unit minimum viewport in both orientations.
         Resize(panel, "BgImage", new Vector2(360, 420));
         Resize(panel, "BgImageShadow", new Vector2(360, 420));
         LanguageCardGraphic.WindowBackground(panel.Find("BgImage") as RectTransform);
         LanguageCardGraphic.WindowBackground(panel.Find("BgImageShadow") as RectTransform, true);
-        Move(panel, "Title", 40); Move(panel, "TitleShadow", 40);
-        Move(panel, "SettingsIcon", 40); Move(panel, "SettingsIconShadow", 40);
-        Move(panel, "MusicToggle", 40); Move(panel, "MusicSlider", 40);
-        Move(panel, "SfxToggle", 40); Move(panel, "SoundSlider", 40);
+        Move(panel, "Title", 40);
+        Move(panel, "TitleShadow", 40);
+        Move(panel, "SettingsIcon", 40);
+        Move(panel, "SettingsIconShadow", 40);
+        Move(panel, "MusicToggle", 40);
+        Move(panel, "MusicSlider", 40);
+        Move(panel, "SfxToggle", 40);
+        Move(panel, "SoundSlider", 40);
+
         foreach (string name in new[] { "RestartButton", "RestartButtonShadow" })
         {
             var rect = panel.Find(name) as RectTransform;
-            if (rect == null) continue;
+
+            if (rect == null)
+                continue;
+
             rect.sizeDelta = new Vector2(56, 56);
-            rect.anchoredPosition = new Vector2(0, name.EndsWith("Shadow") ? -153 : -150);
+            float verticalPosition;
+
+            if (name.EndsWith("Shadow"))
+            {
+                verticalPosition = -153;
+            }
+            else
+            {
+                verticalPosition = -150;
+            }
+
+            rect.anchoredPosition = new Vector2(0, verticalPosition);
+
             foreach (TMP_Text text in rect.GetComponentsInChildren<TMP_Text>(true))
             {
                 text.rectTransform.anchoredPosition = new Vector2(0, -39);
@@ -83,14 +102,25 @@ public sealed class LanguageSelectorUI : MonoBehaviour
                 flag.GetComponent<LanguageFlagGraphic>().raycastTarget = false;
                 Label("Name", rect, Names[i], new Vector2(0, -17), new Vector2(60, 18), 12);
             }
+
             var check = Rect("Selected", rect, new Vector2(24, 23), new Vector2(17, 17));
             var checkSprite = panel.Find("MusicToggle/Background/Checkmark")?.GetComponent<UnityEngine.UI.Image>();
             var checkImage = check.gameObject.AddComponent<UnityEngine.UI.Image>();
-            checkImage.sprite = checkSprite != null ? checkSprite.sprite : null;
+
+            if (checkSprite != null)
+            {
+                checkImage.sprite = checkSprite.sprite;
+            }
+            else
+            {
+                checkImage.sprite = null;
+            }
+
             checkImage.color = new Color32(76, 125, 62, 255);
             checkImage.raycastTarget = false;
             _checks[i] = check.gameObject;
         }
+
         Refresh();
     }
 
@@ -101,10 +131,38 @@ public sealed class LanguageSelectorUI : MonoBehaviour
     {
         for (int i = 0; i < Codes.Length; i++)
         {
-            if (_faces[i] == null) continue;
-            bool selected = Localization.Preference == Codes[i];
-            _faces[i].color = selected ? new Color32(214, 232, 176, 255) : new Color32(255, 247, 229, 255);
-            _faces[i].BorderColor = selected ? new Color32(108, 150, 81, 255) : new Color32(190, 162, 122, 255);
+            if (_faces[i] == null)
+                continue;
+
+            bool selected;
+
+            if (Localization.Preference == Codes[i])
+            {
+                selected = true;
+            }
+            else
+            {
+                selected = false;
+            }
+
+            if (selected)
+            {
+                _faces[i].color = new Color32(214, 232, 176, 255);
+            }
+            else
+            {
+                _faces[i].color = new Color32(255, 247, 229, 255);
+            }
+
+            if (selected)
+            {
+                _faces[i].BorderColor = new Color32(108, 150, 81, 255);
+            }
+            else
+            {
+                _faces[i].BorderColor = new Color32(190, 162, 122, 255);
+            }
+
             _faces[i].SetVerticesDirty();
             _checks[i].SetActive(selected);
         }
@@ -143,10 +201,12 @@ public sealed class LanguageSelectorUI : MonoBehaviour
 
     private static void Move(Transform panel, string name, float amount)
     {
-        if (panel.Find(name) is RectTransform rect) rect.anchoredPosition += Vector2.up * amount;
+        if (panel.Find(name) is RectTransform rect)
+            rect.anchoredPosition += Vector2.up * amount;
     }
     private static void Resize(Transform panel, string name, Vector2 size)
     {
-        if (panel.Find(name) is RectTransform rect) rect.sizeDelta = size;
+        if (panel.Find(name) is RectTransform rect)
+            rect.sizeDelta = size;
     }
 }

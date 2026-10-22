@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// Small vector artwork: rounded cream balloon, warm outline and animated ink.
-// No textures, fonts or per-frame allocations; the same geometry stays sharp at any scale.
 [RequireComponent(typeof(CanvasRenderer))]
 public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
 {
@@ -43,6 +41,7 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
         if (_state == state && _reaction == reaction && (state == CatTrackIndicator.IndicatorState.Ready ||
             Mathf.Abs(_animation - animation) < 0.04f))
             return;
+
         _state = state;
         _reaction = reaction;
         _animation = animation;
@@ -52,9 +51,18 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
     protected override void OnPopulateMesh(VertexHelper mesh)
     {
         mesh.Clear();
-        bool ready = _state == CatTrackIndicator.IndicatorState.Ready;
+        bool ready;
+
+        if (_state == CatTrackIndicator.IndicatorState.Ready)
+        {
+            ready = true;
+        }
+        else
+        {
+            ready = false;
+        }
+
         _outlineCount = 0;
-        // The tail is part of the silhouette, so no seam cuts across its base.
         Curve(new Vector2(34, 34), new Vector2(17, 43), new Vector2(16, 64), new Vector2(29, 78));
         Curve(new Vector2(29, 78), new Vector2(44, 94), new Vector2(83, 95), new Vector2(103, 83));
         Curve(new Vector2(103, 83), new Vector2(123, 73), new Vector2(123, 50), new Vector2(108, 37));
@@ -65,11 +73,22 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
 
         Fill(mesh, new Vector2(0, -3f), new Color32(110, 86, 76, 20), new Color32(110, 86, 76, 20));
         Stroke(mesh, _outline, _outlineCount, true, 6f, new Color32(110, 86, 76, 12), new Vector2(0, -3f));
-        Color bottom = ready ? new Color32(222, 243, 218, 255) : new Color32(255, 224, 198, 255);
+        Color bottom;
+
+        if (ready)
+        {
+            bottom = new Color32(222, 243, 218, 255);
+        }
+        else
+        {
+            bottom = new Color32(255, 224, 198, 255);
+        }
+
         if (_state == CatTrackIndicator.IndicatorState.Bumped)
             bottom = new Color32(255, 225, 222, 255);
         else if (_state == CatTrackIndicator.IndicatorState.Exiting)
             bottom = new Color32(255, 233, 218, 255);
+
         Fill(mesh, Vector2.zero, bottom, new Color32(255, 253, 241, 255));
         Stroke(mesh, _outline, _outlineCount, true, 3.4f, Outline, Vector2.zero);
 
@@ -78,11 +97,11 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
             float angle = Mathf.Lerp(0.65f, 2.45f, i / 14f);
             _ink[i] = new Vector2(70f + Mathf.Cos(angle) * 37f, 58f + Mathf.Sin(angle) * 25f);
         }
+
         Stroke(mesh, _ink, 15, false, 2.8f, new Color(1f, 1f, 1f, 0.8f), Vector2.zero);
 
         if (ready)
         {
-            // A hand-drawn rounded exclamation; no font or localization dependency.
             _ink[0] = new Vector2(70, 74);
             _ink[1] = new Vector2(68, 53);
             Stroke(mesh, _ink, 2, false, 8f, ReadyInk, Vector2.zero);
@@ -94,21 +113,22 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
         }
         else if (_state == CatTrackIndicator.IndicatorState.Bumped)
         {
-            // A pair of soft coral frustration marks with rounded ends and joins.
             for (int line = 0; line < 2; line++)
             {
                 Vector2 center = new Vector2(52f + line * 31f, 57f);
                 float sway = Mathf.Sin(_animation * 3f + line * 1.7f) * 1.1f;
+
                 for (int i = 0; i < BumpZigzag.Length; i++)
                     _ink[i] = center + BumpZigzag[i] + new Vector2(sway, 0f);
+
                 Stroke(mesh, _ink, BumpZigzag.Length, false, 4.2f, BumpInk, Vector2.zero);
+
                 for (int i = 1; i < BumpZigzag.Length - 1; i++)
                     Disc(mesh, _ink[i], 2.1f, BumpInk);
             }
         }
         else if (_state == CatTrackIndicator.IndicatorState.Waiting)
         {
-            // Three readable dots pulse and bounce in sequence while the entry is blocked.
             for (int i = 0; i < 3; i++)
             {
                 float pulse = Mathf.Max(0f, Mathf.Sin(_animation * 2f - i * Mathf.PI * 2f / 3f));
@@ -121,6 +141,7 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
         {
             float breathe = 1f + Mathf.Sin(_animation * 1.2f) * 0.08f;
             Vector2 center = new Vector2(67f, 57f);
+
             for (int i = 0; i < _ink.Length; i++)
             {
                 float t = i / (float)(_ink.Length - 1);
@@ -128,11 +149,11 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
                 float tilt = Mathf.Sin(t * 9f + _animation * 0.6f) * 0.65f;
                 float x = Mathf.Sin(angle) * (14f + Mathf.Sin(t * 8f + _animation) * 3f);
                 float y = Mathf.Cos(angle) * (11f + Mathf.Cos(t * 9f - _animation) * 2f);
-                // Rotate both axes together: the loops must never collapse into slashes.
                 _ink[i] = new Vector2(44f + t * 46f + x * Mathf.Cos(tilt) - y * Mathf.Sin(tilt),
                     57f + x * Mathf.Sin(tilt) + y * Mathf.Cos(tilt) + Mathf.Sin(t * 11f + _animation) * 2f);
                 _ink[i] = center + (_ink[i] - center) * breathe;
             }
+
             Stroke(mesh, _ink, _ink.Length, false, 3.2f, WaitingInk, Vector2.zero);
         }
     }
@@ -140,10 +161,10 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
     private void DrawExitReaction(VertexHelper mesh)
     {
         float pulse = 1f + Mathf.Sin(_animation * 1.8f) * 0.055f;
+
         if (_reaction == CatTrackIndicator.ExitReaction.Heart)
         {
             Heart(mesh, new Vector2(69, 60), 22f * pulse, 2.4f);
-            // A small cream glint keeps the heart in the same painted style as the cats.
             _ink[0] = new Vector2(55, 67);
             _ink[1] = new Vector2(57, 70);
             _ink[2] = new Vector2(61, 71);
@@ -156,6 +177,7 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
             Disc(mesh, center, 21f, Honey, 40);
             Heart(mesh, new Vector2(59.5f, 64), 8f * pulse, 1.2f);
             Heart(mesh, new Vector2(78.5f, 64), 8f * pulse, 1.2f);
+
             for (int i = 0; i < 17; i++)
             {
                 float t = i / 16f;
@@ -163,6 +185,7 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
                 _ink[i] = s * s * new Vector2(60, 52) + 2f * s * t * new Vector2(69, 42)
                     + t * t * new Vector2(78, 52);
             }
+
             Stroke(mesh, _ink, 17, false, 3.4f, new Color32(151, 106, 78, 255), Vector2.zero);
         }
         else
@@ -172,11 +195,11 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
             FillShape(mesh, _ink, count, new Vector2(68, 57) + bounce,
                 new Color32(243, 181, 118, 255), new Color32(255, 229, 175, 255));
             Stroke(mesh, _ink, count, true, 2.4f, HoneyEdge, Vector2.zero);
-            // A yellow cuff and two light finger creases make the small silhouette readable.
             count = RoundedShape(Cuff, bounce);
             FillShape(mesh, _ink, count, new Vector2(49.5f, 50) + bounce,
                 new Color32(235, 195, 80, 255), new Color32(255, 232, 145, 255));
             Stroke(mesh, _ink, count, true, 2.2f, new Color32(195, 159, 78, 255), Vector2.zero);
+
             for (int i = 0; i < 2; i++)
             {
                 _ink[0] = new Vector2(79, 49 + i * 8) + bounce;
@@ -189,6 +212,7 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
     private void Heart(VertexHelper mesh, Vector2 center, float halfWidth, float border)
     {
         const int count = 48;
+
         for (int i = 0; i < count; i++)
         {
             float t = i * Mathf.PI * 2f / count;
@@ -197,6 +221,7 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
                 13f * Mathf.Cos(t) - 5f * Mathf.Cos(2f * t) - 2f * Mathf.Cos(3f * t) - Mathf.Cos(4f * t))
                 * (halfWidth / 16f);
         }
+
         FillShape(mesh, _ink, count, center, HeartEdge, HeartPink);
         Stroke(mesh, _ink, count, true, border, HeartEdge, Vector2.zero);
     }
@@ -204,10 +229,12 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
     private int RoundedShape(Vector2[] corners, Vector2 offset)
     {
         int count = 0;
+
         for (int i = 0; i < corners.Length; i++)
         {
             Vector2 a = Vector2.Lerp(corners[i], corners[(i + corners.Length - 1) % corners.Length], 0.2f);
             Vector2 b = Vector2.Lerp(corners[i], corners[(i + 1) % corners.Length], 0.2f);
+
             for (int step = 0; step < 4; step++)
             {
                 float t = step / 3f;
@@ -215,6 +242,7 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
                 _ink[count++] = s * s * a + 2f * s * t * corners[i] + t * t * b + offset;
             }
         }
+
         return count;
     }
 
@@ -222,15 +250,19 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
         Color bottom, Color top)
     {
         float minY = points[0].y, maxY = minY;
+
         for (int i = 1; i < count; i++)
         {
             minY = Mathf.Min(minY, points[i].y);
             maxY = Mathf.Max(maxY, points[i].y);
         }
+
         int first = mesh.currentVertCount;
         AddVertex(mesh, center, Color.Lerp(bottom, top, Mathf.InverseLerp(minY, maxY, center.y)));
+
         for (int i = 0; i < count; i++)
             AddVertex(mesh, points[i], Color.Lerp(bottom, top, Mathf.InverseLerp(minY, maxY, points[i].y)));
+
         for (int i = 0; i < count; i++)
             mesh.AddTriangle(first, first + 1 + i, first + 1 + (i + 1) % count);
     }
@@ -250,8 +282,10 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
     {
         int first = mesh.currentVertCount;
         AddVertex(mesh, new Vector2(65, 54) + offset, Color.Lerp(bottom, top, 0.58f));
+
         for (int i = 0; i < _outlineCount; i++)
             AddVertex(mesh, _outline[i] + offset, Color.Lerp(bottom, top, Mathf.InverseLerp(15, 85, _outline[i].y)));
+
         for (int i = 0; i < _outlineCount; i++)
             mesh.AddTriangle(first, first + 1 + i, first + 1 + (i + 1) % _outlineCount);
     }
@@ -262,12 +296,54 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
         const float fringe = 0.8f;
         int first = mesh.currentVertCount;
         Color clear = new Color(tint.r, tint.g, tint.b, 0f);
+
         for (int i = 0; i < count; i++)
         {
-            Vector2 before = points[i] - points[i == 0 ? (closed ? count - 1 : 0) : i - 1];
-            Vector2 after = points[i == count - 1 ? (closed ? 0 : i) : i + 1] - points[i];
-            if (before.sqrMagnitude < 0.0001f) before = after;
-            if (after.sqrMagnitude < 0.0001f) after = before;
+            int previousIndex;
+
+            if (i == 0)
+            {
+                if (closed)
+                {
+                    previousIndex = count - 1;
+                }
+                else
+                {
+                    previousIndex = 0;
+                }
+            }
+            else
+            {
+                previousIndex = i - 1;
+            }
+
+            Vector2 before = points[i] - points[previousIndex];
+            int nextIndex;
+
+            if (i == count - 1)
+            {
+                if (closed)
+                {
+                    nextIndex = 0;
+                }
+                else
+                {
+                    nextIndex = i;
+                }
+            }
+            else
+            {
+                nextIndex = i + 1;
+            }
+
+            Vector2 after = points[nextIndex] - points[i];
+
+            if (before.sqrMagnitude < 0.0001f)
+                before = after;
+
+            if (after.sqrMagnitude < 0.0001f)
+                after = before;
+
             Vector2 normalA = new Vector2(-before.y, before.x).normalized;
             Vector2 normalB = new Vector2(-after.y, after.x).normalized;
             Vector2 normal = (normalA + normalB).normalized;
@@ -278,18 +354,31 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
             AddVertex(mesh, p + normal * thickness * 0.5f, tint);
             AddVertex(mesh, p + normal * (thickness * 0.5f + fringe), clear);
         }
-        int segments = closed ? count : count - 1;
+
+        int segments;
+
+        if (closed)
+        {
+            segments = count;
+        }
+        else
+        {
+            segments = count - 1;
+        }
+
         for (int i = 0; i < segments; i++)
         {
             int a = first + i * 4;
             int b = first + ((i + 1) % count) * 4;
+
             for (int band = 0; band < 3; band++)
             {
                 mesh.AddTriangle(a + band, b + band, b + band + 1);
                 mesh.AddTriangle(a + band, b + band + 1, a + band + 1);
             }
         }
-        if (!closed)
+
+        if (closed == false)
         {
             Disc(mesh, points[0] + offset, thickness * 0.5f, tint);
             Disc(mesh, points[count - 1] + offset, thickness * 0.5f, tint);
@@ -300,6 +389,7 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
     {
         int first = mesh.currentVertCount;
         AddVertex(mesh, center, tint);
+
         for (int i = 0; i < segments; i++)
         {
             float angle = i * Mathf.PI * 2f / segments;
@@ -307,6 +397,7 @@ public sealed class CatTrackBubbleGraphic : UnityEngine.UI.MaskableGraphic
             AddVertex(mesh, center + direction * radius, tint);
             AddVertex(mesh, center + direction * (radius + 0.8f), new Color(tint.r, tint.g, tint.b, 0));
         }
+
         for (int i = 0; i < segments; i++)
         {
             int a = first + 1 + i * 2;

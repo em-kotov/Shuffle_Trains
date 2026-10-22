@@ -1,7 +1,5 @@
 using UnityEngine;
 
-// Compose the vector artwork in one fragment before applying the button tint.
-// Fading overlapping mesh pieces separately makes their hidden edges show through.
 [RequireComponent(typeof(CanvasRenderer))]
 public sealed class HintLampGraphic : UnityEngine.UI.MaskableGraphic
 {
@@ -12,6 +10,7 @@ public sealed class HintLampGraphic : UnityEngine.UI.MaskableGraphic
     {
         base.Awake();
         Shader shader = Resources.Load<Shader>("HintLamp");
+
         if (shader != null)
         {
             _lampMaterial = new Material(shader) { name = "Hint lamp composite" };
@@ -33,7 +32,9 @@ public sealed class HintLampGraphic : UnityEngine.UI.MaskableGraphic
 
     protected override void OnDestroy()
     {
-        if (_lampMaterial != null) Destroy(_lampMaterial);
+        if (_lampMaterial != null)
+            Destroy(_lampMaterial);
+
         base.OnDestroy();
     }
 }

@@ -6,12 +6,40 @@ public static class HintSettings
 
     public static bool Enabled
     {
-        get => _enabled ?? (_enabled = PlayerPrefs.GetInt(SaveKeys.Hints, 1) != 0).Value;
+        get
+        {
+            if (_enabled.HasValue == false)
+            {
+                if (PlayerPrefs.GetInt(SaveKeys.Hints, 1) != 0)
+                {
+                    _enabled = true;
+                }
+                else
+                {
+                    _enabled = false;
+                }
+            }
+
+            return _enabled.Value;
+        }
         set
         {
-            if (Enabled == value) return;
+            if (Enabled == value)
+                return;
+
             _enabled = value;
-            PlayerPrefs.SetInt(SaveKeys.Hints, value ? 1 : 0);
+            int enabledValue;
+
+            if (value)
+            {
+                enabledValue = 1;
+            }
+            else
+            {
+                enabledValue = 0;
+            }
+
+            PlayerPrefs.SetInt(SaveKeys.Hints, enabledValue);
             PlayerPrefs.Save();
         }
     }

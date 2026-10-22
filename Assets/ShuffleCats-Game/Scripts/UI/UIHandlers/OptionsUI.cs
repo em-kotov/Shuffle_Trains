@@ -21,17 +21,19 @@ public class OptionsUI : UIPanel
 
     private void Awake()
     {
-        // The panel is a shared prefab; OptionsUI itself lives in each scene.
         Transform panel = _closeButton.transform.parent;
         LanguageSelectorUI.Attach(panel);
         BuildHintsControl(panel);
+
         if (_musicSlider == null)
             _musicSlider = panel.Find("MusicSlider")?.GetComponent<UnityEngine.UI.Slider>();
+
         if (_sfxSlider == null)
             _sfxSlider = panel.Find("SoundSlider")?.GetComponent<UnityEngine.UI.Slider>();
 
         if (_musicSlider != null)
             _musicVolumeLabel = _musicSlider.GetComponentInChildren<TMPro.TMP_Text>(true);
+
         if (_sfxSlider != null)
             _sfxVolumeLabel = _sfxSlider.GetComponentInChildren<TMPro.TMP_Text>(true);
     }
@@ -50,6 +52,7 @@ public class OptionsUI : UIPanel
         {
             _musicToggle.onValueChanged.AddListener(OnMusicChanged);
         }
+
         if (_sfxToggle != null)
         {
             _sfxToggle.onValueChanged.AddListener(OnSfxChanged);
@@ -57,8 +60,10 @@ public class OptionsUI : UIPanel
 
         if (_musicSlider != null)
             _musicSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+
         if (_sfxSlider != null)
             _sfxSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
+
         if (_hintsToggle != null)
             _hintsToggle.onValueChanged.AddListener(OnHintsChanged);
 
@@ -80,17 +85,22 @@ public class OptionsUI : UIPanel
         {
             _musicToggle.onValueChanged.RemoveListener(OnMusicChanged);
         }
+
         if (_sfxToggle != null)
         {
             _sfxToggle.onValueChanged.RemoveListener(OnSfxChanged);
         }
+
         if (_musicSlider != null)
             _musicSlider.onValueChanged.RemoveListener(OnMusicVolumeChanged);
+
         if (_sfxSlider != null)
             _sfxSlider.onValueChanged.RemoveListener(OnSfxVolumeChanged);
+
         if (_hintsToggle != null)
             _hintsToggle.onValueChanged.RemoveListener(OnHintsChanged);
-        // Restarting from settings unloads this handler without pressing Close.
+
+        // Restart unloads this handler without calling Close.
         YandexSdk.SetOptionsOpen(false);
     }
 
@@ -113,9 +123,10 @@ public class OptionsUI : UIPanel
     {
         if (_hintsToggle != null)
             _hintsToggle.SetIsOnWithoutNotify(HintSettings.Enabled);
+
         RefreshHintsLamp();
         AudioManager audio = AudioManager.Instance;
-        
+
         if (audio == null)
         {
             return;
@@ -125,23 +136,38 @@ public class OptionsUI : UIPanel
         {
             _musicToggle.SetIsOnWithoutNotify(audio.MusicOn);
         }
+
         if (_sfxToggle != null)
         {
             _sfxToggle.SetIsOnWithoutNotify(audio.SfxOn);
         }
+
         if (_musicSlider != null)
             _musicSlider.SetValueWithoutNotify(audio.MusicVolume);
+
         if (_sfxSlider != null)
             _sfxSlider.SetValueWithoutNotify(audio.SfxVolume);
+
         UpdateVolumeLabel(_musicVolumeLabel, audio.MusicVolume);
         UpdateVolumeLabel(_sfxVolumeLabel, audio.SfxVolume);
     }
 
     private void BuildHintsControl(Transform panel)
     {
-        // Share the authored checkbox artwork, without copying its audio events.
-        var source = _musicToggle != null ? _musicToggle : _sfxToggle;
-        if (source == null) return;
+        Toggle source;
+
+        if (_musicToggle != null)
+        {
+            source = _musicToggle;
+        }
+        else
+        {
+            source = _sfxToggle;
+        }
+
+        if (source == null)
+            return;
+
         RectTransform root = NewHintsRect("HintsToggle", panel, new Vector2(-112, -155), new Vector2(112, 86));
         var hitArea = root.gameObject.AddComponent<UnityEngine.UI.Image>();
         hitArea.color = Color.clear;
@@ -153,24 +179,26 @@ public class OptionsUI : UIPanel
         _hintsLamp.raycastTarget = false;
         RefreshHintsLamp();
 
-        // A small checkbox badge makes the saved on/off state explicit while
-        // using exactly the same lamp artwork as the gameplay button.
         RectTransform box = NewHintsRect("Background", root, new Vector2(23, 23), Vector2.one * 18);
         var background = box.gameObject.AddComponent<UnityEngine.UI.Image>();
+
         if (source.targetGraphic is UnityEngine.UI.Image sourceBackground)
         {
             background.sprite = sourceBackground.sprite;
             background.type = sourceBackground.type;
             background.color = sourceBackground.color;
         }
+
         background.raycastTarget = false;
         RectTransform check = NewHintsRect("Checkmark", box, Vector2.zero, Vector2.one * 18);
         var checkmark = check.gameObject.AddComponent<UnityEngine.UI.Image>();
+
         if (source.graphic is UnityEngine.UI.Image sourceCheck)
         {
             checkmark.sprite = sourceCheck.sprite;
             checkmark.color = sourceCheck.color;
         }
+
         checkmark.raycastTarget = false;
         _hintsToggle.targetGraphic = background;
         _hintsToggle.graphic = checkmark;
@@ -179,7 +207,16 @@ public class OptionsUI : UIPanel
         var label = NewHintsRect("Label", root, new Vector2(0, -34), new Vector2(112, 27))
             .gameObject.AddComponent<TMPro.TextMeshProUGUI>();
         var sourceLabel = source.GetComponentInChildren<TMPro.TMP_Text>(true);
-        label.font = sourceLabel != null ? sourceLabel.font : Resources.Load<TMPro.TMP_FontAsset>("Fonts/Eno Black SDF");
+
+        if (sourceLabel != null)
+        {
+            label.font = sourceLabel.font;
+        }
+        else
+        {
+            label.font = Resources.Load<TMPro.TMP_FontAsset>("Fonts/Eno Black SDF");
+        }
+
         label.fontSize = 17;
         label.color = new Color32(92, 62, 47, 255);
         label.alignment = TMPro.TextAlignmentOptions.Center;
@@ -187,7 +224,6 @@ public class OptionsUI : UIPanel
         label.raycastTarget = false;
         LocalizationBinder.Set(label, "Hints");
 
-        // Two footer controls: hints at bottom-left, restart on the right.
         foreach (string name in new[] { "RestartButton", "RestartButtonShadow" })
             if (panel.Find(name) is RectTransform rect)
                 rect.anchoredPosition = new Vector2(62, rect.anchoredPosition.y);
@@ -213,13 +249,21 @@ public class OptionsUI : UIPanel
     private void RefreshHintsLamp()
     {
         if (_hintsLamp != null)
-            _hintsLamp.color = HintSettings.Enabled ? Color.white : HintLampGraphic.DisabledTint;
+            if (HintSettings.Enabled)
+            {
+                _hintsLamp.color = Color.white;
+            }
+            else
+            {
+                _hintsLamp.color = HintLampGraphic.DisabledTint;
+            }
     }
 
     private void OnMusicVolumeChanged(float value)
     {
         if (AudioManager.Instance != null)
             AudioManager.Instance.MusicVolume = value;
+
         UpdateVolumeLabel(_musicVolumeLabel, value);
     }
 
@@ -227,6 +271,7 @@ public class OptionsUI : UIPanel
     {
         if (AudioManager.Instance != null)
             AudioManager.Instance.SfxVolume = value;
+
         UpdateVolumeLabel(_sfxVolumeLabel, value);
     }
 

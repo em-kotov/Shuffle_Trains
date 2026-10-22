@@ -30,8 +30,6 @@ Shader "ShuffleCats/CatRunningSmoke"
             }
             fixed4 frag(v2f i) : SV_Target
             {
-                // Continuous fade: fully visible at the cat, transparent at the tip.
-                // No start fade: both lines reach underneath the cat's sprite.
                 float across = i.uv.y * 2.0 - 1.0;
                 float lines = 1.0 - smoothstep(0.028 / 0.055, 1.0, abs(across));
                 float endFade = 1.0 - smoothstep(0.0, 1.0, i.uv.x);

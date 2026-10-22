@@ -6,10 +6,6 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
-// One-button WebGL build shaped for the Yandex Games console: it forces the
-// player settings the platform needs, then packs the output into a ZIP with
-// index.html at its root (console requirement: one index.html, contents under
-// 100 MB before compression).
 public static class YandexBuildTool
 {
     private const string BuildFolder = "Builds/YandexGames";
@@ -26,8 +22,7 @@ public static class YandexBuildTool
         string archivePath = Path.Combine(projectRoot, ArchiveFile);
 
         ApplyYandexPlayerSettings();
-        // Localization tables/locales are Addressables and must accompany the
-        // WebGL player, including after translations have changed.
+        // Localization tables are Addressables and must be rebuilt alongside the player.
         LocalizationSetup.BuildAddressables();
 
         BuildPlayerOptions options = new BuildPlayerOptions
@@ -61,7 +56,6 @@ public static class YandexBuildTool
         }
     }
 
-    // Entry point for: Unity.exe -quit -batchmode -executeMethod YandexBuildTool.BuildFromCommandLine
     public static void BuildFromCommandLine()
     {
         Build();
@@ -71,14 +65,10 @@ public static class YandexBuildTool
     {
         PlayerSettings.WebGL.template = TemplateName;
 
-        // Yandex serves the archive as plain static files without setting
-        // Content-Encoding, so the browser never unpacks .br/.gz itself. Gzip
-        // plus the JS fallback decoder is the combination that always loads.
+        // The host does not set Content-Encoding; compressed builds need the JS fallback decoder.
         PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
         PlayerSettings.WebGL.decompressionFallback = true;
 
-        // Second and later visits read the build out of IndexedDB instead of
-        // downloading it again.
         PlayerSettings.WebGL.dataCaching = true;
 
         PlayerSettings.WebGL.linkerTarget = WebGLLinkerTarget.Wasm;
@@ -104,8 +94,7 @@ public static class YandexBuildTool
         return scenes.ToArray();
     }
 
-    // includeBaseDirectory stays false: the console looks for index.html in the
-    // archive root, not inside a folder.
+    // The upload archive must contain index.html at its root.
     private static void Archive(string sourcePath, string archivePath)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(archivePath));
@@ -115,7 +104,6 @@ public static class YandexBuildTool
             File.Delete(archivePath);
         }
 
-        // Qualified: UnityEngine has a CompressionLevel of its own.
         ZipFile.CreateFromDirectory(sourcePath, archivePath, System.IO.Compression.CompressionLevel.Optimal, false);
     }
 

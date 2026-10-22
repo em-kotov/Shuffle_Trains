@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// Follow the visible sprite after its facing lock and breathing animation.
 [DefaultExecutionOrder(210)]
 [DisallowMultipleComponent]
 public sealed class CatTrackIndicator : MonoBehaviour
@@ -33,7 +32,7 @@ public sealed class CatTrackIndicator : MonoBehaviour
         _cat = cat;
         _faceAnchor = faceAnchor;
         _camera = Camera.main;
-        // A stable phase avoids consuming the game's random sequence.
+        // Keep cosmetic animation from consuming the gameplay random sequence.
         _phase = Mathf.Abs(GetInstanceID() % 997) * 0.071f;
         _visualRandom = new System.Random(GetInstanceID());
         Hide();
@@ -49,19 +48,20 @@ public sealed class CatTrackIndicator : MonoBehaviour
     {
         if (_cat == null || State == IndicatorState.Exiting)
             return;
-        // Choose once for the entire exit, without changing gameplay randomness.
+
         Reaction = (ExitReaction)_visualRandom.Next(3);
         Show(IndicatorState.Exiting);
     }
 
     public void ShowBump()
     {
-        // Never bring an on-track/disabled cat's balloon back. A fresh gameplay
-        // state (Ready, Waiting or Hidden) takes priority over this temporary reaction.
+        // A reaction must not overwrite a gameplay state changed while the coroutine was waiting.
         if (State == IndicatorState.Hidden || State == IndicatorState.Exiting || _cat == null)
             return;
+
         if (State != IndicatorState.Bumped)
             _stateBeforeBump = State;
+
         _bumpUntil = Time.time + 0.9f;
         _stateChangedAt = Time.time;
         Show(IndicatorState.Bumped);
@@ -71,8 +71,10 @@ public sealed class CatTrackIndicator : MonoBehaviour
     {
         State = IndicatorState.Hidden;
         _thoughtVisible = false;
+
         if (_bubble != null)
             _bubble.gameObject.SetActive(false);
+
         enabled = false;
     }
 
@@ -85,10 +87,12 @@ public sealed class CatTrackIndicator : MonoBehaviour
         _stateChangedAt = Time.time;
         _thoughtVisible = false;
         enabled = true;
+
         if (state == IndicatorState.Parked)
         {
             if (_bubble != null)
                 _bubble.gameObject.SetActive(false);
+
             _nextThoughtAt = Time.time + IdleRange(3f, 6f);
             return;
         }
@@ -104,10 +108,13 @@ public sealed class CatTrackIndicator : MonoBehaviour
     {
         if (_bubble == null)
             CreateBubble();
-        if (!_bubble.gameObject.activeSelf)
+
+        if (_bubble.gameObject.activeSelf == false)
             _shownAt = Time.time;
+
         if (immediate)
             _shownAt = Time.time - 0.16f;
+
         _bubble.gameObject.SetActive(true);
     }
 
@@ -135,7 +142,8 @@ public sealed class CatTrackIndicator : MonoBehaviour
     {
         if (State == IndicatorState.Hidden)
             return;
-        if (_cat == null || !_cat.enabled || !_cat.gameObject.activeInHierarchy)
+
+        if (_cat == null || _cat.enabled == false || _cat.gameObject.activeInHierarchy == false)
         {
             Hide();
             return;
@@ -146,12 +154,14 @@ public sealed class CatTrackIndicator : MonoBehaviour
             Show(_stateBeforeBump);
             return;
         }
+
         if (State == IndicatorState.Parked)
         {
-            if (!_thoughtVisible)
+            if (_thoughtVisible == false)
             {
                 if (Time.time < _nextThoughtAt)
                     return;
+
                 _thoughtVisible = true;
                 _thoughtUntil = Time.time + IdleRange(1.8f, 2.6f);
                 RevealBubble(false);
@@ -164,8 +174,10 @@ public sealed class CatTrackIndicator : MonoBehaviour
                 return;
             }
         }
+
         if (_camera == null)
             _camera = Camera.main;
+
         if (_camera == null || _cat.sprite == null)
             return;
 
@@ -175,39 +187,71 @@ public sealed class CatTrackIndicator : MonoBehaviour
         Vector3 spriteY = _cat.transform.TransformVector(Vector3.up * extents.y);
         float bodyWidth = Mathf.Min(spriteX.magnitude, spriteY.magnitude) * 2f;
         float width = Mathf.Clamp(bodyWidth * 0.42f, 0.85f, 1.2f);
-        // Keep the symbol legible when the board fits a narrow phone screen.
         float depth = Vector3.Dot(_cat.bounds.center - view.position, view.forward);
-        float viewHeight = _camera.orthographic ? _camera.orthographicSize * 2f :
-            2f * Mathf.Max(0f, depth) * Mathf.Tan(_camera.fieldOfView * Mathf.Deg2Rad * 0.5f);
+        float viewHeight;
+
+        if (_camera.orthographic)
+        {
+            viewHeight = _camera.orthographicSize * 2f;
+        }
+        else
+        {
+            viewHeight = 2f * Mathf.Max(0f, depth) * Mathf.Tan(_camera.fieldOfView * Mathf.Deg2Rad * 0.5f);
+        }
+
         width = Mathf.Max(width, Mathf.Min(1.6f, viewHeight * 20f / Mathf.Max(1, _camera.pixelHeight)));
 
-        // The face is a point in the artwork, not the top of its world bounds.
         // SpriteRenderer flips do not affect TransformPoint, so apply them explicitly.
         Vector2 facePixels = Vector2.Scale(_faceAnchor, _cat.sprite.rect.size) - _cat.sprite.pivot;
         Vector3 localFace = new Vector3(facePixels.x, facePixels.y, 0f) / _cat.sprite.pixelsPerUnit;
-        if (_cat.flipX) localFace.x = -localFace.x;
-        if (_cat.flipY) localFace.y = -localFace.y;
+
+        if (_cat.flipX)
+            localFace.x = -localFace.x;
+
+        if (_cat.flipY)
+            localFace.y = -localFace.y;
+
         Vector3 face = _cat.transform.TransformPoint(localFace);
 
         float age = Time.time - _shownAt;
         float stateAge = Time.time - _stateChangedAt;
-        bool ready = State == IndicatorState.Ready;
+        bool ready;
+
+        if (State == IndicatorState.Ready)
+        {
+            ready = true;
+        }
+        else
+        {
+            ready = false;
+        }
+
         float appear = Mathf.Clamp01(age / 0.16f);
         float scale = Mathf.Lerp(0.65f, 1f, Mathf.Sin(appear * Mathf.PI * 0.5f));
+
         if (ready)
             scale *= 1f + 0.16f * Mathf.Sin(Mathf.Clamp01(stateAge / 0.28f) * Mathf.PI);
         else if (State == IndicatorState.Bumped)
             scale *= 1f + 0.1f * Mathf.Sin(Mathf.Clamp01(stateAge / 0.24f) * Mathf.PI);
         else if (State == IndicatorState.Exiting)
             scale *= 1f + 0.12f * Mathf.Sin(Mathf.Clamp01(stateAge / 0.32f) * Mathf.PI);
+
         float bob = Mathf.Sin(Time.time * 3.2f + _phase) * width * 0.025f;
-        // Tuck the tail by the cheek; the small balloon can overlap the ear slightly.
         _bubble.position = face + view.up * (width * 0.12f + bob)
             + view.right * width * 0.16f - view.forward * 0.15f;
-        _bubble.rotation = view.rotation * Quaternion.Euler(0f, 0f,
-            ready ? 0f : Mathf.Sin(Time.time * 2.2f + _phase) * 2f);
+        float tilt;
 
-        // Cats include scaled/rotated parents. Keep the balloon upright and round.
+        if (ready)
+        {
+            tilt = 0f;
+        }
+        else
+        {
+            tilt = Mathf.Sin(Time.time * 2.2f + _phase) * 2f;
+        }
+
+        _bubble.rotation = view.rotation * Quaternion.Euler(0f, 0f, tilt);
+
         _bubble.localScale = Vector3.one;
         Vector3 inheritedScale = _bubble.lossyScale;
         float unit = width * scale / 128f;
@@ -215,8 +259,10 @@ public sealed class CatTrackIndicator : MonoBehaviour
             unit / Mathf.Max(0.0001f, Mathf.Abs(inheritedScale.y)),
             unit / Mathf.Max(0.0001f, Mathf.Abs(inheritedScale.z)));
         _group.alpha = Mathf.SmoothStep(0f, 1f, appear);
+
         if (State == IndicatorState.Parked)
             _group.alpha *= Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((_thoughtUntil - Time.time) / 0.3f));
+
         _canvas.worldCamera = _camera;
         _canvas.sortingLayerID = _cat.sortingLayerID;
         _canvas.sortingOrder = _cat.sortingOrder + 20;
