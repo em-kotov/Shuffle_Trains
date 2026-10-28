@@ -15,19 +15,29 @@ public class ParkingCar : MonoBehaviour
     private ParkingCar _pendingBumpedCar;
     private Vector2 _pendingImpactDir;
 
+    public event Action Bumped;
+
+    public event Action IsOnBorder;
+
+    public event Action DepartureStarted;
+
+    public event Action<Vector2> BumpReceived;
+
+    public event Action<Vector2> BumpAttempted;
+
     public bool IsMoving => _isMoving;
+
     public bool IsAtBorderCell => _isAtBorderCell;
+
     public System.Collections.Generic.List<ParkingCar> GetBlockingCars() =>
         _parkingRegistrator.GetBlockingCars(this, _orientation, _signDirection);
 
-    public event Action Bumped;
-    public event Action IsOnBorder;
-    public event Action DepartureStarted;
-    public event Action<Vector2> BumpReceived;
-    public event Action<Vector2> BumpAttempted;
-
-    public void Initialize(ParkingRegistrator parkingRegistrator, Mover mover,
-                        CarOrientation orientation, float sign, int length)
+    public void Initialize(
+        ParkingRegistrator parkingRegistrator,
+        Mover mover,
+        CarOrientation orientation,
+        float sign,
+        int length)
     {
         _parkingRegistrator = parkingRegistrator;
         _mover = mover;
@@ -37,8 +47,12 @@ public class ParkingCar : MonoBehaviour
 
         _carPosition = transform.position;
         _parkingRegistrator.RegisterCar(_carPosition, this);
-        _parkingRegistrator.RegisterTail(this, _carPosition,
-                            _orientation, _signDirection, _length);
+        _parkingRegistrator.RegisterTail(
+            this,
+            _carPosition,
+            _orientation,
+            _signDirection,
+            _length);
     }
 
     public void OnPress()
@@ -49,6 +63,9 @@ public class ParkingCar : MonoBehaviour
 
     public void OnClick()
     {
+        const float minimumMoveSqrDistance = 0.0001f;
+        const float zeroImpactComponent = 0f;
+
         if (_isMoving)
             return;
 
@@ -57,7 +74,7 @@ public class ParkingCar : MonoBehaviour
         _pendingBumpedCar = null;
         bool willMove;
 
-        if ((furthestSlotToMoveIn - _carPosition).sqrMagnitude > 0.0001f)
+        if ((furthestSlotToMoveIn - _carPosition).sqrMagnitude > minimumMoveSqrDistance)
         {
             willMove = true;
         }
@@ -76,11 +93,11 @@ public class ParkingCar : MonoBehaviour
 
                 if (_orientation == CarOrientation.Horizontal)
                 {
-                    impactDir = new Vector2(_signDirection, 0f);
+                    impactDir = new Vector2(_signDirection, zeroImpactComponent);
                 }
                 else
                 {
-                    impactDir = new Vector2(0f, _signDirection);
+                    impactDir = new Vector2(zeroImpactComponent, _signDirection);
                 }
 
                 if (willMove)
@@ -116,8 +133,13 @@ public class ParkingCar : MonoBehaviour
     {
         _carPosition = transform.position;
 
-        return _parkingRegistrator.GetFurthestCellToMove(this, _carPosition,
-                            _orientation, _signDirection, out cellOccupancy, out bumpedCar);
+        return _parkingRegistrator.GetFurthestCellToMove(
+            this,
+            _carPosition,
+            _orientation,
+            _signDirection,
+            out cellOccupancy,
+            out bumpedCar);
     }
 
     public void PlayBumpEffect(Vector2 impactDir)
@@ -133,15 +155,23 @@ public class ParkingCar : MonoBehaviour
         {
             // Keep the border cell reserved while waiting, or another cat can move into it.
             _parkingRegistrator.RegisterCar(transform.position, this);
-            _parkingRegistrator.RegisterTail(this, transform.position,
-                                _orientation, _signDirection, _length);
+            _parkingRegistrator.RegisterTail(
+                this,
+                transform.position,
+                _orientation,
+                _signDirection,
+                _length);
             IsOnBorder?.Invoke();
             return;
         }
 
         _parkingRegistrator.RegisterCar(transform.position, this);
-        _parkingRegistrator.RegisterTail(this, transform.position,
-                            _orientation, _signDirection, _length);
+        _parkingRegistrator.RegisterTail(
+            this,
+            transform.position,
+            _orientation,
+            _signDirection,
+            _length);
 
         if (_pendingBumpedCar != null)
         {
@@ -153,17 +183,29 @@ public class ParkingCar : MonoBehaviour
 
     public void Deactivate()
     {
-        _parkingRegistrator.UnregisterCar(transform.position, this,
-                            _orientation, _signDirection, _length);
+        _parkingRegistrator.UnregisterCar(
+            transform.position,
+            this,
+            _orientation,
+            _signDirection,
+            _length);
     }
 
     private IEnumerator SmoothMoveTo(Vector3 target)
     {
         _isMoving = true;
-        _parkingRegistrator.UnregisterCar(transform.position, this,
-                            _orientation, _signDirection, _length);
-        _parkingRegistrator.ReserveCells(target, this,
-                            _orientation, _signDirection, _length);
+        _parkingRegistrator.UnregisterCar(
+            transform.position,
+            this,
+            _orientation,
+            _signDirection,
+            _length);
+        _parkingRegistrator.ReserveCells(
+            target,
+            this,
+            _orientation,
+            _signDirection,
+            _length);
 
         _mover.MoveTo(target);
 

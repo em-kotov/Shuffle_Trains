@@ -3,27 +3,12 @@ using UnityEngine;
 public static class LevelProgress
 {
     // Legacy saves store the next zero-based level index, which also counts completed levels.
-    public static int BestCompletedLevel => Mathf.Max(0,
-        Mathf.Max(PlayerPrefs.GetInt(SaveKeys.BestCompletedLevel, 0),
+    public static int BestCompletedLevel => Mathf.Max(
+        0,
+        Mathf.Max(
+            PlayerPrefs.GetInt(SaveKeys.BestCompletedLevel, 0),
             PlayerPrefs.GetInt(SaveKeys.LevelIndex, 0)));
 
-    public static void RecordCompletion(int levelNumber)
-    {
-#if UNITY_EDITOR
-        if (EditorPreviewIndex >= 0)
-            return;
-
-#endif
-        MergeBestCompletedLevel(levelNumber);
-        CloudSave.Push();
-        YandexLeaderboard.SyncScore();
-    }
-
-    public static void MergeBestCompletedLevel(int levelNumber)
-    {
-        PlayerPrefs.SetInt(SaveKeys.BestCompletedLevel, Mathf.Max(BestCompletedLevel, levelNumber));
-        PlayerPrefs.Save();
-    }
 #if UNITY_EDITOR
     public static int EditorPreviewIndex
     {
@@ -43,6 +28,7 @@ public static class LevelProgress
 #endif
             return PlayerPrefs.GetInt(SaveKeys.LevelIndex, 0);
         }
+
         set
         {
 #if UNITY_EDITOR
@@ -57,6 +43,24 @@ public static class LevelProgress
             PlayerPrefs.Save();
             CloudSave.Push();
         }
+    }
+
+    public static void RecordCompletion(int levelNumber)
+    {
+#if UNITY_EDITOR
+        if (EditorPreviewIndex >= 0)
+            return;
+
+#endif
+        MergeBestCompletedLevel(levelNumber);
+        CloudSave.Push();
+        YandexLeaderboard.SyncScore();
+    }
+
+    public static void MergeBestCompletedLevel(int levelNumber)
+    {
+        PlayerPrefs.SetInt(SaveKeys.BestCompletedLevel, Mathf.Max(BestCompletedLevel, levelNumber));
+        PlayerPrefs.Save();
     }
 
     public static void Advance()

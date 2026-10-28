@@ -8,9 +8,11 @@ public sealed class TutorialHandGraphic : UnityEngine.UI.MaskableGraphic
 
     protected override void OnPopulateMesh(UnityEngine.UI.VertexHelper mesh)
     {
+        const float outlineWidth = 2.4f;
+
         mesh.Clear();
         Glove(mesh, new Vector2(2, -3), 3, new Color32(0, 0, 0, 65));
-        Glove(mesh, Vector2.zero, 2.4f, Outline);
+        Glove(mesh, Vector2.zero, outlineWidth, Outline);
         Glove(mesh, Vector2.zero, 0, Fill);
         Capsule(mesh, new Vector2(11, -27), new Vector2(11, -40), 1, Outline);
         Capsule(mesh, new Vector2(21, -31), new Vector2(21, -41), 1, Outline);
@@ -37,6 +39,7 @@ public sealed class TutorialHandGraphic : UnityEngine.UI.MaskableGraphic
         const int half = 12;
 
         for (int end = 0; end < 2; end++)
+        {
             for (int i = 0; i <= half; i++)
             {
                 float angleOffset;
@@ -50,7 +53,7 @@ public sealed class TutorialHandGraphic : UnityEngine.UI.MaskableGraphic
                     angleOffset = Mathf.PI * 0.5f;
                 }
 
-                float angle = direction + angleOffset + i * Mathf.PI / half;
+                float angle = direction + angleOffset + (i * Mathf.PI / half);
                 Vector2 capCenter;
 
                 if (end == 0)
@@ -62,12 +65,13 @@ public sealed class TutorialHandGraphic : UnityEngine.UI.MaskableGraphic
                     capCenter = from;
                 }
 
-                mesh.AddVert(capCenter + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius, tint, Vector2.zero);
+                mesh.AddVert(capCenter + (new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius), tint, Vector2.zero);
             }
+        }
 
         int count = (half + 1) * 2;
 
         for (int i = 0; i < count; i++)
-            mesh.AddTriangle(start, start + i + 1, start + (i + 1) % count + 1);
+            mesh.AddTriangle(start, start + i + 1, start + ((i + 1) % count) + 1);
     }
 }

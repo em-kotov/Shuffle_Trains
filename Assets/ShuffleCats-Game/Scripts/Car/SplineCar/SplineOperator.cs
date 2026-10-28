@@ -10,13 +10,6 @@ public class SplineOperator : MonoBehaviour
     private float _speedMultiplier = 1f;
     private bool _isFollowingSpline;
 
-    public void Initialize(SplineAnimate splineAnimate, ParkingRegistrator parkingRegistrator)
-    {
-        _splineAnimate = splineAnimate;
-        _parkingRegistrator = parkingRegistrator;
-        _isFollowingSpline = false;
-    }
-
     private void Update()
     {
         if (_isFollowingSpline == false)
@@ -33,11 +26,11 @@ public class SplineOperator : MonoBehaviour
         _splineAnimate.NormalizedTime = normalizedTime;
     }
 
-    private void ConfigureDuration(ISpline spline, float speed)
+    public void Initialize(SplineAnimate splineAnimate, ParkingRegistrator parkingRegistrator)
     {
-        _baseDuration = CalculateDuration(spline, speed);
-        _speedMultiplier = _parkingRegistrator.TrackSpeedMultiplier;
-        _splineAnimate.Duration = _baseDuration / _speedMultiplier;
+        _splineAnimate = splineAnimate;
+        _parkingRegistrator = parkingRegistrator;
+        _isFollowingSpline = false;
     }
 
     public void EnableSplineAnimate(SplineContainer splineContainer, float startOffset, float speed)
@@ -46,6 +39,7 @@ public class SplineOperator : MonoBehaviour
         _splineAnimate.Container = splineContainer;
         _splineAnimate.StartOffset = startOffset;
         ConfigureDuration(splineContainer.Spline, speed);
+
         // OnEnable may restart with the old container/offset; restore entry before the trail samples it.
         _splineAnimate.NormalizedTime = 0f;
         _isFollowingSpline = true;
@@ -64,11 +58,20 @@ public class SplineOperator : MonoBehaviour
 
     public Vector3 PrepareSwitchToNearest(SplineContainer newSplineContainer, Vector3 worldPosition, float speed, out float targetT)
     {
+        const int nearestPointResolution = 32;
+        const int nearestPointIterations = 8;
+
         _isFollowingSpline = false;
         Vector3 localPosition = newSplineContainer.transform.InverseTransformPoint(worldPosition);
-        SplineUtilityExtension.GetNearestPoint(newSplineContainer.Spline, localPosition,
-                                        out float3 nearest, out float t, resolution: 32, iterations: 8);
+        SplineUtilityExtension.GetNearestPoint(
+            newSplineContainer.Spline,
+            localPosition,
+            out float3 nearest,
+            out float t,
+            resolution: nearestPointResolution,
+            iterations: nearestPointIterations);
         targetT = t;
+
         // Setting NormalizedTime here would invoke SplineAnimate.UpdateTransform and teleport the cat.
         _splineAnimate.Container = newSplineContainer;
         _splineAnimate.StartOffset = 0f;
@@ -80,6 +83,13 @@ public class SplineOperator : MonoBehaviour
     {
         _splineAnimate.NormalizedTime = t;
         _isFollowingSpline = true;
+    }
+
+    private void ConfigureDuration(ISpline spline, float speed)
+    {
+        _baseDuration = CalculateDuration(spline, speed);
+        _speedMultiplier = _parkingRegistrator.TrackSpeedMultiplier;
+        _splineAnimate.Duration = _baseDuration / _speedMultiplier;
     }
 
     private float CalculateDuration(ISpline spline, float speed)

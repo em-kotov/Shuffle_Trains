@@ -16,8 +16,14 @@ public class GridCalculator : MonoBehaviour
     private Vector3 _gridOrigin;
     private ParkingRegistrator _registrator;
 
-    public void Initialize(int width, int height, float cellSize, int startX,
-                            int startY, float axisYLevel, ParkingRegistrator registrator)
+    public void Initialize(
+        int width,
+        int height,
+        float cellSize,
+        int startX,
+        int startY,
+        float axisYLevel,
+        ParkingRegistrator registrator)
     {
         _width = width;
         _height = height;
@@ -33,8 +39,13 @@ public class GridCalculator : MonoBehaviour
         _gridOrigin = new Vector3(_startX, _axisYLevel, _startY);
     }
 
-    public Vector3 GetFurthestCellToMove(ParkingCar car, Vector3 current, CarOrientation orientation,
-                                         float sign, out CellOccupancy cellOccupancy, out ParkingCar bumpedCar)
+    public Vector3 GetFurthestCellToMove(
+        ParkingCar car,
+        Vector3 current,
+        CarOrientation orientation,
+        float sign,
+        out CellOccupancy cellOccupancy,
+        out ParkingCar bumpedCar)
     {
         cellOccupancy = CellOccupancy.Free;
         bumpedCar = null;
@@ -175,8 +186,9 @@ public class GridCalculator : MonoBehaviour
             {
                 Vector3 cellCenter = GridToWorld(new Vector2Int(x, y));
                 Gizmos.DrawWireCube(cellCenter, new Vector3(
-                                   _cellSize * sideMultiplier, ySize,
-                                   _cellSize * sideMultiplier));
+                    _cellSize * sideMultiplier,
+                    ySize,
+                    _cellSize * sideMultiplier));
             }
         }
     }

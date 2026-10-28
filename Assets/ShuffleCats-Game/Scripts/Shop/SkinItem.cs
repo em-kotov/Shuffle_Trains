@@ -13,11 +13,18 @@ public class SkinItem : ScriptableObject
     [SerializeField] private bool _equippedByDefault;
 
     public string Id => _id;
+
     public string DisplayName => _displayName;
+
     public int Price => _price;
+
     public Sprite SlotIcon => _slotIcon;
+
     public Sprite AppliedSprite => _appliedSprite;
+
     public Color Tint => _tint;
+
     public bool OwnedByDefault => _ownedByDefault;
+
     public bool EquippedByDefault => _equippedByDefault;
 }

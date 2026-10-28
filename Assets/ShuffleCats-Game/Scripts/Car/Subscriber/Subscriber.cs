@@ -56,12 +56,19 @@ public class Subscriber : MonoBehaviour
     public event Action<Subscriber> ReachedEnd;
 
     public ParkingCar Parking => _parkingCar;
+
     public SorterCar Sorter => _sorterCar;
+
     public SpriteRenderer CatSprite => _catTexture;
+
     public CatColor Color => _carColor;
+
     public int SeatCount => _holdPoints.Count;
+
     public PassengerTracker Passengers => _passengerTracker;
+
     public ClickDetector Clicks => _clickDetector;
+
     public bool IsOnTrack { get; private set; }
 
     private void OnEnable()
@@ -69,10 +76,29 @@ public class Subscriber : MonoBehaviour
         _clickDetector.Initialize(_raycaster);
     }
 
-    public void Configure(CarOrientation orientation, float signDirection,
-                        bool invertFlip, bool trackFlipSeparate, bool invertFlipTrack,
-                        bool applyRotationFix, bool rotateFixLeft,
-                        List<CatColor> passengers)
+    private void OnDrawGizmos()
+    {
+        const float holdPointGizmoRadius = 0.15f;
+
+        if (_holdPoints.Count > 0)
+        {
+            for (int i = 0; i < _holdPoints.Count; i++)
+            {
+                Gizmos.color = ColorHelper.GetGizmoColor(_carColor);
+                Gizmos.DrawWireSphere(_holdPoints[i].position, holdPointGizmoRadius);
+            }
+        }
+    }
+
+    public void Configure(
+        CarOrientation orientation,
+        float signDirection,
+        bool invertFlip,
+        bool trackFlipSeparate,
+        bool invertFlipTrack,
+        bool applyRotationFix,
+        bool rotateFixLeft,
+        List<CatColor> passengers)
     {
         _orientation = orientation;
         _signDirection = signDirection;
@@ -131,13 +157,27 @@ public class Subscriber : MonoBehaviour
             _rotationFixer.SetConfig(applyRotationFix, rotateFixLeft);
     }
 
-    public void Initialize(ParkingRegistrator parkingRegistrator, SplineContainer trackSpline,
-                        PhysicsRaycaster raycaster, TrackRegistrator trackRegistrator,
-                        float trackSpeed, float slideDuration, float waitTime,
-                        SplineContainer exitSpline, Passenger passengerPrefab,
-                        int stationCount, SorterRegistrator sorterRegistrator,
-                        float searchMin = 0f, float searchMax = 1f)
+    public void Initialize(
+        ParkingRegistrator parkingRegistrator,
+        SplineContainer trackSpline,
+        PhysicsRaycaster raycaster,
+        TrackRegistrator trackRegistrator,
+        float trackSpeed,
+        float slideDuration,
+        float waitTime,
+        SplineContainer exitSpline,
+        Passenger passengerPrefab,
+        int stationCount,
+        SorterRegistrator sorterRegistrator,
+        float searchMin = 0f,
+        float searchMax = 1f)
     {
+        const float verticalFaceX = 0.53f;
+        const float verticalFaceY = 0.68f;
+        const float rightFacingFaceX = 0.65f;
+        const float leftFacingFaceX = 0.38f;
+        const float horizontalFaceY = 0.55f;
+
         _parkingRegistrator = parkingRegistrator;
         _trackRegistrator = trackRegistrator;
         _sorterRegistrator = sorterRegistrator;
@@ -183,7 +223,7 @@ public class Subscriber : MonoBehaviour
 
         if (_length > 1)
         {
-            faceAnchor = new Vector2(0.53f, 0.68f);
+            faceAnchor = new Vector2(verticalFaceX, verticalFaceY);
         }
         else
         {
@@ -191,14 +231,14 @@ public class Subscriber : MonoBehaviour
 
             if (_carColor == CatColor.Green)
             {
-                faceX = 0.65f;
+                faceX = rightFacingFaceX;
             }
             else
             {
-                faceX = 0.38f;
+                faceX = leftFacingFaceX;
             }
 
-            faceAnchor = new Vector2(faceX, 0.55f);
+            faceAnchor = new Vector2(faceX, horizontalFaceY);
         }
 
         _trackIndicator.Initialize(_catTexture, faceAnchor);
@@ -235,10 +275,19 @@ public class Subscriber : MonoBehaviour
     private void ActivateSplineCar()
     {
         _splineCar.enabled = true;
-        _splineCar.Initialize(_mover, _carHead, _trackSwitcher,
-                            _splineAnimate, _trackSpline, _trackSpeed,
-                            _searchMin, _searchMax, _trackRegistrator,
-                            _exitSpline, _splineOperator, _parkingRegistrator);
+        _splineCar.Initialize(
+            _mover,
+            _carHead,
+            _trackSwitcher,
+            _splineAnimate,
+            _trackSpline,
+            _trackSpeed,
+            _searchMin,
+            _searchMax,
+            _trackRegistrator,
+            _exitSpline,
+            _splineOperator,
+            _parkingRegistrator);
 
         _scanner.BlockedAhead += OnBlockedAhead;
         _scanner.PathCleared += OnPathCleared;
@@ -420,17 +469,5 @@ public class Subscriber : MonoBehaviour
         }
 
         return _passengers;
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (_holdPoints.Count > 0)
-        {
-            for (int i = 0; i < _holdPoints.Count; i++)
-            {
-                Gizmos.color = ColorHelper.GetGizmoColor(_carColor);
-                Gizmos.DrawWireSphere(_holdPoints[i].position, 0.15f);
-            }
-        }
     }
 }

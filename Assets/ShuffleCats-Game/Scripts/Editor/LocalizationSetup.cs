@@ -13,8 +13,6 @@ public static class LocalizationSetup
 {
     private const string Folder = "Assets/ShuffleCats-Game/Localization";
     private const string FontPath = "Assets/ShuffleCats-Game/Resources/Fonts/Eno Black SDF.asset";
-    [Serializable] public class Row { public string en, ru, tr; }
-    [Serializable] public class Catalog { public Row[] entries; }
 
     [MenuItem("Tools/Shuffle Cats/Localization/Rebuild Tables")]
     public static void Configure()
@@ -58,24 +56,24 @@ public static class LocalizationSetup
         {
             string code = table.LocaleIdentifier.Code;
 
-            foreach (var row in catalog.entries)
+            foreach (var row in catalog.Entries)
             {
                 string value;
 
                 if (code == "tr")
                 {
-                    value = row.tr;
+                    value = row.Tr;
                 }
                 else if (code == "ru")
                 {
-                    value = row.ru;
+                    value = row.Ru;
                 }
                 else
                 {
-                    value = row.en;
+                    value = row.En;
                 }
 
-                var entry = table.GetEntry(row.en) ?? table.AddEntry(row.en, value);
+                var entry = table.GetEntry(row.En) ?? table.AddEntry(row.En, value);
                 entry.Value = value;
             }
 
@@ -92,8 +90,61 @@ public static class LocalizationSetup
         Validate();
     }
 
+    [MenuItem("Tools/Shuffle Cats/Localization/Validate")]
+    public static void Validate()
+    {
+        var collection = LocalizationEditorSettings.GetStringTableCollection(Localization.TableName);
+        int checkedCount = 0;
+
+        foreach (var key in collection.SharedData.Entries)
+        {
+            foreach (var table in collection.StringTables)
+            {
+                string value = table.GetEntry(key.Id)?.Value;
+
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new Exception("Missing translation: " + table.LocaleIdentifier + "/" + key.Key);
+
+                string.Format(value, 12, 24);
+                var expected = System.Text.RegularExpressions.Regex.Matches(key.Key, @"\{\d+\}").Cast<System.Text.RegularExpressions.Match>().Select(match => match.Value).OrderBy(x => x);
+                var actual = System.Text.RegularExpressions.Regex.Matches(value, @"\{\d+\}").Cast<System.Text.RegularExpressions.Match>().Select(match => match.Value).OrderBy(x => x);
+
+                if (expected.SequenceEqual(actual) == false)
+                    throw new Exception("Format placeholders differ: " + key.Key);
+
+                checkedCount++;
+            }
+        }
+
+        if (checkedCount == 0)
+            throw new Exception("No translation entries found.");
+
+        var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
+
+        if (font.HasCharacters("ÇçĞğİıÖöŞşÜü", out uint[] missing, true) == false)
+            throw new Exception("Turkish font coverage incomplete.");
+
+        if (AssetDatabase.LoadAllAssetsAtPath(FontPath).OfType<Material>().Any() == false)
+            throw new Exception("Font material not saved.");
+
+        Debug.Log($"Localization validation: {checkedCount} entries; no gaps; Turkish glyphs present.");
+        File.WriteAllText("Library/LocalizationValidation.txt", $"PASS: {checkedCount} table entries; no gaps; Turkish glyphs present.");
+    }
+
+    public static void BuildAddressables()
+    {
+        UnityEditor.AddressableAssets.Settings.AddressableAssetSettings.BuildPlayerContent(out var result);
+
+        if (string.IsNullOrEmpty(result.Error) == false)
+            throw new Exception(result.Error);
+    }
+
     private static void ExtendFont()
     {
+        const int samplingPointSize = 48;
+        const int atlasPadding = 5;
+        const int atlasSize = 256;
+
         var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
 
         if (font == null)
@@ -125,7 +176,7 @@ public static class LocalizationSetup
             if (fallback == null)
             {
                 var source = AssetDatabase.LoadAssetAtPath<Font>("Assets/ShuffleCats-Game/Resources/Fonts/Turkish/Nunito-Black.ttf");
-                fallback = TMP_FontAsset.CreateFontAsset(source, 48, 5, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 256, 256);
+                fallback = TMP_FontAsset.CreateFontAsset(source, samplingPointSize, atlasPadding, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, atlasSize, atlasSize);
                 fallback.name = "Nunito Turkish SDF";
                 AssetDatabase.CreateAsset(fallback, fallbackPath);
 
@@ -155,50 +206,29 @@ public static class LocalizationSetup
         EditorUtility.SetDirty(font);
     }
 
-    [MenuItem("Tools/Shuffle Cats/Localization/Validate")]
-    public static void Validate()
+    [Serializable] public class Row
     {
-        var collection = LocalizationEditorSettings.GetStringTableCollection(Localization.TableName);
-        int checkedCount = 0;
+        [SerializeField]
+        private string en;
 
-        foreach (var key in collection.SharedData.Entries)
-            foreach (var table in collection.StringTables)
-            {
-                string value = table.GetEntry(key.Id)?.Value;
+        [SerializeField]
+        private string ru;
 
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new Exception("Missing translation: " + table.LocaleIdentifier + "/" + key.Key);
+        [SerializeField]
+        private string tr;
 
-                string.Format(value, 12, 24);
-                var expected = System.Text.RegularExpressions.Regex.Matches(key.Key, @"\{\d+\}").Cast<System.Text.RegularExpressions.Match>().Select(match => match.Value).OrderBy(x => x);
-                var actual = System.Text.RegularExpressions.Regex.Matches(value, @"\{\d+\}").Cast<System.Text.RegularExpressions.Match>().Select(match => match.Value).OrderBy(x => x);
+        public string En { get => en; set => en = value; }
 
-                if (expected.SequenceEqual(actual) == false)
-                    throw new Exception("Format placeholders differ: " + key.Key);
+        public string Ru { get => ru; set => ru = value; }
 
-                checkedCount++;
-            }
-
-        if (checkedCount == 0)
-            throw new Exception("No translation entries found.");
-
-        var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
-
-        if (font.HasCharacters("ÇçĞğİıÖöŞşÜü", out uint[] missing, true) == false)
-            throw new Exception("Turkish font coverage incomplete.");
-
-        if (AssetDatabase.LoadAllAssetsAtPath(FontPath).OfType<Material>().Any() == false)
-            throw new Exception("Font material not saved.");
-
-        Debug.Log($"Localization validation: {checkedCount} entries; no gaps; Turkish glyphs present.");
-        File.WriteAllText("Library/LocalizationValidation.txt", $"PASS: {checkedCount} table entries; no gaps; Turkish glyphs present.");
+        public string Tr { get => tr; set => tr = value; }
     }
 
-    public static void BuildAddressables()
+    [Serializable] public class Catalog
     {
-        UnityEditor.AddressableAssets.Settings.AddressableAssetSettings.BuildPlayerContent(out var result);
+        [SerializeField]
+        private Row[] entries;
 
-        if (string.IsNullOrEmpty(result.Error) == false)
-            throw new Exception(result.Error);
+        public Row[] Entries { get => entries; set => entries = value; }
     }
 }

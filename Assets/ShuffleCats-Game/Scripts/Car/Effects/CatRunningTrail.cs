@@ -7,16 +7,16 @@ public sealed class CatRunningTrail : MonoBehaviour
     private const int TrailSegments = 32;
     private const int PathCapacity = 512;
     private const float PathSampleSpacing = 0.025f;
+    private readonly Vector3[] _vertices = new Vector3[(TrailSegments + 1) * 4];
+    private readonly Vector2[] _uv = new Vector2[(TrailSegments + 1) * 4];
+    private readonly Vector3[] _centers = new Vector3[TrailSegments + 1];
+    private readonly Vector3[] _path = new Vector3[PathCapacity];
     private SpriteRenderer _cat;
     private Transform _head;
     private Mesh _mesh;
     private Material _material;
     private MeshRenderer _renderer;
     private Transform _visual;
-    private readonly Vector3[] _vertices = new Vector3[(TrailSegments + 1) * 4];
-    private readonly Vector2[] _uv = new Vector2[(TrailSegments + 1) * 4];
-    private readonly Vector3[] _centers = new Vector3[TrailSegments + 1];
-    private readonly Vector3[] _path = new Vector3[PathCapacity];
     private int _newestPathIndex;
     private int _pathCount;
     private Vector3 _previousPosition;
@@ -24,9 +24,14 @@ public sealed class CatRunningTrail : MonoBehaviour
     private float _visibility;
     private bool _active;
 
-    public void Initialize(SpriteRenderer cat, Transform head,
-                           CatColor color, Vector3 parkingDirection)
+    public void Initialize(
+        SpriteRenderer cat,
+        Transform head,
+        CatColor color,
+        Vector3 parkingDirection)
     {
+        const float trailTintBlend = 0.45f;
+
         _cat = cat;
         _head = head;
         _direction = parkingDirection.normalized;
@@ -62,14 +67,14 @@ public sealed class CatRunningTrail : MonoBehaviour
                 for (int i = 0; i <= TrailSegments; i++)
                 {
                     float progress = (float)i / TrailSegments;
-                    _uv[vertexOffset + i * 2] = new Vector2(progress, 0);
-                    _uv[vertexOffset + i * 2 + 1] = new Vector2(progress, 1);
+                    _uv[vertexOffset + (i * 2)] = new Vector2(progress, 0);
+                    _uv[vertexOffset + (i * 2) + 1] = new Vector2(progress, 1);
 
                     if (i == TrailSegments)
                         continue;
 
-                    int vertex = vertexOffset + i * 2;
-                    int index = (line * TrailSegments + i) * 6;
+                    int vertex = vertexOffset + (i * 2);
+                    int index = ((line * TrailSegments) + i) * 6;
                     triangles[index] = vertex;
                     triangles[index + 1] = vertex + 1;
                     triangles[index + 2] = vertex + 2;
@@ -91,7 +96,7 @@ public sealed class CatRunningTrail : MonoBehaviour
             _renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
         }
 
-        Color tint = Color.Lerp(ColorHelper.GetColor(color), new Color(1f, 0.98f, 0.94f), 0.45f);
+        Color tint = Color.Lerp(ColorHelper.GetColor(color), new Color(1f, 0.98f, 0.94f), trailTintBlend);
         _material.SetColor("_Color", tint);
         _renderer.enabled = false;
         enabled = true;
@@ -101,6 +106,23 @@ public sealed class CatRunningTrail : MonoBehaviour
 
     private void LateUpdate()
     {
+        const float minimumMotionSqrDistance = 0.000001f;
+        const float teleportSqrDistance = 100f;
+        const float visibilityChangePerSecond = 6f;
+        const float minimumVisibleOpacity = 0.001f;
+        const float minimumJoinSqrMagnitude = 0.001f;
+        const float minimumHalfWidth = 0.1f;
+        const float bodyWidthFraction = 0.72f;
+        const float trailLengthMultiplier = 4f;
+        const float trailLengthReduction = 1.5f;
+        const float trailLengthCompression = 1.2f;
+        const float lineWidthFraction = 0.055f;
+        const float lineWidthMultiplier = 1.5f;
+        const float lineWidthBoost = 1.7f;
+        const float minimumJoinDotProduct = 0.5f;
+        const float lineOffsetFraction = 0.3f;
+        const float roundingRadiusMultiplier = 2f;
+
         if (_renderer == null || _cat == null || _cat.sprite == null || _head == null)
             return;
 
@@ -109,10 +131,10 @@ public sealed class CatRunningTrail : MonoBehaviour
         Vector3 normal = _cat.transform.forward;
         Vector3 planarDelta = Vector3.ProjectOnPlane(delta, normal);
 
-        if (planarDelta.sqrMagnitude > 0.000001f)
+        if (planarDelta.sqrMagnitude > minimumMotionSqrDistance)
             _direction = planarDelta.normalized;
 
-        if (delta.sqrMagnitude > 100f)
+        if (delta.sqrMagnitude > teleportSqrDistance)
             ResetPath(_head.position);
 
         if ((_head.position - _path[_newestPathIndex]).sqrMagnitude >= PathSampleSpacing * PathSampleSpacing)
@@ -133,9 +155,9 @@ public sealed class CatRunningTrail : MonoBehaviour
             targetVisibility = 0f;
         }
 
-        _visibility = Mathf.MoveTowards(_visibility, targetVisibility, Time.deltaTime * 6f);
+        _visibility = Mathf.MoveTowards(_visibility, targetVisibility, Time.deltaTime * visibilityChangePerSecond);
 
-        if (_visibility > 0.001f && _cat.enabled && _cat.gameObject.activeInHierarchy)
+        if (_visibility > minimumVisibleOpacity && _cat.enabled && _cat.gameObject.activeInHierarchy)
         {
             _renderer.enabled = true;
         }
@@ -156,12 +178,13 @@ public sealed class CatRunningTrail : MonoBehaviour
         Vector3 spriteY = _cat.transform.TransformVector(Vector3.up * extents.y);
         float halfLength = Mathf.Abs(Vector3.Dot(spriteX, forward)) + Mathf.Abs(Vector3.Dot(spriteY, forward));
         float halfWidth = Mathf.Abs(Vector3.Dot(spriteX, side)) + Mathf.Abs(Vector3.Dot(spriteY, side));
-        halfWidth = Mathf.Max(0.1f, halfWidth * 0.72f);
+        halfWidth = Mathf.Max(minimumHalfWidth, halfWidth * bodyWidthFraction);
+
         // The section hidden beneath the body must not consume the visible trail length or fade.
-        float visibleLength = halfWidth * 4f / (1.5f * 1.2f);
+        float visibleLength = halfWidth * trailLengthMultiplier / (trailLengthReduction * trailLengthCompression);
         float length = halfLength + visibleLength;
         Vector3 spriteOffset = _cat.bounds.center - _head.position;
-        float roundingRadius = halfWidth * 2f;
+        float roundingRadius = halfWidth * roundingRadiusMultiplier;
         Vector3 anchorCorrection = _head.position - SampleRoundedPath(0f, roundingRadius);
 
         for (int i = 0; i <= TrailSegments; i++)
@@ -169,12 +192,12 @@ public sealed class CatRunningTrail : MonoBehaviour
             float progress = (float)i / TrailSegments;
             float distance = progress * length;
             Vector3 pathPosition = SampleRoundedPath(distance, roundingRadius) +
-                anchorCorrection * Mathf.Exp(-distance / roundingRadius);
+                (anchorCorrection * Mathf.Exp(-distance / roundingRadius));
             _centers[i] = _head.position + spriteOffset + Vector3.ProjectOnPlane(pathPosition - _head.position, normal);
         }
 
         // Separate strips avoid folded UVs; shared miter joins prevent gaps at corners.
-        float lineHalfWidth = halfWidth * 0.055f * 1.5f * 1.7f;
+        float lineHalfWidth = halfWidth * lineWidthFraction * lineWidthMultiplier * lineWidthBoost;
 
         for (int i = 0; i <= TrailSegments; i++)
         {
@@ -204,10 +227,10 @@ public sealed class CatRunningTrail : MonoBehaviour
             Vector3 outgoingSide = Vector3.Cross(normal, outgoing).normalized;
             Vector3 join = (incomingSide + outgoingSide).normalized;
 
-            if (join.sqrMagnitude < 0.001f)
+            if (join.sqrMagnitude < minimumJoinSqrMagnitude)
                 join = incomingSide;
 
-            join /= Mathf.Max(0.5f, Vector3.Dot(join, incomingSide));
+            join /= Mathf.Max(minimumJoinDotProduct, Vector3.Dot(join, incomingSide));
 
             for (int line = 0; line < 2; line++)
             {
@@ -222,14 +245,14 @@ public sealed class CatRunningTrail : MonoBehaviour
                     lineSide = 1f;
                 }
 
-                float offset = lineSide * halfWidth * 0.3f;
-                int vertex = line * (TrailSegments + 1) * 2 + i * 2;
+                float offset = lineSide * halfWidth * lineOffsetFraction;
+                int vertex = (line * (TrailSegments + 1) * 2) + (i * 2);
                 float distance = (float)i / TrailSegments * length;
                 float fadeProgress = Mathf.Clamp01((distance - halfLength) / visibleLength);
                 _uv[vertex] = new Vector2(fadeProgress, 0f);
                 _uv[vertex + 1] = new Vector2(fadeProgress, 1f);
-                _vertices[vertex] = _visual.InverseTransformPoint(_centers[i] + join * (offset - lineHalfWidth));
-                _vertices[vertex + 1] = _visual.InverseTransformPoint(_centers[i] + join * (offset + lineHalfWidth));
+                _vertices[vertex] = _visual.InverseTransformPoint(_centers[i] + (join * (offset - lineHalfWidth)));
+                _vertices[vertex + 1] = _visual.InverseTransformPoint(_centers[i] + (join * (offset + lineHalfWidth)));
             }
         }
 
@@ -239,53 +262,6 @@ public sealed class CatRunningTrail : MonoBehaviour
         _renderer.sortingLayerID = _cat.sortingLayerID;
         _renderer.sortingOrder = _cat.sortingOrder - 1;
         _material.SetFloat("_Opacity", _visibility);
-    }
-
-    private Vector3 SampleRoundedPath(float distance, float radius)
-    {
-        return (SamplePath(distance - radius) +
-                SamplePath(distance - radius * 0.5f) * 4f +
-                SamplePath(distance) * 6f +
-                SamplePath(distance + radius * 0.5f) * 4f +
-                SamplePath(distance + radius)) / 16f;
-    }
-
-    private void ResetPath(Vector3 position)
-    {
-        _newestPathIndex = 0;
-        _pathCount = 1;
-        _path[0] = position;
-    }
-
-    private Vector3 SamplePath(float distance)
-    {
-        if (distance <= 0f)
-            return _head.position - _direction * distance;
-
-        Vector3 newer = _head.position;
-        Vector3 backward = -_direction;
-
-        for (int i = 0; i < _pathCount; i++)
-        {
-            int index = (_newestPathIndex - i + PathCapacity) % PathCapacity;
-            Vector3 older = _path[index];
-            Vector3 segment = older - newer;
-            float segmentLength = segment.magnitude;
-
-            if (segmentLength > 0.00001f)
-            {
-                backward = segment / segmentLength;
-
-                if (distance <= segmentLength)
-                    return newer + backward * distance;
-
-                distance -= segmentLength;
-            }
-
-            newer = older;
-        }
-
-        return newer + backward * distance;
     }
 
     private void OnDisable()
@@ -304,5 +280,58 @@ public sealed class CatRunningTrail : MonoBehaviour
 
         if (_visual != null)
             Destroy(_visual.gameObject);
+    }
+
+    private Vector3 SampleRoundedPath(float distance, float radius)
+    {
+        const float neighborWeight = 4f;
+        const float centerWeight = 6f;
+        const float totalWeight = 16f;
+
+        return (SamplePath(distance - radius) +
+                (SamplePath(distance - (radius * 0.5f)) * neighborWeight) +
+                (SamplePath(distance) * centerWeight) +
+                (SamplePath(distance + (radius * 0.5f)) * neighborWeight) +
+                SamplePath(distance + radius)) / totalWeight;
+    }
+
+    private void ResetPath(Vector3 position)
+    {
+        _newestPathIndex = 0;
+        _pathCount = 1;
+        _path[0] = position;
+    }
+
+    private Vector3 SamplePath(float distance)
+    {
+        const float minimumSegmentLength = 0.00001f;
+
+        if (distance <= 0f)
+            return _head.position - (_direction * distance);
+
+        Vector3 newer = _head.position;
+        Vector3 backward = -_direction;
+
+        for (int i = 0; i < _pathCount; i++)
+        {
+            int index = (_newestPathIndex - i + PathCapacity) % PathCapacity;
+            Vector3 older = _path[index];
+            Vector3 segment = older - newer;
+            float segmentLength = segment.magnitude;
+
+            if (segmentLength > minimumSegmentLength)
+            {
+                backward = segment / segmentLength;
+
+                if (distance <= segmentLength)
+                    return newer + (backward * distance);
+
+                distance -= segmentLength;
+            }
+
+            newer = older;
+        }
+
+        return newer + (backward * distance);
     }
 }

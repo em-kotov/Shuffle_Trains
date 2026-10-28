@@ -123,7 +123,9 @@ public static class LocalizationPlayModeChecks
 
     private static IEnumerator WaitFrames()
     {
-        double until = EditorApplication.timeSinceStartup + 0.4;
+        const double settleTimeSeconds = 0.4;
+
+        double until = EditorApplication.timeSinceStartup + settleTimeSeconds;
 
         while (EditorApplication.timeSinceStartup < until)
             yield return null;

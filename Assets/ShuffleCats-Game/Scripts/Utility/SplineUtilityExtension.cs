@@ -11,9 +11,11 @@ public static class SplineUtilityExtension
       float searchMin = 0,
       float searchMax = 1,
       int resolution = SplineUtility.PickResolutionDefault,
-      int iterations = 2
-  ) where T : ISpline
+      int iterations = 2)
+        where T : ISpline
     {
+        const int maximumRefinementIterations = 10;
+
         float distance = float.PositiveInfinity;
         nearest = float.PositiveInfinity;
         searchMin = math.max(0, math.min(searchMin, 1));
@@ -22,7 +24,7 @@ public static class SplineUtilityExtension
         t = 0f;
         int res = math.min(math.max(SplineUtility.PickResolutionMin, resolution), SplineUtility.PickResolutionMax);
 
-        for (int i = 0, c = math.min(10, iterations); i < c; i++)
+        for (int i = 0, c = math.min(maximumRefinementIterations, iterations); i < c; i++)
         {
             int segments = SplineUtility.GetSubdivisionCount(spline.GetLength() * segment.y, res);
             segment = GetNearestPointInternal(spline, point, segment, out distance, out nearest, out t, segments);
@@ -31,15 +33,15 @@ public static class SplineUtilityExtension
         return distance;
     }
 
-    static float2 GetNearestPointInternal<T>(
+    private static float2 GetNearestPointInternal<T>(
         T spline,
         float3 point,
         float2 range,
         out float distance,
         out float3 nearest,
         out float time,
-        int segments
-    ) where T : ISpline
+        int segments)
+        where T : ISpline
     {
         distance = float.PositiveInfinity;
         nearest = float.PositiveInfinity;
@@ -60,7 +62,7 @@ public static class SplineUtilityExtension
             {
                 segment.x = t0;
                 segment.y = t1 - t0;
-                time = segment.x + segment.y * lineParam;
+                time = segment.x + (segment.y * lineParam);
                 distance = dsqr;
                 nearest = p;
             }

@@ -1,3 +1,5 @@
 using UnityEngine;
 
-public sealed class LocalizationIgnore : MonoBehaviour { }
+public sealed class LocalizationIgnore : MonoBehaviour
+{
+}

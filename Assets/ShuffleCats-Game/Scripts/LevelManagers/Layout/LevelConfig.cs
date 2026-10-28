@@ -32,25 +32,37 @@ public class LevelConfig : ScriptableObject
     [SerializeField] private List<StationPlacement> _stations = new();
 
     public int LevelNumber => _levelNumber;
+
     public int LevelWinBonus => _levelWinBonus;
+
     public int LevelCarBonus => _levelCarBonus;
 
     public int GridWidth => _gridWidth;
+
     public int GridHeight => _gridHeight;
+
     public float CellSize => _cellSize;
+
     public int StartX => _startX;
+
     public int StartY => _startY;
+
     public float AxisYLevel => _axisYLevel;
 
     public int MaxCarsOnTrackCount => _maxCarsOnTrackCount;
+
     public float WaitTime => _waitTime;
 
     public float TrackSpeed => _trackSpeed;
+
     public float SlideDuration => _slideDuration;
+
     public float SearchMin => _searchMin;
+
     public float SearchMax => _searchMax;
 
     public IReadOnlyList<CatPlacement> Cats => _cats;
+
     public IReadOnlyList<StationPlacement> Stations => _stations;
 
     public int StationCount => _stations.Count;
@@ -63,8 +75,13 @@ public class LevelConfig : ScriptableObject
     }
 
 #if UNITY_EDITOR
-    public void EditorSetGrid(int width, int height, float cellSize,
-                            int startX, int startY, float axisYLevel)
+    public void EditorSetGrid(
+        int width,
+        int height,
+        float cellSize,
+        int startX,
+        int startY,
+        float axisYLevel)
     {
         _gridWidth = width;
         _gridHeight = height;
@@ -87,8 +104,11 @@ public class LevelConfig : ScriptableObject
         _waitTime = waitTime;
     }
 
-    public void EditorSetCars(float trackSpeed, float slideDuration,
-                            float searchMin, float searchMax)
+    public void EditorSetCars(
+        float trackSpeed,
+        float slideDuration,
+        float searchMin,
+        float searchMax)
     {
         _trackSpeed = trackSpeed;
         _slideDuration = slideDuration;

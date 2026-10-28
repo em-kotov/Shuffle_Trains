@@ -7,6 +7,7 @@ public class LevelSequence : ScriptableObject
     [SerializeField] private List<LevelLayout> _levels = new();
 
     public int Count => _levels.Count;
+
     public IReadOnlyList<LevelLayout> Levels => _levels;
 
     public LevelLayout Get(int index)

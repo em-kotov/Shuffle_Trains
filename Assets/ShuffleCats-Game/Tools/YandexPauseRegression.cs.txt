@@ -352,7 +352,7 @@ public static class YandexPauseRegression
         audio.MusicOn = true;
         Check(music.pendingPlayback, "Expected startup music queued by the browser");
         var cloud = SaveSnapshot.FromLocal();
-        cloud.music = 0;
+        cloud.Music = 0;
         cloud.ApplyToLocal();
         music.ResumeAudioContext();
         Check(!audio.MusicOn && !music.audible, "Deferred WebGL playback ignored restored music-off setting");
@@ -376,7 +376,7 @@ public static class YandexPauseRegression
         YandexSdk.HandleSdkPause(true);
         music.ResumeAudioContext();
         Check(music.mute && !music.audible, "Platform pause did not mute a deferred WebGL source");
-        cloud.music = 0;
+        cloud.Music = 0;
         cloud.ApplyToLocal();
         YandexSdk.HandleSdkPause(false);
         Check(!music.audible && !audio.MusicOn, "SDK resume ignored music disabled by a cloud save");
@@ -454,8 +454,8 @@ public static class YandexPauseRegression
         LevelProgress.RecordCompletion(2);
         Check(LevelProgress.BestCompletedLevel == 30, "Replaying a level lowered the record");
         SaveSnapshot snapshot = SaveSnapshot.FromLocal();
-        Check(snapshot.bestCompletedLevel == 30, "Personal record missing from cloud snapshot");
-        snapshot.bestCompletedLevel = 4;
+        Check(snapshot.BestCompletedLevel == 30, "Personal record missing from cloud snapshot");
+        snapshot.BestCompletedLevel = 4;
         snapshot.ApplyToLocal();
         Check(LevelProgress.BestCompletedLevel == 30, "Older cloud snapshot lowered the record");
         PlayerPrefs.DeleteKey(SaveKeys.LevelIndex);

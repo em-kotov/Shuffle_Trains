@@ -10,14 +10,10 @@ public class PlayLevelByNumber : EditorWindow
     private const string GameplayPath = "Assets/ShuffleCats-Game/Scenes/Level-1.unity";
     private ScrollView _levels;
 
-    [MenuItem("Tools/Shuffle Cats/Play Level by Number")]
-    private static void Open()
-    {
-        GetWindow<PlayLevelByNumber>("Play Level by Number").minSize = new Vector2(320f, 240f);
-    }
-
     public void CreateGUI()
     {
+        const int availabilityRefreshIntervalMilliseconds = 100;
+
         rootVisualElement.Clear();
         Label hint = new Label("Click a level to play. Level progress is temporary until Play stops.");
         hint.AddToClassList("level-picker-hint");
@@ -32,7 +28,42 @@ public class PlayLevelByNumber : EditorWindow
 
         rootVisualElement.Add(_levels);
         RefreshLevels();
-        rootVisualElement.schedule.Execute(UpdateAvailability).Every(100);
+        rootVisualElement.schedule.Execute(UpdateAvailability).Every(availabilityRefreshIntervalMilliseconds);
+    }
+
+    [MenuItem("Tools/Shuffle Cats/Play Level by Number")]
+    private static void Open()
+    {
+        GetWindow<PlayLevelByNumber>("Play Level by Number").minSize = new Vector2(320f, 240f);
+    }
+
+    private static void Play(int index)
+    {
+        LevelSequence sequence = AssetDatabase.LoadAssetAtPath<LevelSequence>(SequencePath);
+
+        if (sequence == null || sequence.Get(index) == null)
+            return;
+
+        if (AssetDatabase.LoadAssetAtPath<SceneAsset>(BootPath) == null ||
+            AssetDatabase.LoadAssetAtPath<SceneAsset>(GameplayPath) == null)
+        {
+            Debug.LogError("Cannot play level: Boot or Level-1 scene is missing.");
+            return;
+        }
+
+        LevelProgress.EditorPreviewIndex = index;
+
+        if (EditorApplication.isPlaying)
+        {
+            EditorApplication.isPaused = false;
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(GameplayPath);
+        }
+        else
+        {
+            EditorPlayMode.ApplyStartScene();
+            EditorApplication.EnterPlaymode();
+        }
     }
 
     private void OnProjectChange()
@@ -99,34 +130,5 @@ public class PlayLevelByNumber : EditorWindow
         }
 
         _levels.SetEnabled(EditorApplication.isCompiling == false && transitioning == false && booting == false);
-    }
-
-    private static void Play(int index)
-    {
-        LevelSequence sequence = AssetDatabase.LoadAssetAtPath<LevelSequence>(SequencePath);
-
-        if (sequence == null || sequence.Get(index) == null)
-            return;
-
-        if (AssetDatabase.LoadAssetAtPath<SceneAsset>(BootPath) == null ||
-            AssetDatabase.LoadAssetAtPath<SceneAsset>(GameplayPath) == null)
-        {
-            Debug.LogError("Cannot play level: Boot or Level-1 scene is missing.");
-            return;
-        }
-
-        LevelProgress.EditorPreviewIndex = index;
-
-        if (EditorApplication.isPlaying)
-        {
-            EditorApplication.isPaused = false;
-            Time.timeScale = 1f;
-            SceneManager.LoadScene(GameplayPath);
-        }
-        else
-        {
-            EditorPlayMode.ApplyStartScene();
-            EditorApplication.EnterPlaymode();
-        }
     }
 }

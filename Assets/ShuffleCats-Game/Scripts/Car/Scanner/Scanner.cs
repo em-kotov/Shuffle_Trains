@@ -20,8 +20,11 @@ public class Scanner : MonoBehaviour
     private Coroutine _scanRoutine;
 
     public event Action BlockedAhead;
+
     public event Action PathCleared;
+
     public event Action<Station> StationFound;
+
     public event Action ResetFound;
 
     public void Initialize()
@@ -49,6 +52,24 @@ public class Scanner : MonoBehaviour
             StopCoroutine(_scanRoutine);
             _scanRoutine = null;
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        const float castOriginPadding = 0.05f;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawRay(_backwardOrigin.position, -_backwardOrigin.forward * _clearedDistance);
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawRay(_backwardOrigin.position, _backwardOrigin.forward * _clearedDistance);
+
+        float backOffset = _sphereCastRadius + castOriginPadding;
+        Vector3 sphereStart = _backwardOrigin.position -
+                            (_backwardOrigin.forward * backOffset);
+        Vector3 sphereEnd = sphereStart +
+                            (_backwardOrigin.forward * (_clearedDistance + backOffset));
+        Gizmos.DrawWireSphere(sphereStart, _sphereCastRadius);
+        Gizmos.DrawWireSphere(sphereEnd, _sphereCastRadius);
     }
 
     private IEnumerator RaycastWithInterval()
@@ -99,13 +120,20 @@ public class Scanner : MonoBehaviour
 
     private void ScanForStations(Vector3 origin, Vector3 direction)
     {
+        const float castOriginPadding = 0.05f;
+
         // SphereCast ignores initial overlaps. Offset its origin backward and extend its reach equally.
-        float backOffset = _sphereCastRadius + 0.05f;
+        float backOffset = _sphereCastRadius + castOriginPadding;
         Vector3 castOrigin = origin - (direction * backOffset);
         float castDistance = _clearedDistance + backOffset;
 
-        if (Physics.SphereCast(castOrigin, _sphereCastRadius, direction,
-            out RaycastHit hit, castDistance, _stationsDetectLayer))
+        if (Physics.SphereCast(
+            castOrigin,
+            _sphereCastRadius,
+            direction,
+            out RaycastHit hit,
+            castDistance,
+            _stationsDetectLayer))
         {
             int hitLayer = hit.transform.gameObject.layer;
 
@@ -150,23 +178,5 @@ public class Scanner : MonoBehaviour
     private void InvokeReset()
     {
         ResetFound?.Invoke();
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawRay(_backwardOrigin.position, -_backwardOrigin.forward *
-                     _clearedDistance);
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawRay(_backwardOrigin.position, _backwardOrigin.forward *
-                     _clearedDistance);
-
-        float backOffset = _sphereCastRadius + 0.05f;
-        Vector3 sphereStart = _backwardOrigin.position -
-                            (_backwardOrigin.forward * backOffset);
-        Vector3 sphereEnd = sphereStart +
-                            (_backwardOrigin.forward * (_clearedDistance + backOffset));
-        Gizmos.DrawWireSphere(sphereStart, _sphereCastRadius);
-        Gizmos.DrawWireSphere(sphereEnd, _sphereCastRadius);
     }
 }

@@ -3,9 +3,13 @@ using UnityEngine;
 
 public class ParkingRegistrator : MonoBehaviour
 {
-    [SerializeField, Min(1f)] private float _normalTrackSpeedMultiplier = 1.7f;
+    [SerializeField]
+    [Min(1f)]
+    private float _normalTrackSpeedMultiplier = 1.7f;
     [Tooltip("Additional track speed multiplier after the final cat leaves parking.")]
-    [SerializeField, Min(1f)] private float _finalCatsSpeedMultiplier = 2.7f / 1.7f;
+    [SerializeField]
+    [Min(1f)]
+    private float _finalCatsSpeedMultiplier = 2.7f / 1.7f;
 
     private GridCalculator _gridCalculator;
     private ParkingCar[,] _gridCells;
@@ -37,21 +41,35 @@ public class ParkingRegistrator : MonoBehaviour
         get
         {
             foreach (ParkingCar car in _parkingCars)
+            {
                 if (car.IsMoving)
                     return true;
+            }
 
             return false;
         }
     }
 
-    public void Initialize(int width, int height, float cellSize,
-                    int startX, int startY, float axisYLevel,
-                    GridCalculator gridCalculator, int totalCount)
+    public void Initialize(
+        int width,
+        int height,
+        float cellSize,
+        int startX,
+        int startY,
+        float axisYLevel,
+        GridCalculator gridCalculator,
+        int totalCount)
     {
         _cellSize = cellSize;
         _gridCalculator = gridCalculator;
-        _gridCalculator.Initialize(width, height, cellSize, startX,
-                                startY, axisYLevel, this);
+        _gridCalculator.Initialize(
+            width,
+            height,
+            cellSize,
+            startX,
+            startY,
+            axisYLevel,
+            this);
         _gridCells = _gridCalculator.InitializeGrid();
         _parkingCars = new();
     }
@@ -72,8 +90,12 @@ public class ParkingRegistrator : MonoBehaviour
     }
 
     // Reserve destination cells before motion so another cat cannot enter during the slide.
-    public void ReserveCells(Vector3 targetPosition, ParkingCar car,
-                        CarOrientation orientation, float sign, int length)
+    public void ReserveCells(
+        Vector3 targetPosition,
+        ParkingCar car,
+        CarOrientation orientation,
+        float sign,
+        int length)
     {
         Vector2Int newCell = _gridCalculator.WorldToGrid(targetPosition);
         newCell = _gridCalculator.ClampToGrid(newCell);
@@ -87,8 +109,12 @@ public class ParkingRegistrator : MonoBehaviour
             _parkingCars.Add(car);
     }
 
-    public void UnregisterCar(Vector3 oldPosition, ParkingCar car,
-                        CarOrientation orientation, float sign, float length)
+    public void UnregisterCar(
+        Vector3 oldPosition,
+        ParkingCar car,
+        CarOrientation orientation,
+        float sign,
+        float length)
     {
         Vector2Int oldCell = _gridCalculator.WorldToGrid(oldPosition);
         oldCell = _gridCalculator.ClampToGrid(oldCell);
@@ -102,13 +128,20 @@ public class ParkingRegistrator : MonoBehaviour
             _parkingCars.Remove(car);
     }
 
-    public void RegisterTail(ParkingCar car, Vector3 current,
-                            CarOrientation orientation, float sign, float length)
+    public void RegisterTail(
+        ParkingCar car,
+        Vector3 current,
+        CarOrientation orientation,
+        float sign,
+        float length)
     {
         float oppositeDirection = -1f;
         float tailDistance = (length - 1f) * _cellSize;
-        Vector3 target = _gridCalculator.CalculateTargetPosition(current,
-                        orientation, sign * oppositeDirection, tailDistance);
+        Vector3 target = _gridCalculator.CalculateTargetPosition(
+            current,
+            orientation,
+            sign * oppositeDirection,
+            tailDistance);
         List<Vector2Int> tailCells = _gridCalculator.GetVisitedCells(target, current);
 
         int minCountForRegisterTail = 2;
@@ -129,13 +162,20 @@ public class ParkingRegistrator : MonoBehaviour
         }
     }
 
-    public void UnregisterTail(ParkingCar car, Vector3 current,
-                        CarOrientation orientation, float sign, float length)
+    public void UnregisterTail(
+        ParkingCar car,
+        Vector3 current,
+        CarOrientation orientation,
+        float sign,
+        float length)
     {
         float oppositeDirection = -1f;
         float tailDistance = (length - 1f) * _cellSize;
-        Vector3 target = _gridCalculator.CalculateTargetPosition(current,
-                        orientation, sign * oppositeDirection, tailDistance);
+        Vector3 target = _gridCalculator.CalculateTargetPosition(
+            current,
+            orientation,
+            sign * oppositeDirection,
+            tailDistance);
         List<Vector2Int> tailCells = _gridCalculator.GetVisitedCells(target, current);
 
         int minCountForRegisterTail = 2;
@@ -156,8 +196,13 @@ public class ParkingRegistrator : MonoBehaviour
         }
     }
 
-    public Vector3 GetFurthestCellToMove(ParkingCar car, Vector3 currentPosition,
-                    CarOrientation orientation, float sign, out CellOccupancy cellOccupancy, out ParkingCar bumpedCar)
+    public Vector3 GetFurthestCellToMove(
+        ParkingCar car,
+        Vector3 currentPosition,
+        CarOrientation orientation,
+        float sign,
+        out CellOccupancy cellOccupancy,
+        out ParkingCar bumpedCar)
     {
         return _gridCalculator.GetFurthestCellToMove(car, currentPosition, orientation, sign, out cellOccupancy, out bumpedCar);
     }
@@ -170,8 +215,11 @@ public class ParkingRegistrator : MonoBehaviour
     public List<ParkingCar> GetBlockingCars(ParkingCar car, CarOrientation orientation, float sign)
     {
         var blockers = new List<ParkingCar>();
-        Vector3 target = _gridCalculator.CalculateTargetPosition(car.transform.position,
-            orientation, sign, (_gridCells.GetLength(0) + _gridCells.GetLength(1)) * _cellSize);
+        Vector3 target = _gridCalculator.CalculateTargetPosition(
+            car.transform.position,
+            orientation,
+            sign,
+            (_gridCells.GetLength(0) + _gridCells.GetLength(1)) * _cellSize);
 
         foreach (Vector2Int cell in _gridCalculator.GetVisitedCells(target, car.transform.position))
         {

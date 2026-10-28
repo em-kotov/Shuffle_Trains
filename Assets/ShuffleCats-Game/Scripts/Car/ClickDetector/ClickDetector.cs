@@ -8,6 +8,7 @@ public class ClickDetector : MonoBehaviour, IPointerDownHandler, IPointerClickHa
     private PhysicsRaycaster _raycaster;
 
     public event Action Pressed;
+
     public event Action Clicked;
 
     public bool InteractionAllowed { get; set; } = true;

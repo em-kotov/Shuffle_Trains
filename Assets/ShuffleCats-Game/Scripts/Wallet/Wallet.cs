@@ -10,9 +10,9 @@ public class Wallet : MonoBehaviour, IWalletSpender
     private int _levelBalance;
     private int _defaultBalance = 0;
 
-    public int Balance => _currentMoney;
-
     public event Action BalanceChanged;
+
+    public int Balance => _currentMoney;
 
     private void Awake()
     {
@@ -22,7 +22,9 @@ public class Wallet : MonoBehaviour, IWalletSpender
 
     public bool TrySpend(int amount)
     {
-        if (amount <= 0 || _currentMoney < amount)
+        const int zeroAmount = 0;
+
+        if (amount <= zeroAmount || _currentMoney < amount)
         {
             return false;
         }

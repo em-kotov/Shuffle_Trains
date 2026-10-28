@@ -63,8 +63,24 @@ public class LevelManager : MonoBehaviour
 
     private Wallet _wallet;
 
+    private bool HasManualLayout
+    {
+        get
+        {
+#if UNITY_EDITOR
+            if (LevelProgress.EditorPreviewIndex >= 0)
+                return false;
+
+#endif
+            return _levelLayout != null;
+        }
+    }
+
     private void Awake()
     {
+        const int firstTutorialLevel = 1;
+        const int lastTutorialLevel = 3;
+
         // Register before filtering the station list so inactive stations also receive the theme.
         if (_themeApplier != null)
         {
@@ -83,18 +99,34 @@ public class LevelManager : MonoBehaviour
             LeaderboardUI.Attach(_levelNumberText.canvas.rootCanvas);
         }
 
-        _parkingRegistrator.Initialize(_parkingGridWidth, _parkingGridHeight,
-                                        _cellSize, _startX, _startY, _axisYLevel,
-                                        _gridCalculator, _carSubscribers.Count);
+        _parkingRegistrator.Initialize(
+            _parkingGridWidth,
+            _parkingGridHeight,
+            _cellSize,
+            _startX,
+            _startY,
+            _axisYLevel,
+            _gridCalculator,
+            _carSubscribers.Count);
         _trackRegistrator.Initialize(_trackSpline, _counterUI, _maxCarsOnTrackCount);
         _sorterRegistrator.Initialize(_stations);
 
         foreach (Subscriber subscriber in _carSubscribers)
         {
-            subscriber.Initialize(_parkingRegistrator, _trackSpline, _raycaster,
-                                    _trackRegistrator, _trackSpeed, _slideDuration,
-                                    _waitTime, _exitSpline, _passengerPrefab,
-                                    _stationCount, _sorterRegistrator, _searchMin, _searchMax);
+            subscriber.Initialize(
+                _parkingRegistrator,
+                _trackSpline,
+                _raycaster,
+                _trackRegistrator,
+                _trackSpeed,
+                _slideDuration,
+                _waitTime,
+                _exitSpline,
+                _passengerPrefab,
+                _stationCount,
+                _sorterRegistrator,
+                _searchMin,
+                _searchMax);
             subscriber.ReachedEnd += OnCarReachedEnd;
         }
 
@@ -106,13 +138,20 @@ public class LevelManager : MonoBehaviour
         if (_levelNumberText != null)
         {
             CatHintController hints = gameObject.AddComponent<CatHintController>();
-            hints.Initialize(_carSubscribers, _stations, _parkingRegistrator, _trackRegistrator,
+            hints.Initialize(
+                _carSubscribers,
+                _stations,
+                _parkingRegistrator,
+                _trackRegistrator,
                 _levelNumberText.canvas.rootCanvas);
 
-            if (_levelNumber >= 1 && _levelNumber <= 3)
+            if (_levelNumber >= firstTutorialLevel && _levelNumber <= lastTutorialLevel)
             {
-                gameObject.AddComponent<TutorialController>().Initialize(_levelNumber, _carSubscribers,
-                    hints, _levelNumberText.canvas.rootCanvas);
+                gameObject.AddComponent<TutorialController>().Initialize(
+                    _levelNumber,
+                    _carSubscribers,
+                    hints,
+                    _levelNumberText.canvas.rootCanvas);
             }
         }
 
@@ -162,19 +201,6 @@ public class LevelManager : MonoBehaviour
         return null;
     }
 
-    private bool HasManualLayout
-    {
-        get
-        {
-#if UNITY_EDITOR
-            if (LevelProgress.EditorPreviewIndex >= 0)
-                return false;
-
-#endif
-            return _levelLayout != null;
-        }
-    }
-
     private void ApplyConfig(LevelConfig baseConfig, LevelLayout layout)
     {
         _parkingGridWidth = baseConfig.GridWidth;
@@ -221,7 +247,7 @@ public class LevelManager : MonoBehaviour
 
         IReadOnlyList<CatPlacement> cats;
 
-        if ((layout != null && layout.Cats.Count > 0))
+        if (layout != null && layout.Cats.Count > 0)
         {
             cats = layout.Cats;
         }

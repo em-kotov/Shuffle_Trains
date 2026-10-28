@@ -42,41 +42,16 @@ public class CameraFitter : MonoBehaviour
         Fit();
     }
 
-    private void Fit()
+    private void OnValidate()
     {
-        if (_camera == null)
-            _camera = GetComponent<Camera>();
+        const float minimumCameraSize = 0.01f;
 
-        if (_camera.orthographic == false)
-        {
-            Debug.LogWarning($"{nameof(CameraFitter)} on '{name}': camera is not " +
-                "orthographic, so there is no orthographic size to fit. Component does nothing.", this);
-            return;
-        }
+        _baseSize = Mathf.Max(minimumCameraSize, _baseSize);
+        _minVisibleWidth = Mathf.Max(minimumCameraSize, _minVisibleWidth);
+        _padding = Mathf.Max(0f, _padding);
 
-        if (_camera.aspect <= 0f)
-            return;
-
-        float sizeForWidth = (_minVisibleWidth * (1f + _padding) * 0.5f)
-            / (_camera.aspect * Mathf.Max(0.01f, _gameplayArea.width));
-
-        _camera.orthographicSize = Mathf.Max(_baseSize / Mathf.Max(0.01f, _gameplayArea.height), sizeForWidth);
-
-        if (Application.isPlaying)
-        {
-            Vector2 offset = _gameplayArea.center - Vector2.one * 0.5f;
-            float spareHeight = Mathf.Max(0, _gameplayArea.height - _baseSize / _camera.orthographicSize);
-            offset.y += (_verticalAlignment - 0.5f) * spareHeight;
-            transform.position = _authoredPosition
-                - transform.right * (offset.x * 2 * _camera.orthographicSize * _camera.aspect)
-                - transform.up * (offset.y * 2 * _camera.orthographicSize);
-
-            if (_theme == null)
-                _theme = FindObjectOfType<ThemeApplier>();
-
-            if (_theme != null)
-                _theme.FitBackgroundToCamera(_camera);
-        }
+        if (isActiveAndEnabled)
+            Fit();
     }
 
     public void SetGameplayArea(Rect area, float verticalAlignment = 0.5f)
@@ -86,13 +61,44 @@ public class CameraFitter : MonoBehaviour
         Fit();
     }
 
-    private void OnValidate()
+    private void Fit()
     {
-        _baseSize = Mathf.Max(0.01f, _baseSize);
-        _minVisibleWidth = Mathf.Max(0.01f, _minVisibleWidth);
-        _padding = Mathf.Max(0f, _padding);
+        const float minimumViewportFraction = 0.01f;
 
-        if (isActiveAndEnabled)
-            Fit();
+        if (_camera == null)
+            _camera = GetComponent<Camera>();
+
+        if (_camera.orthographic == false)
+        {
+            Debug.LogWarning(
+                $"{nameof(CameraFitter)} on '{name}': camera is not " +
+                "orthographic, so there is no orthographic size to fit. Component does nothing.",
+                this);
+            return;
+        }
+
+        if (_camera.aspect <= 0f)
+            return;
+
+        float sizeForWidth = (_minVisibleWidth * (1f + _padding) * 0.5f)
+            / (_camera.aspect * Mathf.Max(minimumViewportFraction, _gameplayArea.width));
+
+        _camera.orthographicSize = Mathf.Max(_baseSize / Mathf.Max(minimumViewportFraction, _gameplayArea.height), sizeForWidth);
+
+        if (Application.isPlaying)
+        {
+            Vector2 offset = _gameplayArea.center - (Vector2.one * 0.5f);
+            float spareHeight = Mathf.Max(0, _gameplayArea.height - (_baseSize / _camera.orthographicSize));
+            offset.y += (_verticalAlignment - 0.5f) * spareHeight;
+            transform.position = _authoredPosition
+                - (transform.right * (offset.x * 2 * _camera.orthographicSize * _camera.aspect))
+                - (transform.up * (offset.y * 2 * _camera.orthographicSize));
+
+            if (_theme == null)
+                _theme = FindObjectOfType<ThemeApplier>();
+
+            if (_theme != null)
+                _theme.FitBackgroundToCamera(_camera);
+        }
     }
 }

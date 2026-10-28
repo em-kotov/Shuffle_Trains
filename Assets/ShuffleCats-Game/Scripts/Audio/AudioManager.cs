@@ -5,6 +5,8 @@ public class AudioManager : MonoBehaviour
 {
     public const float DefaultVolume = 0.35f;
 
+    private static AudioManager _instance;
+
     [SerializeField] private AudioSource _musicSource;
     [SerializeField] private AudioClip[] _musicClips;
 
@@ -18,15 +20,13 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip _winClip;
     [SerializeField] private AudioClip _coinBonusClip;
 
-    private static AudioManager _instance;
-
     private int _currentTrackIndex;
     private bool _wasPlaying;
     private bool _isMuted;
 
-    public static AudioManager Instance => _instance;
-
     public event Action Changed;
+
+    public static AudioManager Instance => _instance;
 
     public float MusicVolume
     {
@@ -139,8 +139,12 @@ public class AudioManager : MonoBehaviour
         ApplyMusic();
     }
 
+    public static void PlayUIClickStatic() => _instance?.PlayUIClick();
+
     public void PlayMeow()
     {
+        const float clipEndPaddingSeconds = 0.01f;
+
         if (_isMuted || _meowClip == null || _sfxSource == null || SfxOn == false)
         {
             return;
@@ -148,7 +152,7 @@ public class AudioManager : MonoBehaviour
 
         _sfxSource.Stop();
         _sfxSource.clip = _meowClip;
-        _sfxSource.time = Mathf.Clamp(_meowStartTime, 0f, Mathf.Max(0f, _meowClip.length - 0.01f));
+        _sfxSource.time = Mathf.Clamp(_meowStartTime, 0f, Mathf.Max(0f, _meowClip.length - clipEndPaddingSeconds));
         _sfxSource.pitch = UnityEngine.Random.Range(_meowMinPitch, _meowMaxPitch);
         _sfxSource.Play();
     }
@@ -191,8 +195,6 @@ public class AudioManager : MonoBehaviour
     public void PlayWin() => PlaySfx(_winClip);
 
     public void PlayCoinBonus() => PlaySfx(_coinBonusClip);
-
-    public static void PlayUIClickStatic() => _instance?.PlayUIClick();
 
     private void PlaySfx(AudioClip clip)
     {

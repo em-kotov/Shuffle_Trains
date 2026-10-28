@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class StationOperator : MonoBehaviour
 {
-    private List<(Station station, bool isVisited)> _stationsProgress;
+    private List<(Station Station, bool IsVisited)> _stationsProgress;
     private List<Station> _stations;
 
     public void Initialize(int stationCount)
@@ -24,26 +24,26 @@ public class StationOperator : MonoBehaviour
 
     public bool IsVisited(Station station)
     {
-        int stationIndex = _stationsProgress.FindIndex(progress => progress.station == station);
-        return _stationsProgress[stationIndex].isVisited;
+        int stationIndex = _stationsProgress.FindIndex(progress => progress.Station == station);
+        return _stationsProgress[stationIndex].IsVisited;
     }
 
     public void MarkVisited(Station station)
     {
-        int stationIndex = _stationsProgress.FindIndex(progress => progress.station == station);
-        _stationsProgress[stationIndex] = (_stationsProgress[stationIndex].station, true);
+        int stationIndex = _stationsProgress.FindIndex(progress => progress.Station == station);
+        _stationsProgress[stationIndex] = (_stationsProgress[stationIndex].Station, true);
     }
 
     public void ResetProgress()
     {
         for (int i = 0; i < _stationsProgress.Count; i++)
         {
-            _stationsProgress[i] = (_stationsProgress[i].station, false);
+            _stationsProgress[i] = (_stationsProgress[i].Station, false);
         }
     }
 
     public bool HasAnyVisited()
     {
-        return _stationsProgress.Exists(progress => progress.isVisited);
+        return _stationsProgress.Exists(progress => progress.IsVisited);
     }
 }

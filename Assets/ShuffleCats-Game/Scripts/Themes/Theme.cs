@@ -47,37 +47,56 @@ public class Theme : ScriptableObject
     [SerializeField] private Color _textAdditional = Color.white;
 
     public string Id => _id;
+
     public string DisplayName => _displayName;
+
     public int Price => _price;
+
     public Sprite SlotIcon => _slotIcon;
+
     public bool OwnedByDefault => _ownedByDefault;
+
     public bool EquippedByDefault => _equippedByDefault;
 
     public Sprite BackgroundSprite => _backgroundSprite;
+
     public Vector3 BackgroundSize => _backgroundSize;
+
     public Vector2 BackgroundTileSize => _backgroundTileSize;
 
     public Sprite StationSpriteA => _stationSpriteA;
+
     public Sprite StationSpriteB => _stationSpriteB;
+
     public Vector3 StationSpriteScale => _stationSpriteScale;
 
     public Sprite PlayAreaSprite => _playAreaSprite;
+
     public Vector3 PlayAreaSize => _playAreaSize;
+
     public float PlayAreaRotationZ => _playAreaRotationZ;
 
     public Sprite GridSprite => _gridSprite;
+
     public Vector2 GridTileSize => _gridTileSize;
+
     public Color GridColor => _gridColor;
 
     public bool GradientActive => _gradientActive;
+
     public Color GradientColor => _gradientColor;
 
     public Color BgPrimary => _bgPrimary;
+
     public Color BgSecondary => _bgSecondary;
+
     public Color BgContour => _bgContour;
+
     public Color BgShadow => _bgShadow;
 
     public Color TextPrimary => _textPrimary;
+
     public Color TextSecondary => _textSecondary;
+
     public Color TextAdditional => _textAdditional;
 }

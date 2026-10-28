@@ -8,6 +8,10 @@ public class LocalizationBinder : MonoBehaviour
 {
     private static LocalizationBinder _instance;
 
+    private void OnEnable() => SceneManager.sceneLoaded += OnSceneLoaded;
+
+    private void OnDisable() => SceneManager.sceneLoaded -= OnSceneLoaded;
+
     public static void Create()
     {
         if (_instance != null)
@@ -18,17 +22,15 @@ public class LocalizationBinder : MonoBehaviour
         DontDestroyOnLoad(host);
     }
 
-    private void OnEnable() => SceneManager.sceneLoaded += OnSceneLoaded;
-    private void OnDisable() => SceneManager.sceneLoaded -= OnSceneLoaded;
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) => Apply(scene);
-
     public static void Apply(Scene scene)
     {
         foreach (GameObject root in scene.GetRootGameObjects())
         {
             foreach (TMP_Text label in root.GetComponentsInChildren<TMP_Text>(true))
+            {
                 if (label.GetComponent<LocalizationIgnore>() == null && label.GetComponent<LocalizeStringEvent>() == null && Localization.HasKey(label.text))
                     Set(label, label.text);
+            }
 
             foreach (UnityEngine.UI.Text label in root.GetComponentsInChildren<UnityEngine.UI.Text>(true))
             {
@@ -47,6 +49,8 @@ public class LocalizationBinder : MonoBehaviour
 
     public static void Set(TMP_Text label, string key, params object[] arguments)
     {
+        const int minimumAutoFontSize = 10;
+
         if (label == null)
             return;
 
@@ -67,7 +71,7 @@ public class LocalizationBinder : MonoBehaviour
                 UnityEngine.UI.LayoutRebuilder.MarkLayoutForRebuild(label.rectTransform);
             });
             label.fontSizeMax = label.fontSize;
-            label.fontSizeMin = Mathf.Min(10, label.fontSize);
+            label.fontSizeMin = Mathf.Min(minimumAutoFontSize, label.fontSize);
             label.enableAutoSizing = true;
 
             if (key == "Try again?" || key == "SETTINGS" || key == "SHOP")
@@ -78,4 +82,6 @@ public class LocalizationBinder : MonoBehaviour
         label.text = Localization.Format(key, arguments);
         binding.RefreshString();
     }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) => Apply(scene);
 }

@@ -3,22 +3,24 @@ using UnityEngine;
 
 public class ShopSlotUI : MonoBehaviour
 {
-    [SerializeField] private UnityEngine.UI.Image _icon;
-    [SerializeField] private TextMeshProUGUI _price;
-    [SerializeField] private TextMeshProUGUI _status;
-    [SerializeField] private UnityEngine.UI.Button _actionButton;
-
     private static readonly Color Ink = new Color32(92, 62, 47, 255);
     private static readonly Color Cream = new Color32(255, 247, 229, 255);
     private static readonly Color Border = new Color32(190, 162, 122, 255);
     private static readonly Color Selected = new Color32(214, 232, 176, 255);
     private static readonly Color SelectedBorder = new Color32(108, 150, 81, 255);
+    [SerializeField] private UnityEngine.UI.Image _icon;
+    [SerializeField] private TextMeshProUGUI _price;
+    [SerializeField] private TextMeshProUGUI _status;
+    [SerializeField] private UnityEngine.UI.Button _actionButton;
 
     private Theme _theme;
     private Shop _shop;
-    private LanguageCardGraphic _card, _buttonFace;
+    private LanguageCardGraphic _card;
+    private LanguageCardGraphic _buttonFace;
     private TMP_Text _name;
-    private UnityEngine.UI.Image _board, _stationA, _stationB;
+    private UnityEngine.UI.Image _board;
+    private UnityEngine.UI.Image _stationA;
+    private UnityEngine.UI.Image _stationB;
     private GameObject _check;
     private RectTransform _priceRow;
 
@@ -82,6 +84,12 @@ public class ShopSlotUI : MonoBehaviour
 
     public void Refresh()
     {
+        const int priceRowHeight = 22;
+        const int lockedStatusHeight = 20;
+        const int unlockedStatusHeight = 44;
+        const int equippedStatusLeftPadding = 25;
+        const int statusSidePadding = 4;
+
         if (_theme == null || _shop == null)
         {
             return;
@@ -156,7 +164,7 @@ public class ShopSlotUI : MonoBehaviour
 
         if (locked)
         {
-            statusBottom = 22;
+            statusBottom = priceRowHeight;
         }
         else
         {
@@ -167,25 +175,25 @@ public class ShopSlotUI : MonoBehaviour
 
         if (locked)
         {
-            statusHeight = 20;
+            statusHeight = lockedStatusHeight;
         }
         else
         {
-            statusHeight = 44;
+            statusHeight = unlockedStatusHeight;
         }
 
         float statusLeft;
 
         if (equipped)
         {
-            statusLeft = 25;
+            statusLeft = equippedStatusLeftPadding;
         }
         else
         {
-            statusLeft = 4;
+            statusLeft = statusSidePadding;
         }
 
-        Band(_status.rectTransform, statusBottom, statusHeight, statusLeft, 4);
+        Band(_status.rectTransform, statusBottom, statusHeight, statusLeft, statusSidePadding);
 
         switch (status)
         {
@@ -207,165 +215,10 @@ public class ShopSlotUI : MonoBehaviour
         }
     }
 
-    private void BuildCard()
-    {
-        var oldBackground = GetComponent<UnityEngine.UI.Image>();
-
-        if (oldBackground != null)
-            oldBackground.enabled = false;
-
-        RectTransform face = Rect("CardFace", transform);
-        Fill(face);
-        face.SetAsFirstSibling();
-        _card = Card(face, true);
-        _card.Radius = 10;
-        Shadow(face);
-
-        _name = Rect("ThemeName", transform).gameObject.AddComponent<TextMeshProUGUI>();
-        StyleText(_name, 19);
-        _name.rectTransform.anchorMin = new Vector2(0, 1);
-        _name.rectTransform.anchorMax = Vector2.one;
-        _name.rectTransform.pivot = new Vector2(0.5f, 1);
-        _name.rectTransform.anchoredPosition = new Vector2(0, -8);
-        _name.rectTransform.sizeDelta = new Vector2(-16, 28);
-
-        RectTransform preview = Rect("Preview", transform);
-        preview.anchorMin = new Vector2(0, 1);
-        preview.anchorMax = Vector2.one;
-        preview.pivot = new Vector2(0.5f, 1);
-        preview.anchoredPosition = new Vector2(0, -42);
-        preview.sizeDelta = new Vector2(-20, 98);
-        Card(preview, false);
-        RectTransform crop = Rect("Crop", preview);
-        Fill(crop, 2);
-        var maskFace = Card(crop, false);
-        maskFace.BorderWidth = 0;
-        maskFace.Radius = 6;
-        crop.gameObject.AddComponent<UnityEngine.UI.Mask>().showMaskGraphic = true;
-        _icon.rectTransform.SetParent(crop, false);
-        Fill(_icon.rectTransform);
-        _icon.type = UnityEngine.UI.Image.Type.Simple;
-        _icon.color = Color.white;
-        _icon.preserveAspect = false;
-        _icon.raycastTarget = false;
-        _board = PreviewImage("Board", crop, Vector2.zero, new Vector2(80, 80));
-        _stationA = PreviewImage("StationA", crop, new Vector2(-42, -24), new Vector2(28, 28));
-        _stationB = PreviewImage("StationB", crop, new Vector2(42, 24), new Vector2(28, 28));
-
-        var buttonRect = (RectTransform)_actionButton.transform;
-        Band(buttonRect, 10, 44, 10, 10);
-        var oldFace = _actionButton.GetComponent<UnityEngine.UI.Image>();
-
-        if (oldFace != null)
-            oldFace.enabled = false;
-
-        foreach (TMP_Text unused in _actionButton.GetComponentsInChildren<TMP_Text>(true))
-            unused.gameObject.SetActive(false);
-
-        RectTransform buttonFace = Rect("Face", buttonRect);
-        Fill(buttonFace);
-        buttonFace.SetAsFirstSibling();
-        _buttonFace = Card(buttonFace, true);
-        Shadow(buttonFace);
-        _actionButton.targetGraphic = _buttonFace;
-        var colors = _actionButton.colors;
-        colors.normalColor = colors.selectedColor = colors.disabledColor = Color.white;
-        colors.highlightedColor = new Color(1, 0.96f, 0.84f);
-        colors.pressedColor = new Color(0.84f, 0.9f, 0.73f);
-        _actionButton.colors = colors;
-        _status.rectTransform.SetParent(buttonRect, false);
-        StyleText(_status, 17);
-        _priceRow = Rect("PriceRow", buttonRect);
-        Band(_priceRow, 2, 22, 4, 4);
-        var priceLayout = _priceRow.gameObject.AddComponent<UnityEngine.UI.HorizontalLayoutGroup>();
-        priceLayout.childAlignment = TextAnchor.MiddleCenter;
-        priceLayout.spacing = 4;
-        priceLayout.childControlWidth = true;
-        priceLayout.childControlHeight = false;
-        priceLayout.childForceExpandWidth = priceLayout.childForceExpandHeight = false;
-        _price.rectTransform.SetParent(_priceRow, false);
-        StyleText(_price, 15);
-        _price.rectTransform.sizeDelta = new Vector2(0, 22);
-        var coin = _price.transform.Find("CoinIcon") as RectTransform;
-
-        if (coin != null)
-        {
-            coin.SetParent(_priceRow, false);
-            coin.SetAsFirstSibling();
-            coin.pivot = Vector2.one * 0.5f;
-            coin.localRotation = Quaternion.identity;
-            coin.localScale = Vector3.one;
-            coin.sizeDelta = Vector2.one * 14;
-            var coinLayout = coin.gameObject.AddComponent<UnityEngine.UI.LayoutElement>();
-            coinLayout.minWidth = coinLayout.preferredWidth = 14;
-            coinLayout.flexibleWidth = 0;
-            var coinImage = coin.GetComponent<UnityEngine.UI.Image>();
-            coinImage.preserveAspect = true;
-            coinImage.raycastTarget = false;
-        }
-
-        var coinShadow = _price.transform.Find("CoinIconShadow");
-
-        if (coinShadow != null)
-            coinShadow.gameObject.SetActive(false);
-
-        var check = PreviewImage("Selected", buttonRect, Vector2.zero, Vector2.one * 18);
-        check.rectTransform.anchorMin = check.rectTransform.anchorMax = new Vector2(0, 0.5f);
-        check.rectTransform.anchoredPosition = new Vector2(16, 0);
-        var canvas = GetComponentInParent<Canvas>();
-        ResponsiveGameUI responsive;
-
-        if (canvas != null)
-        {
-            responsive = canvas.GetComponent<ResponsiveGameUI>();
-        }
-        else
-        {
-            responsive = null;
-        }
-
-        Transform root;
-
-        if (responsive != null)
-        {
-            root = responsive.SafeRoot;
-        }
-        else if (canvas != null)
-        {
-            root = canvas.transform;
-        }
-        else
-        {
-            root = null;
-        }
-
-        Transform source;
-
-        if (root != null)
-        {
-            source = root.Find("OptionsPanel/MusicToggle/Background/Checkmark");
-        }
-        else
-        {
-            source = null;
-        }
-
-        if (source != null)
-        {
-            check.sprite = source.GetComponent<UnityEngine.UI.Image>()?.sprite;
-        }
-        else
-        {
-            check.sprite = null;
-        }
-
-        check.color = new Color32(76, 125, 62, 255);
-        _check = check.gameObject;
-        buttonRect.SetAsLastSibling();
-    }
-
     private static void StyleText(TMP_Text text, float size)
     {
+        const int minimumFontSize = 12;
+
         var font = Resources.Load<TMP_FontAsset>("Fonts/Eno Black SDF");
 
         if (font != null)
@@ -376,7 +229,7 @@ public class ShopSlotUI : MonoBehaviour
 
         text.fontStyle = FontStyles.Normal;
         text.fontSize = text.fontSizeMax = size;
-        text.fontSizeMin = 12;
+        text.fontSizeMin = minimumFontSize;
         text.enableAutoSizing = true;
         text.enableWordWrapping = false;
         text.alignment = TextAlignmentOptions.Center;
@@ -436,6 +289,178 @@ public class ShopSlotUI : MonoBehaviour
         rect.pivot = new Vector2(0.5f, 0);
         rect.offsetMin = new Vector2(left, bottom);
         rect.offsetMax = new Vector2(-right, bottom + height);
+    }
+
+    private void BuildCard()
+    {
+        const int cardCornerRadius = 10;
+        const int nameFontSize = 19;
+        const int previewCropPadding = 2;
+        const int previewCornerRadius = 6;
+        const int actionButtonPadding = 10;
+        const int actionButtonHeight = 44;
+        const int statusFontSize = 17;
+        const int priceRowBottom = 2;
+        const int priceRowHeight = 22;
+        const int priceRowSidePadding = 4;
+        const int priceItemSpacing = 4;
+        const int priceFontSize = 15;
+        const int coinIconSize = 14;
+        const int checkmarkSize = 18;
+
+        var oldBackground = GetComponent<UnityEngine.UI.Image>();
+
+        if (oldBackground != null)
+            oldBackground.enabled = false;
+
+        RectTransform face = Rect("CardFace", transform);
+        Fill(face);
+        face.SetAsFirstSibling();
+        _card = Card(face, true);
+        _card.Radius = cardCornerRadius;
+        Shadow(face);
+
+        _name = Rect("ThemeName", transform).gameObject.AddComponent<TextMeshProUGUI>();
+        StyleText(_name, nameFontSize);
+        _name.rectTransform.anchorMin = new Vector2(0, 1);
+        _name.rectTransform.anchorMax = Vector2.one;
+        _name.rectTransform.pivot = new Vector2(0.5f, 1);
+        _name.rectTransform.anchoredPosition = new Vector2(0, -8);
+        _name.rectTransform.sizeDelta = new Vector2(-16, 28);
+
+        RectTransform preview = Rect("Preview", transform);
+        preview.anchorMin = new Vector2(0, 1);
+        preview.anchorMax = Vector2.one;
+        preview.pivot = new Vector2(0.5f, 1);
+        preview.anchoredPosition = new Vector2(0, -42);
+        preview.sizeDelta = new Vector2(-20, 98);
+        Card(preview, false);
+        RectTransform crop = Rect("Crop", preview);
+        Fill(crop, previewCropPadding);
+        var maskFace = Card(crop, false);
+        maskFace.BorderWidth = 0;
+        maskFace.Radius = previewCornerRadius;
+        crop.gameObject.AddComponent<UnityEngine.UI.Mask>().showMaskGraphic = true;
+        _icon.rectTransform.SetParent(crop, false);
+        Fill(_icon.rectTransform);
+        _icon.type = UnityEngine.UI.Image.Type.Simple;
+        _icon.color = Color.white;
+        _icon.preserveAspect = false;
+        _icon.raycastTarget = false;
+        _board = PreviewImage("Board", crop, Vector2.zero, new Vector2(80, 80));
+        _stationA = PreviewImage("StationA", crop, new Vector2(-42, -24), new Vector2(28, 28));
+        _stationB = PreviewImage("StationB", crop, new Vector2(42, 24), new Vector2(28, 28));
+
+        var buttonRect = (RectTransform)_actionButton.transform;
+        Band(buttonRect, actionButtonPadding, actionButtonHeight, actionButtonPadding, actionButtonPadding);
+        var oldFace = _actionButton.GetComponent<UnityEngine.UI.Image>();
+
+        if (oldFace != null)
+            oldFace.enabled = false;
+
+        foreach (TMP_Text unused in _actionButton.GetComponentsInChildren<TMP_Text>(true))
+            unused.gameObject.SetActive(false);
+
+        RectTransform buttonFace = Rect("Face", buttonRect);
+        Fill(buttonFace);
+        buttonFace.SetAsFirstSibling();
+        _buttonFace = Card(buttonFace, true);
+        Shadow(buttonFace);
+        _actionButton.targetGraphic = _buttonFace;
+        var colors = _actionButton.colors;
+        colors.normalColor = colors.selectedColor = colors.disabledColor = Color.white;
+        colors.highlightedColor = new Color(1, 0.96f, 0.84f);
+        colors.pressedColor = new Color(0.84f, 0.9f, 0.73f);
+        _actionButton.colors = colors;
+        _status.rectTransform.SetParent(buttonRect, false);
+        StyleText(_status, statusFontSize);
+        _priceRow = Rect("PriceRow", buttonRect);
+        Band(_priceRow, priceRowBottom, priceRowHeight, priceRowSidePadding, priceRowSidePadding);
+        var priceLayout = _priceRow.gameObject.AddComponent<UnityEngine.UI.HorizontalLayoutGroup>();
+        priceLayout.childAlignment = TextAnchor.MiddleCenter;
+        priceLayout.spacing = priceItemSpacing;
+        priceLayout.childControlWidth = true;
+        priceLayout.childControlHeight = false;
+        priceLayout.childForceExpandWidth = priceLayout.childForceExpandHeight = false;
+        _price.rectTransform.SetParent(_priceRow, false);
+        StyleText(_price, priceFontSize);
+        _price.rectTransform.sizeDelta = new Vector2(0, priceRowHeight);
+        var coin = _price.transform.Find("CoinIcon") as RectTransform;
+
+        if (coin != null)
+        {
+            coin.SetParent(_priceRow, false);
+            coin.SetAsFirstSibling();
+            coin.pivot = Vector2.one * 0.5f;
+            coin.localRotation = Quaternion.identity;
+            coin.localScale = Vector3.one;
+            coin.sizeDelta = Vector2.one * coinIconSize;
+            var coinLayout = coin.gameObject.AddComponent<UnityEngine.UI.LayoutElement>();
+            coinLayout.minWidth = coinLayout.preferredWidth = coinIconSize;
+            coinLayout.flexibleWidth = 0;
+            var coinImage = coin.GetComponent<UnityEngine.UI.Image>();
+            coinImage.preserveAspect = true;
+            coinImage.raycastTarget = false;
+        }
+
+        var coinShadow = _price.transform.Find("CoinIconShadow");
+
+        if (coinShadow != null)
+            coinShadow.gameObject.SetActive(false);
+
+        var check = PreviewImage("Selected", buttonRect, Vector2.zero, Vector2.one * checkmarkSize);
+        check.rectTransform.anchorMin = check.rectTransform.anchorMax = new Vector2(0, 0.5f);
+        check.rectTransform.anchoredPosition = new Vector2(16, 0);
+        var canvas = GetComponentInParent<Canvas>();
+        ResponsiveGameUI responsive;
+
+        if (canvas != null)
+        {
+            responsive = canvas.GetComponent<ResponsiveGameUI>();
+        }
+        else
+        {
+            responsive = null;
+        }
+
+        Transform root;
+
+        if (responsive != null)
+        {
+            root = responsive.SafeRoot;
+        }
+        else if (canvas != null)
+        {
+            root = canvas.transform;
+        }
+        else
+        {
+            root = null;
+        }
+
+        Transform source;
+
+        if (root != null)
+        {
+            source = root.Find("OptionsPanel/MusicToggle/Background/Checkmark");
+        }
+        else
+        {
+            source = null;
+        }
+
+        if (source != null)
+        {
+            check.sprite = source.GetComponent<UnityEngine.UI.Image>()?.sprite;
+        }
+        else
+        {
+            check.sprite = null;
+        }
+
+        check.color = new Color32(76, 125, 62, 255);
+        _check = check.gameObject;
+        buttonRect.SetAsLastSibling();
     }
 
     private void OnClick()

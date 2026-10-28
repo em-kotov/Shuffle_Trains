@@ -85,8 +85,10 @@ public class SpriteFacingLock : MonoBehaviour
 
         if (_target == null)
         {
-            Debug.LogWarning($"{nameof(SpriteFacingLock)} on '{name}': Target is not " +
-                "assigned. Wire the cat's sprite transform in the inspector.", this);
+            Debug.LogWarning(
+                $"{nameof(SpriteFacingLock)} on '{name}': Target is not " +
+                "assigned. Wire the cat's sprite transform in the inspector.",
+                this);
             return;
         }
 
@@ -121,7 +123,7 @@ public class SpriteFacingLock : MonoBehaviour
 
         bool invert;
 
-        if ((_onTrack && _trackFlipSeparate))
+        if (_onTrack && _trackFlipSeparate)
         {
             invert = _invertFlipTrack;
         }

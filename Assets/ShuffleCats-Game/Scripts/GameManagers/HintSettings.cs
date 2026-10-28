@@ -22,6 +22,7 @@ public static class HintSettings
 
             return _enabled.Value;
         }
+
         set
         {
             if (Enabled == value)

@@ -12,19 +12,29 @@ public static class Localization
 {
     public const string TableName = "Game UI";
     public const string Auto = "auto";
-    public enum Language { English, Russian, Turkish }
-    public static event Action Changed;
-
-    private static readonly Dictionary<string, StringTable> Tables = new();
-    private static readonly List<AsyncOperationHandle<StringTable>> Handles = new();
-    private static readonly HashSet<string> RussianCodes = new() { "ru", "be", "kk", "uk", "uz" };
-    public static bool IsReady { get; private set; }
-    public static string Preference => NormalizePreference(PlayerPrefs.GetString(SaveKeys.Language, Auto));
-    public static Language Current => Resolve(LocalizationSettings.SelectedLocale?.Identifier.Code);
 
 #if UNITY_EDITOR
     public const string EditorLanguageKey = "ShuffleCats.PreviewLanguage";
 #endif
+
+    private static readonly Dictionary<string, StringTable> Tables = new();
+    private static readonly List<AsyncOperationHandle<StringTable>> Handles = new();
+    private static readonly HashSet<string> RussianCodes = new() { "ru", "be", "kk", "uk", "uz" };
+
+    public static event Action Changed;
+
+    public enum Language
+    {
+        English,
+        Russian,
+        Turkish,
+    }
+
+    public static bool IsReady { get; private set; }
+
+    public static string Preference => NormalizePreference(PlayerPrefs.GetString(SaveKeys.Language, Auto));
+
+    public static Language Current => Resolve(LocalizationSettings.SelectedLocale?.Identifier.Code);
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void Reset()
@@ -32,8 +42,10 @@ public static class Localization
         LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
 
         foreach (var handle in Handles)
+        {
             if (handle.IsValid())
                 Addressables.Release(handle);
+        }
 
         Handles.Clear();
         Tables.Clear();
@@ -84,46 +96,6 @@ public static class Localization
             Changed?.Invoke();
     }
 
-    private static void ApplyPreference()
-    {
-        if (IsReady == false)
-            return;
-
-        string code = Preference;
-
-        if (code == Auto)
-            code = DetectLanguageCode();
-
-        var locale = LocalizationSettings.AvailableLocales.GetLocale(Code(Resolve(code)));
-
-        if (locale != null)
-            LocalizationSettings.SelectedLocale = locale;
-    }
-
-    private static string DetectLanguageCode()
-    {
-#if UNITY_EDITOR
-        return UnityEditor.EditorPrefs.GetString(EditorLanguageKey, "ru");
-#else
-        if (YandexSdk.IsInitialized)
-            return YandexSdk.Language;
-
-        switch (Application.systemLanguage)
-        {
-            case SystemLanguage.Turkish:
-                return "tr";
-            case SystemLanguage.Russian:
-                return "ru";
-            case SystemLanguage.Ukrainian:
-                return "uk";
-            case SystemLanguage.Belarusian:
-                return "be";
-            default:
-                return "en";
-        }
-#endif
-    }
-
     public static string Get(string english)
     {
         if (string.IsNullOrEmpty(english))
@@ -141,8 +113,9 @@ public static class Localization
 
     public static bool HasKey(string english) => string.IsNullOrEmpty(english) == false
         && Tables.TryGetValue("en", out var table) && table.GetEntry(english) != null;
+
     public static string Format(string english, params object[] arguments) => string.Format(Get(english), arguments);
-    private static void OnLocaleChanged(Locale locale) => Changed?.Invoke();
+
     public static string NormalizePreference(string value)
     {
         if (value == "en" || value == "ru" || value == "tr")
@@ -188,4 +161,46 @@ public static class Localization
             return Language.English;
         }
     }
+
+    private static void ApplyPreference()
+    {
+        if (IsReady == false)
+            return;
+
+        string code = Preference;
+
+        if (code == Auto)
+            code = DetectLanguageCode();
+
+        var locale = LocalizationSettings.AvailableLocales.GetLocale(Code(Resolve(code)));
+
+        if (locale != null)
+            LocalizationSettings.SelectedLocale = locale;
+    }
+
+    private static string DetectLanguageCode()
+    {
+#if UNITY_EDITOR
+        return UnityEditor.EditorPrefs.GetString(EditorLanguageKey, "ru");
+#else
+        if (YandexSdk.IsInitialized)
+            return YandexSdk.Language;
+
+        switch (Application.systemLanguage)
+        {
+            case SystemLanguage.Turkish:
+                return "tr";
+            case SystemLanguage.Russian:
+                return "ru";
+            case SystemLanguage.Ukrainian:
+                return "uk";
+            case SystemLanguage.Belarusian:
+                return "be";
+            default:
+                return "en";
+        }
+#endif
+    }
+
+    private static void OnLocaleChanged(Locale locale) => Changed?.Invoke();
 }

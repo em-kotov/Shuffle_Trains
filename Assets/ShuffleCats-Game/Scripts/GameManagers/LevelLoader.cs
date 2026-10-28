@@ -3,7 +3,6 @@ using UnityEngine.SceneManagement;
 
 public static class LevelLoader
 {
-    // Save progress before the ad so leaving during it does not lose the completed level.
     public static void LoadNextLevel()
     {
         LevelProgress.Advance();

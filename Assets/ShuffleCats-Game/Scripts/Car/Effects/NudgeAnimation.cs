@@ -3,19 +3,18 @@ using UnityEngine;
 
 public class NudgeAnimation : MonoBehaviour
 {
-    public event Action Finished;
-
     [Header("Nudge")]
     [Tooltip("Duration of one nudge in seconds.")]
     [SerializeField] private float _duration = 0.15f;
     [Tooltip("Peak offset toward impact direction, in local units.")]
-    [SerializeField, Range(0f, 1f)] private float _offsetAmount = 0.2f;
+    [SerializeField]
+    [Range(0f, 1f)]
+    private float _offsetAmount = 0.2f;
     [Tooltip("Shape of the nudge over normalized time 0→1. Y=+1 = full lunge along impact axis.")]
     [SerializeField] private AnimationCurve _nudgeCurve = new AnimationCurve(
         new Keyframe(0f, 0f),
         new Keyframe(0.35f, 1f),
-        new Keyframe(1f, 0f)
-    );
+        new Keyframe(1f, 0f));
 
     private Transform _target;
     private Vector3 _restPos;
@@ -23,15 +22,19 @@ public class NudgeAnimation : MonoBehaviour
     private float _elapsed;
     private Vector3 _offsetDir;
 
+    public event Action Finished;
+
     public void Activate(Transform target, Vector2 impactDir)
     {
+        const float minimumImpactSqrMagnitude = 1e-6f;
+
         if (_isActive)
             Deactivate();
 
         _target = target;
         _restPos = _target.localPosition;
 
-        if (impactDir.sqrMagnitude > 1e-6f)
+        if (impactDir.sqrMagnitude > minimumImpactSqrMagnitude)
             impactDir.Normalize();
 
         // impactDir uses the grid plane: x = world X, y = world Z.
@@ -80,7 +83,7 @@ public class NudgeAnimation : MonoBehaviour
         }
 
         float s = _nudgeCurve.Evaluate(t) * _offsetAmount;
-        _target.localPosition = _restPos + _offsetDir * s;
+        _target.localPosition = _restPos + (_offsetDir * s);
     }
 
     private void Reset()

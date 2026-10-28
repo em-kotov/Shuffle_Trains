@@ -6,21 +6,6 @@ using UnityEngine.UI;
 
 public class ThemeApplier : MonoBehaviour
 {
-    public enum StationSpriteVariant
-    {
-        A,
-        B,
-    }
-
-    [Serializable]
-    public class StationEntry
-    {
-        public SpriteRenderer Target;
-        public StationSpriteVariant Sprite;
-        public bool FlipX;
-        public bool FlipY;
-    }
-
     [SerializeField] private ShopCatalog _catalog;
 
     [Header("Background")]
@@ -41,6 +26,7 @@ public class ThemeApplier : MonoBehaviour
     [Header("UI Background Colors")]
     [SerializeField] private List<Image> _uiBgPrimaryTargets = new List<Image>();
     [SerializeField] private List<Image> _uiBgSecondaryTargets = new List<Image>();
+
     [SerializeField] private List<Image> _uiBgContourTargets = new List<Image>();
     [SerializeField] private List<Image> _uiBgShadowTargets = new List<Image>();
 
@@ -54,20 +40,39 @@ public class ThemeApplier : MonoBehaviour
     private bool _playAreaBaseCached;
     private Vector2 _backgroundBaseSize;
 
-    public void ClearStations()
+    public enum StationSpriteVariant
     {
-        _stations.Clear();
+        A,
+        B,
     }
 
-    public void AddStation(SpriteRenderer target, StationSpriteVariant variant,
-                        bool flipX, bool flipY)
+    private void Start()
+    {
+        if (_shop != null)
+        {
+            return;
+        }
+
+        Initialize(FindObjectOfType<Shop>());
+    }
+
+    private void OnDestroy()
+    {
+        Unsubscribe();
+    }
+
+    public void AddStation(
+        SpriteRenderer target,
+        StationSpriteVariant variant,
+        bool flipX,
+        bool flipY)
     {
         _stations.Add(new StationEntry
         {
             Target = target,
             Sprite = variant,
             FlipX = flipX,
-            FlipY = flipY
+            FlipY = flipY,
         });
     }
 
@@ -109,19 +114,54 @@ public class ThemeApplier : MonoBehaviour
         Apply();
     }
 
-    private void Start()
+    public void FitBackgroundToCamera(Camera camera)
     {
-        if (_shop != null)
-        {
+        const int viewportCornerCount = 4;
+        const int cornersPerAxis = 2;
+        const float backgroundCoverageMultiplier = 2.02f;
+
+        if (_backgroundTarget == null || camera == null || camera.orthographic == false)
             return;
+
+        Transform background = _backgroundTarget.transform;
+        var plane = new Plane(background.forward, background.position);
+        Vector2 size = _backgroundBaseSize;
+
+        for (int corner = 0; corner < viewportCornerCount; corner++)
+        {
+            Ray ray = camera.ViewportPointToRay(new Vector3(corner % cornersPerAxis, corner / cornersPerAxis, 0));
+
+            if (plane.Raycast(ray, out float distance) == false)
+                continue;
+
+            Vector3 local = background.InverseTransformPoint(ray.GetPoint(distance));
+            size.x = Mathf.Max(size.x, Mathf.Abs(local.x) * backgroundCoverageMultiplier);
+            size.y = Mathf.Max(size.y, Mathf.Abs(local.y) * backgroundCoverageMultiplier);
         }
 
-        Initialize(FindObjectOfType<Shop>());
+        _backgroundTarget.size = size;
     }
 
-    private void OnDestroy()
+    private static void SetImageColors(List<Image> images, Color color)
     {
-        Unsubscribe();
+        foreach (Image image in images)
+        {
+            if (image != null)
+            {
+                image.color = color;
+            }
+        }
+    }
+
+    private static void SetTextColors(List<TMP_Text> texts, Color color)
+    {
+        foreach (TMP_Text text in texts)
+        {
+            if (text != null)
+            {
+                text.color = color;
+            }
+        }
     }
 
     private void Unsubscribe()
@@ -174,30 +214,6 @@ public class ThemeApplier : MonoBehaviour
         _backgroundTarget.transform.localScale = theme.BackgroundSize;
         _backgroundBaseSize = theme.BackgroundTileSize;
         FitBackgroundToCamera(Camera.main);
-    }
-
-    public void FitBackgroundToCamera(Camera camera)
-    {
-        if (_backgroundTarget == null || camera == null || camera.orthographic == false)
-            return;
-
-        Transform background = _backgroundTarget.transform;
-        var plane = new Plane(background.forward, background.position);
-        Vector2 size = _backgroundBaseSize;
-
-        for (int corner = 0; corner < 4; corner++)
-        {
-            Ray ray = camera.ViewportPointToRay(new Vector3(corner % 2, corner / 2, 0));
-
-            if (plane.Raycast(ray, out float distance) == false)
-                continue;
-
-            Vector3 local = background.InverseTransformPoint(ray.GetPoint(distance));
-            size.x = Mathf.Max(size.x, Mathf.Abs(local.x) * 2.02f);
-            size.y = Mathf.Max(size.y, Mathf.Abs(local.y) * 2.02f);
-        }
-
-        _backgroundTarget.size = size;
     }
 
     private void ApplyStations(Theme theme)
@@ -268,25 +284,12 @@ public class ThemeApplier : MonoBehaviour
         SetTextColors(_uiTextAdditionalTargets, theme.TextAdditional);
     }
 
-    private static void SetImageColors(List<Image> images, Color color)
+    [Serializable]
+    public class StationEntry
     {
-        foreach (Image image in images)
-        {
-            if (image != null)
-            {
-                image.color = color;
-            }
-        }
-    }
-
-    private static void SetTextColors(List<TMP_Text> texts, Color color)
-    {
-        foreach (TMP_Text text in texts)
-        {
-            if (text != null)
-            {
-                text.color = color;
-            }
-        }
+        public SpriteRenderer Target;
+        public StationSpriteVariant Sprite;
+        public bool FlipX;
+        public bool FlipY;
     }
 }

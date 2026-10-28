@@ -29,6 +29,29 @@ public static class EditorPlayMode
         };
     }
 
+    private static bool PlayFromBoot => EditorPrefs.GetBool(PlayFromBootKey, true);
+
+    private static string PreviewLanguage => EditorPrefs.GetString(Localization.EditorLanguageKey, Russian);
+
+    internal static void ApplyStartScene()
+    {
+        if (PlayFromBoot == false && LevelProgress.EditorPreviewIndex < 0)
+        {
+            EditorSceneManager.playModeStartScene = null;
+            return;
+        }
+
+        SceneAsset boot = AssetDatabase.LoadAssetAtPath<SceneAsset>(BootScenePath);
+
+        if (boot == null)
+        {
+            Debug.LogWarning($"EditorPlayMode - boot scene not found at {BootScenePath}");
+            return;
+        }
+
+        EditorSceneManager.playModeStartScene = boot;
+    }
+
     [MenuItem(PlayFromBootMenu)]
     private static void TogglePlayFromBoot()
     {
@@ -69,8 +92,6 @@ public static class EditorPlayMode
         return true;
     }
 
-    private static bool PlayFromBoot => EditorPrefs.GetBool(PlayFromBootKey, true);
-
     [MenuItem(TurkishMenu)]
     private static void PreviewTurkish() => EditorPrefs.SetString(Localization.EditorLanguageKey, "tr");
 
@@ -79,26 +100,5 @@ public static class EditorPlayMode
     {
         Menu.SetChecked(TurkishMenu, PreviewLanguage == "tr");
         return true;
-    }
-
-    private static string PreviewLanguage => EditorPrefs.GetString(Localization.EditorLanguageKey, Russian);
-
-    internal static void ApplyStartScene()
-    {
-        if (PlayFromBoot == false && LevelProgress.EditorPreviewIndex < 0)
-        {
-            EditorSceneManager.playModeStartScene = null;
-            return;
-        }
-
-        SceneAsset boot = AssetDatabase.LoadAssetAtPath<SceneAsset>(BootScenePath);
-
-        if (boot == null)
-        {
-            Debug.LogWarning($"EditorPlayMode - boot scene not found at {BootScenePath}");
-            return;
-        }
-
-        EditorSceneManager.playModeStartScene = boot;
     }
 }

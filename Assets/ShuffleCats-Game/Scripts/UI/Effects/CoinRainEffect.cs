@@ -5,6 +5,8 @@ using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 public class CoinRainEffect : MonoBehaviour
 {
+    private const string CoinResourcePath = "Textures/Icons/coin-icon-1";
+
     [Header("Trigger")]
     [Tooltip("Fires the rain when this raises WinLevel. Leave empty and call Play() manually if you prefer.")]
     [SerializeField] private AutoWin _autoWin;
@@ -16,11 +18,15 @@ public class CoinRainEffect : MonoBehaviour
     [SerializeField] private RectTransform _spawnArea;
 
     [Header("Amounts & size")]
-    [SerializeField, Min(1)] private int _coinCount = 30;
+    [SerializeField]
+    [Min(1)]
+    private int _coinCount = 30;
     [Tooltip("Coin width/height in canvas pixels (a random size in this range is picked per coin).")]
     [SerializeField] private Vector2 _sizeRange = new Vector2(70f, 100f);
     [Tooltip("How long the whole burst takes to spawn. 0 = all at once.")]
-    [SerializeField, Min(0f)] private float _spawnDuration = 0.6f;
+    [SerializeField]
+    [Min(0f)]
+    private float _spawnDuration = 0.6f;
 
     [Header("Fall")]
     [Tooltip("Initial downward speed in pixels/second (random per coin).")]
@@ -38,8 +44,6 @@ public class CoinRainEffect : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] private bool _playCoinSound = true;
-
-    private const string CoinResourcePath = "Textures/Icons/coin-icon-1";
 
     private void Awake()
     {
@@ -102,6 +106,8 @@ public class CoinRainEffect : MonoBehaviour
 
     private void SpawnCoin(float halfWidth, float halfHeight)
     {
+        const float reverseSpinProbability = 0.5f;
+
         float size = Random.Range(_sizeRange.x, _sizeRange.y);
 
         var go = new GameObject("Coin", typeof(RectTransform), typeof(Image));
@@ -124,7 +130,7 @@ public class CoinRainEffect : MonoBehaviour
         float spinSpeed = Random.Range(_spinSpeedRange.x, _spinSpeedRange.y);
         float spinDirection;
 
-        if (Random.value < 0.5f)
+        if (Random.value < reverseSpinProbability)
         {
             spinDirection = -1f;
         }
@@ -139,8 +145,14 @@ public class CoinRainEffect : MonoBehaviour
         StartCoroutine(FallRoutine(rect, startX, startY, endY, fallSpeed, spin, driftPhase));
     }
 
-    private IEnumerator FallRoutine(RectTransform coin, float startX, float startY, float endY,
-                                    float fallSpeed, float spinSpeed, float driftPhase)
+    private IEnumerator FallRoutine(
+        RectTransform coin,
+        float startX,
+        float startY,
+        float endY,
+        float fallSpeed,
+        float spinSpeed,
+        float driftPhase)
     {
         float y = startY;
         float velocity = fallSpeed;
@@ -153,7 +165,7 @@ public class CoinRainEffect : MonoBehaviour
             velocity += _gravity * dt;
             y -= velocity * dt;
 
-            float x = startX + _driftAmplitude * Mathf.Sin(_driftFrequency * elapsed + driftPhase);
+            float x = startX + (_driftAmplitude * Mathf.Sin((_driftFrequency * elapsed) + driftPhase));
             coin.anchoredPosition = new Vector2(x, y);
             coin.Rotate(0f, 0f, spinSpeed * dt);
 

@@ -8,5 +8,5 @@ public enum CatColor
     Orange,
     Brown,
     Iridiscent,
-    Uncolored
+    Uncolored,
 }

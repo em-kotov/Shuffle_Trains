@@ -10,8 +10,10 @@ public static class LevelConfigCapture
     public static void ResetProgress()
     {
         LevelProgress.Reset();
-        EditorUtility.DisplayDialog("Reset Level Progress",
-            "Progress reset to the first level in the sequence.", "OK");
+        EditorUtility.DisplayDialog(
+            "Reset Level Progress",
+            "Progress reset to the first level in the sequence.",
+            "OK");
     }
 
     [MenuItem("ShuffleCats/Reset Wallet")]
@@ -29,8 +31,10 @@ public static class LevelConfigCapture
 
         if (manager == null)
         {
-            EditorUtility.DisplayDialog("Capture Base Config",
-                "No LevelManager found in the open scene.", "OK");
+            EditorUtility.DisplayDialog(
+                "Capture Base Config",
+                "No LevelManager found in the open scene.",
+                "OK");
             return;
         }
 
@@ -65,9 +69,8 @@ public static class LevelConfigCapture
         EnsureFolder();
         SaveAsset(config, $"{OutputFolder}/BaseConfig.asset");
 
-        EditorUtility.DisplayDialog("Capture Base Config",
-            $"Captured grid, track, movement and {stations.Count} stations into " +
-            $"BaseConfig.", "OK");
+        string message = $"Captured grid, track, movement and {stations.Count} stations into BaseConfig.";
+        EditorUtility.DisplayDialog("Capture Base Config", message, "OK");
     }
 
     [MenuItem("ShuffleCats/Capture Level Layout")]
@@ -77,8 +80,10 @@ public static class LevelConfigCapture
 
         if (manager == null)
         {
-            EditorUtility.DisplayDialog("Capture Level Layout",
-                "No LevelManager found in the open scene.", "OK");
+            EditorUtility.DisplayDialog(
+                "Capture Level Layout",
+                "No LevelManager found in the open scene.",
+                "OK");
             return;
         }
 
@@ -97,13 +102,17 @@ public static class LevelConfigCapture
             managerSo.FindProperty("_levelWinBonus").intValue,
             managerSo.FindProperty("_levelCarBonus").intValue,
             managerSo.FindProperty("_maxCarsOnTrackCount").intValue,
-            cats, activeStations);
+            cats,
+            activeStations);
 
         EnsureFolder();
         string defaultName = $"Level-{layout.LevelNumber}-Layout";
         string path = EditorUtility.SaveFilePanelInProject(
-            "Save Level Layout", defaultName, "asset",
-            "Choose where to save this level's layout.", OutputFolder);
+            "Save Level Layout",
+            defaultName,
+            "asset",
+            "Choose where to save this level's layout.",
+            OutputFolder);
 
         if (string.IsNullOrEmpty(path))
         {
@@ -115,13 +124,16 @@ public static class LevelConfigCapture
 
         int activeCount = activeStations.FindAll(active => active).Count;
 
-        EditorUtility.DisplayDialog("Capture Level Layout",
-            $"Captured {cats.Count} cats and {activeCount}/{activeStations.Count} " +
-            $"active stations into {System.IO.Path.GetFileNameWithoutExtension(path)}.", "OK");
+        string message = $"Captured {cats.Count} cats and {activeCount}/{activeStations.Count} " +
+            $"active stations into {System.IO.Path.GetFileNameWithoutExtension(path)}.";
+        EditorUtility.DisplayDialog("Capture Level Layout", message, "OK");
     }
 
-    private static List<CatPlacement> CaptureCats(SerializedObject managerSo,
-                                            int startX, int startY, float cellSize)
+    private static List<CatPlacement> CaptureCats(
+        SerializedObject managerSo,
+        int startX,
+        int startY,
+        float cellSize)
     {
         List<CatPlacement> cats = new();
         SerializedProperty carsProp = managerSo.FindProperty("_carSubscribers");
@@ -180,10 +192,19 @@ public static class LevelConfigCapture
                 Mathf.RoundToInt((position.z - startY) / cellSize));
             Vector3 eulerAngles = subscriber.transform.eulerAngles;
 
-            cats.Add(new CatPlacement(color, length, cell, eulerAngles,
-                                    orientation, signDirection, invertFlip,
-                                    trackFlipSeparate, invertFlipTrack,
-                                    applyRotationFix, rotateFixLeft, passengers));
+            cats.Add(new CatPlacement(
+                color,
+                length,
+                cell,
+                eulerAngles,
+                orientation,
+                signDirection,
+                invertFlip,
+                trackFlipSeparate,
+                invertFlipTrack,
+                applyRotationFix,
+                rotateFixLeft,
+                passengers));
         }
 
         return cats;
@@ -194,7 +215,7 @@ public static class LevelConfigCapture
         List<StationPlacement> stations = new();
         SerializedProperty stationsProp = managerSo.FindProperty("_stations");
 
-        Dictionary<SpriteRenderer, (ThemeApplier.StationSpriteVariant variant, bool flipX, bool flipY)>
+        Dictionary<SpriteRenderer, (ThemeApplier.StationSpriteVariant Variant, bool FlipX, bool FlipY)>
             themeEntries = ReadThemeEntries();
 
         for (int i = 0; i < stationsProp.arraySize; i++)
@@ -212,9 +233,9 @@ public static class LevelConfigCapture
 
             if (station.ThemeTarget != null && themeEntries.TryGetValue(station.ThemeTarget, out var theme))
             {
-                variant = theme.variant;
-                flipX = theme.flipX;
-                flipY = theme.flipY;
+                variant = theme.Variant;
+                flipX = theme.FlipX;
+                flipY = theme.FlipY;
             }
 
             stations.Add(new StationPlacement(t.position, t.eulerAngles, variant, flipX, flipY));
@@ -237,9 +258,9 @@ public static class LevelConfigCapture
         return active;
     }
 
-    private static Dictionary<SpriteRenderer, (ThemeApplier.StationSpriteVariant, bool, bool)> ReadThemeEntries()
+    private static Dictionary<SpriteRenderer, (ThemeApplier.StationSpriteVariant Variant, bool FlipX, bool FlipY)> ReadThemeEntries()
     {
-        Dictionary<SpriteRenderer, (ThemeApplier.StationSpriteVariant, bool, bool)> map = new();
+        Dictionary<SpriteRenderer, (ThemeApplier.StationSpriteVariant Variant, bool FlipX, bool FlipY)> map = new();
         ThemeApplier applier = Object.FindObjectOfType<ThemeApplier>();
 
         if (applier == null)

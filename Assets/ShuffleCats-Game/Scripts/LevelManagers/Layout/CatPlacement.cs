@@ -17,26 +17,23 @@ public class CatPlacement
     [SerializeField] private bool _rotateFixLeft;
     [SerializeField] private List<CatColor> _passengers = new();
 
-    public CatColor Color => _color;
-    public int Length => _length;
-    public Vector2Int Cell => _cell;
-    public Vector3 EulerAngles => _eulerAngles;
-    public CarOrientation Orientation => _orientation;
-    public float SignDirection => _signDirection;
-    public bool InvertFlip => _invertFlip;
-    public bool TrackFlipSeparate => _trackFlipSeparate;
-    public bool InvertFlipTrack => _invertFlipTrack;
-    public bool ApplyRotationFix => _applyRotationFix;
-    public bool RotateFixLeft => _rotateFixLeft;
-    public List<CatColor> Passengers => _passengers;
+    public CatPlacement()
+    {
+    }
 
-    public CatPlacement() { }
-
-    public CatPlacement(CatColor color, int length, Vector2Int cell, Vector3 eulerAngles,
-                        CarOrientation orientation, float signDirection,
-                        bool invertFlip, bool trackFlipSeparate, bool invertFlipTrack,
-                        bool applyRotationFix, bool rotateFixLeft,
-                        List<CatColor> passengers)
+    public CatPlacement(
+        CatColor color,
+        int length,
+        Vector2Int cell,
+        Vector3 eulerAngles,
+        CarOrientation orientation,
+        float signDirection,
+        bool invertFlip,
+        bool trackFlipSeparate,
+        bool invertFlipTrack,
+        bool applyRotationFix,
+        bool rotateFixLeft,
+        List<CatColor> passengers)
     {
         _color = color;
         _length = length;
@@ -51,4 +48,28 @@ public class CatPlacement
         _rotateFixLeft = rotateFixLeft;
         _passengers = passengers;
     }
+
+    public CatColor Color => _color;
+
+    public int Length => _length;
+
+    public Vector2Int Cell => _cell;
+
+    public Vector3 EulerAngles => _eulerAngles;
+
+    public CarOrientation Orientation => _orientation;
+
+    public float SignDirection => _signDirection;
+
+    public bool InvertFlip => _invertFlip;
+
+    public bool TrackFlipSeparate => _trackFlipSeparate;
+
+    public bool InvertFlipTrack => _invertFlipTrack;
+
+    public bool ApplyRotationFix => _applyRotationFix;
+
+    public bool RotateFixLeft => _rotateFixLeft;
+
+    public List<CatColor> Passengers => _passengers;
 }

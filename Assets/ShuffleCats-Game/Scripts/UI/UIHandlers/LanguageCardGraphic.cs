@@ -1,14 +1,44 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(CanvasRenderer))]
 public sealed class LanguageCardGraphic : UnityEngine.UI.MaskableGraphic
 {
-    public float Radius = 8;
-    public float BorderWidth = 1.5f;
-    public Color BorderColor = new Color32(190, 162, 122, 255);
+    [SerializeField]
+    [FormerlySerializedAs("Radius")]
+    private float _radius = 8;
+
+    [SerializeField]
+    [FormerlySerializedAs("BorderWidth")]
+    private float _borderWidth = 1.5f;
+
+    [SerializeField]
+    [FormerlySerializedAs("BorderColor")]
+    private Color _borderColor = new Color32(190, 162, 122, 255);
+
+    public float Radius
+    {
+        get => _radius;
+        set => _radius = value;
+    }
+
+    public float BorderWidth
+    {
+        get => _borderWidth;
+        set => _borderWidth = value;
+    }
+
+    public Color BorderColor
+    {
+        get => _borderColor;
+        set => _borderColor = value;
+    }
 
     public static LanguageCardGraphic WindowBackground(RectTransform parent, bool shadow = false)
     {
+        const int cornerRadius = 20;
+        const float borderWidth = 2.5f;
+
         if (parent == null)
             return null;
 
@@ -43,8 +73,8 @@ public sealed class LanguageCardGraphic : UnityEngine.UI.MaskableGraphic
             card.color = new Color32(252, 242, 220, 255);
         }
 
-        card.Radius = 20;
-        card.BorderWidth = 2.5f;
+        card.Radius = cornerRadius;
+        card.BorderWidth = borderWidth;
 
         if (shadow)
         {
@@ -115,14 +145,14 @@ public sealed class LanguageCardGraphic : UnityEngine.UI.MaskableGraphic
 
             for (int i = 0; i <= segments; i++)
             {
-                float angle = (corner * 90 + i * 90f / segments) * Mathf.Deg2Rad;
-                mesh.AddVert(center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius, tint, Vector2.zero);
+                float angle = ((corner * 90) + (i * 90f / segments)) * Mathf.Deg2Rad;
+                mesh.AddVert(center + (new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius), tint, Vector2.zero);
             }
         }
 
         int count = 4 * (segments + 1);
 
         for (int i = 0; i < count; i++)
-            mesh.AddTriangle(first, first + 1 + i, first + 1 + (i + 1) % count);
+            mesh.AddTriangle(first, first + 1 + i, first + 1 + ((i + 1) % count));
     }
 }

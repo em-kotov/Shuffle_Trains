@@ -15,9 +15,9 @@ public static class TutorialPlayModeChecks
     private const string ScenePath = "Assets/ShuffleCats-Game/Scenes/Level-1.unity";
     private const string ReportPath = "Library/TutorialPlayChecks.txt";
     private static readonly List<string> Report = new();
+    private static readonly Dictionary<RectTransform, Vector3[]> HudCorners = new();
     private static Vector3 _cameraPosition;
     private static float _cameraSize;
-    private static readonly Dictionary<RectTransform, Vector3[]> HudCorners = new();
 
     [MenuItem("Tools/Shuffle Cats/Tutorial/Check First Three Levels (Play Mode)")]
     public static void Run()
@@ -79,6 +79,17 @@ public static class TutorialPlayModeChecks
 
     private static IEnumerator Check()
     {
+        const int availabilityTimeoutSeconds = 15;
+        const int targetTimeoutSeconds = 30;
+        const int deadlockTimeoutSeconds = 60;
+        const int restartTimeoutSeconds = 10;
+        const int sceneReloadTimeoutSeconds = 20;
+        const int solveTimeoutSeconds = 45;
+        const float cardObservationSeconds = 8f;
+        const float inputSettleSeconds = 0.1f;
+        const float layoutSettleSeconds = 0.2f;
+        const float animationSettleSeconds = 0.3f;
+
         int preview = LevelProgress.EditorPreviewIndex;
         int money = PlayerPrefs.GetInt(SaveKeys.Money), savedLevel = PlayerPrefs.GetInt(SaveKeys.LevelIndex);
         bool hadMoney = PlayerPrefs.HasKey(SaveKeys.Money), hadLanguage = PlayerPrefs.HasKey(SaveKeys.Language), hadHints = PlayerPrefs.HasKey(SaveKeys.Hints);
@@ -88,7 +99,7 @@ public static class TutorialPlayModeChecks
         {
             HintSettings.Enabled = false;
             yield return LoadLevel(0);
-            yield return Wait(() => Tutorial()?.Target != null, 15);
+            yield return Wait(() => Tutorial()?.Target != null, availabilityTimeoutSeconds);
             var tutorial = Tutorial();
             var overlay = Overlay();
             CheckThat(tutorial.IsRunning, "Level 1 starts with idle hints disabled");
@@ -96,13 +107,13 @@ public static class TutorialPlayModeChecks
             yield return CheckLesson(tutorial, overlay, TutorialController.Stage.Baskets, 2);
             CheckThat(tutorial.CompletedSteps == 1, "Baskets shown once, after the first launch");
             Continue(overlay);
-            yield return Wait(() => tutorial.Target != null, 30);
+            yield return Wait(() => tutorial.Target != null, targetTimeoutSeconds);
             CheckThat(tutorial.CurrentStage == TutorialController.Stage.LastCat, "Basket acknowledgement leads to the other cat");
             yield return CheckTarget(tutorial, overlay);
             yield return CheckWin(tutorial, 1);
 
             yield return LoadLevel(1);
-            yield return Wait(() => Tutorial() != null && Overlay() != null, 15);
+            yield return Wait(() => Tutorial() != null && Overlay() != null, availabilityTimeoutSeconds);
             tutorial = Tutorial();
             overlay = Overlay();
             yield return CheckLesson(tutorial, overlay, TutorialController.Stage.Capacity, 1);
@@ -114,43 +125,50 @@ public static class TutorialPlayModeChecks
             CheckThat(capacity != null, "Track capacity artwork exists");
             CheckThat(overlay.SpotlightRects[0].Contains(overlay.transform.InverseTransformPoint(capacity.TransformPoint(capacity.rect.center))), "Capacity badge is spotlighted");
             TapFocus(overlay);
-            yield return Wait(() => tutorial.Target != null, 30);
+            yield return Wait(() => tutorial.Target != null, targetTimeoutSeconds);
             CheckThat(tutorial.Target.Color == CatColor.Green, "Demonstration starts with a green cat");
             yield return CheckTarget(tutorial, overlay);
-            yield return Wait(() => tutorial.Target != null, 30);
-            CheckThat(tutorial.CurrentStage == TutorialController.Stage.DemoSecond && tutorial.Target.Color == CatColor.Green,
+            yield return Wait(() => tutorial.Target != null, targetTimeoutSeconds);
+            CheckThat(
+                tutorial.CurrentStage == TutorialController.Stage.DemoSecond && tutorial.Target.Color == CatColor.Green,
                 "Demonstration sends a second green cat, without repeating baskets");
-            CheckThat(overlay.transform.Find("Instruction/Progress").GetComponent<TMP_Text>().text.Contains("2/9"),
+            CheckThat(
+                overlay.transform.Find("Instruction/Progress").GetComponent<TMP_Text>().text.Contains("2/9"),
                 "Both demonstration launches belong to tip 2");
             yield return CheckTarget(tutorial, overlay);
             var demoContinue = overlay.transform.Find("Instruction/Continue").GetComponent<UnityEngine.UI.Button>();
-            yield return Wait(() => tutorial.CurrentStage == TutorialController.Stage.FullTrack, 60);
+            yield return Wait(() => tutorial.CurrentStage == TutorialController.Stage.FullTrack, deadlockTimeoutSeconds);
             CheckThat(tutorial.CompletedSteps == 2, "Tip 3 follows both launches and the real deadlock");
             yield return CheckLesson(tutorial, overlay, TutorialController.Stage.FullTrack, 1);
-            CheckThat(overlay.transform.Find("Instruction/Progress").GetComponent<TMP_Text>().text.Contains("3/9"),
+            CheckThat(
+                overlay.transform.Find("Instruction/Progress").GetComponent<TMP_Text>().text.Contains("3/9"),
                 "The full-track explanation is tip 3");
-            CheckThat(overlay.transform.Find("Instruction/Title").GetComponent<TMP_Text>().text == Localization.Get("The track is full"),
+            CheckThat(
+                overlay.transform.Find("Instruction/Title").GetComponent<TMP_Text>().text == Localization.Get("The track is full"),
                 "Tip 3 explains the result instead of repeating the launch instruction");
-            yield return StableCard(overlay, 8f);
-            CheckThat(tutorial.CurrentStage == TutorialController.Stage.FullTrack,
+            yield return StableCard(overlay, cardObservationSeconds);
+            CheckThat(
+                tutorial.CurrentStage == TutorialController.Stage.FullTrack,
                 "Tip 3 cannot be replaced by a timer or completed cat movement");
             var background = new PointerEventData(EventSystem.current) { position = Vector2.one * 2, pointerId = -1 };
             overlay.OnPointerDown(background);
             overlay.OnPointerUp(background);
             overlay.OnPointerClick(background);
             CheckThat(tutorial.CurrentStage == TutorialController.Stage.FullTrack, "Background taps cannot dismiss tip 3");
-            UnityEngine.Object.FindObjectOfType<YandexBridge>().OnGameApiPause("");
-            yield return Seconds(0.1f);
+            UnityEngine.Object.FindObjectOfType<YandexBridge>().OnGameApiPause(string.Empty);
+            yield return Seconds(inputSettleSeconds);
             demoContinue.onClick.Invoke();
             CheckThat(tutorial.CurrentStage == TutorialController.Stage.FullTrack, "Paused Continue cannot replace tip 3");
-            UnityEngine.Object.FindObjectOfType<YandexBridge>().OnGameApiResume("");
-            yield return Seconds(0.1f);
+            UnityEngine.Object.FindObjectOfType<YandexBridge>().OnGameApiResume(string.Empty);
+            yield return Seconds(inputSettleSeconds);
             Continue(overlay);
             CheckThat(tutorial.CurrentStage == TutorialController.Stage.Blocked, "A deliberate Continue opens tip 4");
             var track = UnityEngine.Object.FindObjectOfType<TrackRegistrator>();
-            CheckThat(track.CurrentCount == 2 && track.MaxCount == 2 && UnityEngine.Object.FindObjectOfType<SorterRegistrator>().IsTrackDeadlocked(2),
+            CheckThat(
+                track.CurrentCount == 2 && track.MaxCount == 2 && UnityEngine.Object.FindObjectOfType<SorterRegistrator>().IsTrackDeadlocked(2),
                 "Two green cats cause a real 2/2 deadlock");
-            CheckThat(UnityEngine.Object.FindObjectsOfType<Subscriber>().Any(c => c.Color == CatColor.Blue && c.Parking.isActiveAndEnabled && c.Parking.IsAtBorderCell == false),
+            CheckThat(
+                UnityEngine.Object.FindObjectsOfType<Subscriber>().Any(c => c.Color == CatColor.Blue && c.Parking.isActiveAndEnabled && c.Parking.IsAtBorderCell == false),
                 "The blue cat remains parked with its yarn");
             var filledStations = UnityEngine.Object.FindObjectsOfType<Station>().Where(s => s.HavePassengers(out _, out _)).ToArray();
             yield return CheckLesson(tutorial, overlay, TutorialController.Stage.Blocked, 3 + filledStations.Length);
@@ -168,17 +186,19 @@ public static class TutorialPlayModeChecks
 
             CheckThat(UnityEngine.Object.FindObjectOfType<LooseUI>().IsVisible == false, "Deadlock lesson keeps the loss window closed");
             Continue(overlay);
-            yield return Seconds(0.3f);
+            yield return Seconds(animationSettleSeconds);
             var options = UnityEngine.Object.FindObjectOfType<OptionsUI>();
-            CheckThat(tutorial.CurrentStage == TutorialController.Stage.OpenSettings && options.IsVisible == false,
+            CheckThat(
+                tutorial.CurrentStage == TutorialController.Stage.OpenSettings && options.IsVisible == false,
                 "Restart lesson first waits for a click on Settings");
             CheckButtonAccent(overlay, options.OpenButton);
             yield return CheckTranslations(overlay, "OpenSettings");
             yield return StableCard(overlay, 1f);
             TapFocus(overlay);
-            yield return Wait(() => tutorial.CurrentStage == TutorialController.Stage.Restart, 10);
-            yield return Seconds(0.2f);
-            CheckThat(options.IsVisible && YandexSdk.IsOnlyOptionsPaused && Time.timeScale == 0 && overlay.gameObject.activeSelf,
+            yield return Wait(() => tutorial.CurrentStage == TutorialController.Stage.Restart, restartTimeoutSeconds);
+            yield return Seconds(layoutSettleSeconds);
+            CheckThat(
+                options.IsVisible && YandexSdk.IsOnlyOptionsPaused && Time.timeScale == 0 && overlay.gameObject.activeSelf,
                 "Settings opens normally and the guide remains visible during its pause");
             CheckThat(UnityEngine.Object.FindObjectOfType<LooseUI>().IsVisible == false, "Guided restart uses Settings, not the loss window");
             CheckButtonAccent(overlay, options.RestartButton);
@@ -187,29 +207,30 @@ public static class TutorialPlayModeChecks
             int oldScene = SceneManager.GetActiveScene().handle;
             var pausedPointer = FocusPointer(overlay);
             var bridge = UnityEngine.Object.FindObjectOfType<YandexBridge>();
-            bridge.OnGameApiPause("");
-            yield return Seconds(0.2f);
+            bridge.OnGameApiPause(string.Empty);
+            yield return Seconds(layoutSettleSeconds);
             CheckThat(overlay.gameObject.activeSelf == false && YandexSdk.IsOnlyOptionsPaused == false, "Platform pause also suspends the Settings guide");
             overlay.OnPointerDown(pausedPointer);
             overlay.OnPointerUp(pausedPointer);
             overlay.OnPointerClick(pausedPointer);
             CheckThat(SceneManager.GetActiveScene().handle == oldScene, "Platform-paused tutorial cannot restart the level");
-            bridge.OnGameApiResume("");
-            yield return Seconds(0.2f);
+            bridge.OnGameApiResume(string.Empty);
+            yield return Seconds(layoutSettleSeconds);
             CheckThat(overlay.gameObject.activeSelf && Time.timeScale == 0, "Platform resume restores the guide while Settings keeps gameplay paused");
             TapFocus(overlay);
-            yield return Wait(() => SceneManager.GetActiveScene().handle != oldScene && Tutorial()?.Target != null, 20);
+            yield return Wait(() => SceneManager.GetActiveScene().handle != oldScene && Tutorial()?.Target != null, sceneReloadTimeoutSeconds);
             tutorial = Tutorial();
             overlay = Overlay();
             CaptureGameFraming();
-            CheckThat(tutorial.CurrentStage == TutorialController.Stage.PracticeFirst && tutorial.CompletedSteps == 0,
+            CheckThat(
+                tutorial.CurrentStage == TutorialController.Stage.PracticeFirst && tutorial.CompletedSteps == 0,
                 "Real restart resumes the solution, without looping the failure lesson");
             CheckThat(UnityEngine.Object.FindObjectOfType<TrackRegistrator>().CurrentCount == 0, "Restart resets track occupancy");
             CheckThat(YandexSdk.IsPaused == false && Time.timeScale > 0, "Restart releases the Settings pause");
 
             foreach (CatColor color in new[] { CatColor.Green, CatColor.Blue, CatColor.Green })
             {
-                yield return Wait(() => tutorial.Target != null, 45);
+                yield return Wait(() => tutorial.Target != null, solveTimeoutSeconds);
                 CheckThat(tutorial.Target.Color == color && tutorial.IsReadingBaskets == false, "Retry guides the winning order: " + color);
                 yield return CheckTarget(tutorial, overlay);
             }
@@ -217,30 +238,30 @@ public static class TutorialPlayModeChecks
             yield return CheckWin(tutorial, 2);
 
             yield return LoadLevel(0);
-            yield return Wait(() => Tutorial()?.Target != null, 15);
+            yield return Wait(() => Tutorial()?.Target != null, availabilityTimeoutSeconds);
             tutorial = Tutorial();
             Overlay().transform.Find("Instruction/Skip").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
-            yield return Seconds(0.1f);
+            yield return Seconds(inputSettleSeconds);
             CheckThat(tutorial.IsRunning == false && Overlay() == null, "Skip dismisses tutorial");
             CheckGameFraming();
             CheckThat(UnityEngine.Object.FindObjectsOfType<Subscriber>().All(c => c.Clicks.InteractionAllowed), "Skip restores cat input");
             CheckThat(UnityEngine.Object.FindObjectOfType<AutoLoose>().TutorialOwnsDeadlock == false, "Skip restores normal loss handling");
             yield return LoadLevel(1);
-            yield return Wait(() => Tutorial()?.CurrentStage == TutorialController.Stage.Capacity && Overlay() != null, 15);
-            yield return Seconds(0.2f);
+            yield return Wait(() => Tutorial()?.CurrentStage == TutorialController.Stage.Capacity && Overlay() != null, availabilityTimeoutSeconds);
+            yield return Seconds(layoutSettleSeconds);
             Continue(Overlay());
 
             for (int i = 0; i < 2; i++)
             {
-                yield return Wait(() => Tutorial()?.Target != null, 30);
-                yield return Seconds(0.2f);
+                yield return Wait(() => Tutorial()?.Target != null, targetTimeoutSeconds);
+                yield return Seconds(layoutSettleSeconds);
                 TapFocus(Overlay());
             }
 
-            yield return Wait(() => Tutorial()?.CurrentStage == TutorialController.Stage.FullTrack, 60);
+            yield return Wait(() => Tutorial()?.CurrentStage == TutorialController.Stage.FullTrack, deadlockTimeoutSeconds);
             CheckThat(YandexSdk.IsOnlyTutorialPaused && Time.timeScale == 0, "Observation freezes only the demonstrated board state");
             Overlay().transform.Find("Instruction/Skip").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
-            yield return Seconds(0.1f);
+            yield return Seconds(inputSettleSeconds);
             CheckThat(YandexSdk.IsPaused == false && Time.timeScale > 0, "Skipping an observation releases the tutorial pause");
             yield return CheckHintLesson();
             yield return LoadLevel(3);
@@ -251,7 +272,7 @@ public static class TutorialPlayModeChecks
         }
         finally
         {
-            UnityEngine.Object.FindObjectOfType<YandexBridge>()?.OnGameApiResume("");
+            UnityEngine.Object.FindObjectOfType<YandexBridge>()?.OnGameApiResume(string.Empty);
             YandexSdk.SetTutorialOpen(false);
             Time.timeScale = 1;
             HintSettings.Enabled = hints;
@@ -279,67 +300,93 @@ public static class TutorialPlayModeChecks
 
     private static IEnumerator CheckHintLesson()
     {
+        const int availabilityTimeoutSeconds = 15;
+        const int highlightTimeoutSeconds = 5;
+        const float cardObservationSeconds = 9f;
+        const float layoutSettleSeconds = 0.2f;
+
         HintSettings.Enabled = true;
         yield return LoadLevel(2);
-        yield return Wait(() => Tutorial()?.CurrentStage == TutorialController.Stage.Hint && Overlay() != null, 15);
+        yield return Wait(() => Tutorial()?.CurrentStage == TutorialController.Stage.Hint && Overlay() != null, availabilityTimeoutSeconds);
         var tutorial = Tutorial();
         var overlay = Overlay();
         var hints = UnityEngine.Object.FindObjectOfType<CatHintController>();
         var highlight = hints.HintButton.transform.parent.Find("CatHintHighlight");
         CheckButtonAccent(overlay, hints.HintButton);
         yield return CheckTranslations(overlay, "Hint");
-        yield return StableCard(overlay, 9f);
-        CheckThat(tutorial.IsRunning && highlight.gameObject.activeSelf == false,
+        yield return StableCard(overlay, cardObservationSeconds);
+        CheckThat(
+            tutorial.IsRunning && highlight.gameObject.activeSelf == false,
             "Hint lesson waits for the player without an automatic hint or timeout");
-        CheckThat(UnityEngine.Object.FindObjectsOfType<Subscriber>().All(cat => cat.Clicks.InteractionAllowed == false),
+        CheckThat(
+            UnityEngine.Object.FindObjectsOfType<Subscriber>().All(cat => cat.Clicks.InteractionAllowed == false),
             "Hint lesson blocks cat launches until the player chooses help or skips");
         var background = new PointerEventData(EventSystem.current) { position = Vector2.one * 2, pointerId = -1 };
-        overlay.OnPointerDown(background); overlay.OnPointerUp(background); overlay.OnPointerClick(background);
+        overlay.OnPointerDown(background);
+        overlay.OnPointerUp(background);
+        overlay.OnPointerClick(background);
         CheckThat(tutorial.IsRunning, "Background tap does not dismiss the hint lesson");
         var pointer = FocusPointer(overlay);
         var bridge = UnityEngine.Object.FindObjectOfType<YandexBridge>();
-        bridge.OnGameApiPause("");
-        yield return Seconds(0.2f);
+        bridge.OnGameApiPause(string.Empty);
+        yield return Seconds(layoutSettleSeconds);
         CheckThat(overlay.gameObject.activeSelf == false, "Platform pause hides the hint lesson");
-        overlay.OnPointerDown(pointer); overlay.OnPointerUp(pointer); overlay.OnPointerClick(pointer);
+        overlay.OnPointerDown(pointer);
+        overlay.OnPointerUp(pointer);
+        overlay.OnPointerClick(pointer);
         CheckThat(tutorial.IsRunning && highlight.gameObject.activeSelf == false, "Paused hint tap has no effect");
-        bridge.OnGameApiResume("");
-        yield return Seconds(0.2f);
+        bridge.OnGameApiResume(string.Empty);
+        yield return Seconds(layoutSettleSeconds);
         TapFocus(overlay);
-        yield return Wait(() => highlight.gameObject.activeInHierarchy, 5);
-        CheckThat(tutorial.IsRunning == false && Overlay() == null && hints.TutorialActive == false,
+        yield return Wait(() => highlight.gameObject.activeInHierarchy, highlightTimeoutSeconds);
+        CheckThat(
+            tutorial.IsRunning == false && Overlay() == null && hints.TutorialActive == false,
             "Clicking the real hint button finishes the tip and displays a cat suggestion");
-        CheckThat(UnityEngine.Object.FindObjectsOfType<Subscriber>().All(cat => cat.Clicks.InteractionAllowed),
+        CheckThat(
+            UnityEngine.Object.FindObjectsOfType<Subscriber>().All(cat => cat.Clicks.InteractionAllowed),
             "Normal cat input resumes after the hint lesson");
-        CheckThat(UnityEngine.Object.FindObjectOfType<TrackRegistrator>().CurrentCount == 0,
+        CheckThat(
+            UnityEngine.Object.FindObjectOfType<TrackRegistrator>().CurrentCount == 0,
             "A hint highlights a choice without launching a cat");
         CheckGameFraming();
 
         HintSettings.Enabled = false;
         yield return LoadLevel(2);
-        tutorial = Tutorial(); overlay = Overlay();
+        tutorial = Tutorial();
+        overlay = Overlay();
         yield return CheckLesson(tutorial, overlay, TutorialController.Stage.Hint, 1);
-        CheckThat(UnityEngine.Object.FindObjectOfType<CatHintController>().HintButton.interactable == false,
+        CheckThat(
+            UnityEngine.Object.FindObjectOfType<CatHintController>().HintButton.interactable == false,
             "Disabled hints stay disabled during their explanation");
         Continue(overlay);
-        yield return Seconds(0.2f);
-        CheckThat(tutorial.IsRunning == false && Overlay() == null && HintSettings.Enabled == false,
+        yield return Seconds(layoutSettleSeconds);
+        CheckThat(
+            tutorial.IsRunning == false && Overlay() == null && HintSettings.Enabled == false,
             "Disabled-hints explanation can be acknowledged without changing the preference");
 
         HintSettings.Enabled = true;
         yield return LoadLevel(2);
-        tutorial = Tutorial(); overlay = Overlay();
+        tutorial = Tutorial();
+        overlay = Overlay();
         overlay.transform.Find("Instruction/Skip").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
-        yield return Seconds(0.2f);
-        CheckThat(tutorial.IsRunning == false && Overlay() == null && HintSettings.Enabled,
+        yield return Seconds(layoutSettleSeconds);
+        CheckThat(
+            tutorial.IsRunning == false && Overlay() == null && HintSettings.Enabled,
             "The hint lesson can be skipped while keeping hints enabled");
-        CheckThat(UnityEngine.Object.FindObjectOfType<CatHintController>().HintButton.transform.parent.Find("CatHintHighlight").gameObject.activeSelf == false,
+        CheckThat(
+            UnityEngine.Object.FindObjectOfType<CatHintController>().HintButton.transform.parent.Find("CatHintHighlight").gameObject.activeSelf == false,
             "Skipping does not request a hint");
     }
 
     private static IEnumerator CheckTarget(TutorialController tutorial, TutorialOverlay overlay)
     {
-        yield return Seconds(0.2f);
+        const float layoutSettleSeconds = 0.2f;
+        const float pauseTransitionSeconds = 0.1f;
+        const int secondPointerId = 42;
+        const int deadlockTimeoutSeconds = 60;
+        const float cardLayoutTolerance = 0.01f;
+
+        yield return Seconds(layoutSettleSeconds);
         var target = tutorial.Target;
         int completed = tutorial.CompletedSteps;
         var stage = tutorial.CurrentStage;
@@ -360,17 +407,17 @@ public static class TutorialPlayModeChecks
         }
 
         Time.timeScale = 0;
-        yield return Seconds(0.1f);
+        yield return Seconds(pauseTransitionSeconds);
         CheckThat(overlay.gameObject.activeSelf == false && target.Clicks.InteractionAllowed == false, "Pause hides guide and blocks cats");
         Time.timeScale = 1;
-        yield return Seconds(0.1f);
+        yield return Seconds(pauseTransitionSeconds);
         var pointer = FocusPointer(overlay);
         AssertOverlayRaycast(overlay, pointer);
         overlay.OnPointerClick(pointer);
         CheckThat(tutorial.CompletedSteps == completed, "Orphan click does not advance");
         overlay.OnPointerDown(pointer);
         CheckThat(tutorial.CompletedSteps == completed, "Press alone does not advance");
-        var second = new PointerEventData(EventSystem.current) { position = pointer.position, pointerId = 42 };
+        var second = new PointerEventData(EventSystem.current) { position = pointer.position, pointerId = secondPointerId };
         overlay.OnPointerDown(second);
         overlay.OnPointerClick(second);
         CheckThat(tutorial.CompletedSteps == completed, "Second touch cannot consume the pending step");
@@ -382,58 +429,68 @@ public static class TutorialPlayModeChecks
 
         if (stage == TutorialController.Stage.DemoSecond)
         {
-            float deadline = Time.realtimeSinceStartup + 60;
+            float deadline = Time.realtimeSinceStartup + deadlockTimeoutSeconds;
 
             while (tutorial.CurrentStage == TutorialController.Stage.WaitingForDeadlock)
             {
                 if (Time.realtimeSinceStartup > deadline)
                     throw new Exception("Deadlock demonstration did not finish.");
 
-                if (Vector2.Distance(overlay.Card.anchoredPosition, cardPosition) > 0.01f ||
-                    Vector2.Distance(overlay.Card.sizeDelta, cardSize) > 0.01f)
+                if (Vector2.Distance(overlay.Card.anchoredPosition, cardPosition) > cardLayoutTolerance ||
+                    Vector2.Distance(overlay.Card.sizeDelta, cardSize) > cardLayoutTolerance)
                     throw new Exception("Tip 2 moved or resized before tip 3 was ready.");
 
                 yield return null;
             }
 
-            CheckThat(tutorial.CurrentStage == TutorialController.Stage.FullTrack,
+            CheckThat(
+                tutorial.CurrentStage == TutorialController.Stage.FullTrack,
                 "Tip 2 stays in its original position until tip 3 replaces it");
         }
 
-        yield return Seconds(0.2f);
+        yield return Seconds(layoutSettleSeconds);
     }
 
     private static IEnumerator CheckLesson(TutorialController tutorial, TutorialOverlay overlay, TutorialController.Stage stage, int holes)
     {
-        yield return Seconds(0.2f);
+        const float layoutSettleSeconds = 0.2f;
+        const float inputSettleSeconds = 0.1f;
+        const float cardObservationSeconds = 3f;
+
+        yield return Seconds(layoutSettleSeconds);
         CheckThat(tutorial.CurrentStage == stage && tutorial.Target == null, "Reading lesson: " + stage);
         yield return CheckTranslations(overlay, stage.ToString());
         CheckThat(overlay.SpotlightRects.Count == holes, "Expected focus areas: " + holes);
-        yield return StableCard(overlay, 3f);
+        yield return StableCard(overlay, cardObservationSeconds);
         CheckThat(tutorial.CurrentStage == stage, "Reading lesson cannot advance on a timer");
         var outside = new PointerEventData(EventSystem.current) { position = Vector2.one * 2, pointerId = -1 };
-        overlay.OnPointerDown(outside); overlay.OnPointerUp(outside); overlay.OnPointerClick(outside);
+        overlay.OnPointerDown(outside);
+        overlay.OnPointerUp(outside);
+        overlay.OnPointerClick(outside);
         CheckThat(tutorial.CurrentStage == stage, "Background click cannot dismiss lesson");
         CheckThat(UnityEngine.Object.FindObjectsOfType<Subscriber>().All(c => c.Clicks.InteractionAllowed == false), "Reading lesson blocks cat launches");
         var button = overlay.transform.Find("Instruction/Continue").GetComponent<UnityEngine.UI.Button>();
-        UnityEngine.Object.FindObjectOfType<YandexBridge>().OnGameApiPause("");
-        yield return Seconds(0.1f);
+        UnityEngine.Object.FindObjectOfType<YandexBridge>().OnGameApiPause(string.Empty);
+        yield return Seconds(inputSettleSeconds);
         button.onClick.Invoke();
         CheckThat(tutorial.CurrentStage == stage, "Paused Continue cannot dismiss lesson");
-        UnityEngine.Object.FindObjectOfType<YandexBridge>().OnGameApiResume("");
-        yield return Seconds(0.1f);
+        UnityEngine.Object.FindObjectOfType<YandexBridge>().OnGameApiResume(string.Empty);
+        yield return Seconds(inputSettleSeconds);
     }
 
     private static IEnumerator CheckTranslations(TutorialOverlay overlay, string name)
     {
+        const float translationSettleSeconds = 0.25f;
+        const float screenshotSettleSeconds = 0.15f;
+
         foreach (string language in new[] { "ru", "en", "tr" })
         {
             Localization.Select(language);
-            yield return Seconds(0.25f);
+            yield return Seconds(translationSettleSeconds);
             CheckThat(overlay.GetComponentsInChildren<TMP_Text>().Any(t => t.isTextOverflowing) == false, name + " text fits: " + language);
             CheckLayout(overlay);
             ScreenCapture.CaptureScreenshot("Library/Tutorial-" + Screen.width + "x" + Screen.height + "-" + name + "-" + language + ".png");
-            yield return Seconds(0.15f);
+            yield return Seconds(screenshotSettleSeconds);
         }
     }
 
@@ -445,7 +502,8 @@ public static class TutorialPlayModeChecks
         overlay.Card.GetWorldCorners(corners);
         Vector2 min = root.InverseTransformPoint(corners[0]), max = root.InverseTransformPoint(corners[2]);
         Rect card = Rect.MinMaxRect(min.x, min.y, max.x, max.y), screen = root.rect;
-        CheckThat(card.xMin >= screen.xMin && card.xMax <= screen.xMax && card.yMin >= screen.yMin && card.yMax <= screen.yMax,
+        CheckThat(
+            card.xMin >= screen.xMin && card.xMax <= screen.xMax && card.yMin >= screen.yMin && card.yMax <= screen.yMax,
             "Instruction stays on screen");
 
         foreach (Rect hole in overlay.SpotlightRects)
@@ -554,15 +612,20 @@ public static class TutorialPlayModeChecks
 
     private static void CheckGameFraming()
     {
-        CheckThat(Vector3.Distance(Camera.main.transform.position, _cameraPosition) < 0.001f &&
-            Mathf.Abs(Camera.main.orthographicSize - _cameraSize) < 0.001f,
+        const float cameraTolerance = 0.001f;
+        const float hudPositionTolerance = 0.01f;
+
+        CheckThat(
+            Vector3.Distance(Camera.main.transform.position, _cameraPosition) < cameraTolerance &&
+            Mathf.Abs(Camera.main.orthographicSize - _cameraSize) < cameraTolerance,
             "Tutorial leaves camera position and zoom unchanged");
 
         foreach (var pair in HudCorners)
         {
             var corners = new Vector3[4];
             pair.Key.GetWorldCorners(corners);
-            CheckThat(corners.Zip(pair.Value, (a, b) => Vector3.Distance(a, b)).All(d => d < 0.01f),
+            CheckThat(
+                corners.Zip(pair.Value, (a, b) => Vector3.Distance(a, b)).All(d => d < hudPositionTolerance),
                 "Tutorial leaves HUD placement unchanged: " + pair.Key.name);
         }
     }
@@ -572,7 +635,8 @@ public static class TutorialPlayModeChecks
         var button = overlay.transform.Find("Instruction/Continue").GetComponent<UnityEngine.UI.Button>();
         var rect = (RectTransform)button.transform;
         var pointer = new PointerEventData(EventSystem.current) { position = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center)), pointerId = -1 };
-        var hits = new List<RaycastResult>(); EventSystem.current.RaycastAll(pointer, hits);
+        var hits = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointer, hits);
         CheckThat(hits.Count > 0 && hits[0].gameObject == button.gameObject, "Continue receives a real UI raycast");
         ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerDownHandler);
         ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerUpHandler);
@@ -581,35 +645,49 @@ public static class TutorialPlayModeChecks
 
     private static PointerEventData FocusPointer(TutorialOverlay overlay) => new(EventSystem.current)
     {
-        position = RectTransformUtility.WorldToScreenPoint(null, overlay.transform.TransformPoint(overlay.SpotlightRect.center)), pointerId = -1
+        position = RectTransformUtility.WorldToScreenPoint(null, overlay.transform.TransformPoint(overlay.SpotlightRect.center)), pointerId = -1,
     };
+
     private static void TapFocus(TutorialOverlay overlay)
     {
-        var pointer = FocusPointer(overlay); AssertOverlayRaycast(overlay, pointer);
-        overlay.OnPointerDown(pointer); overlay.OnPointerUp(pointer); overlay.OnPointerClick(pointer);
+        var pointer = FocusPointer(overlay);
+        AssertOverlayRaycast(overlay, pointer);
+        overlay.OnPointerDown(pointer);
+        overlay.OnPointerUp(pointer);
+        overlay.OnPointerClick(pointer);
     }
+
     private static void AssertOverlayRaycast(TutorialOverlay overlay, PointerEventData pointer)
     {
-        var hits = new List<RaycastResult>(); EventSystem.current.RaycastAll(pointer, hits);
+        var hits = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointer, hits);
         CheckThat(hits.Count > 0 && hits[0].gameObject == overlay.gameObject, "Spotlight receives a real UI raycast");
     }
+
     private static IEnumerator CheckWin(TutorialController tutorial, int level)
     {
+        const int winTimeoutSeconds = 60;
+
         CheckGameFraming();
         CheckThat(tutorial.IsRunning == false, "Final click finishes tutorial");
         CheckThat(UnityEngine.Object.FindObjectsOfType<Subscriber>().All(c => c.Clicks.InteractionAllowed), "Input restored");
-        yield return Wait(() => UnityEngine.Object.FindObjectOfType<WinUI>(true).IsVisible, 60);
+        yield return Wait(() => UnityEngine.Object.FindObjectOfType<WinUI>(true).IsVisible, winTimeoutSeconds);
         CheckThat(UnityEngine.Object.FindObjectOfType<LooseUI>(true).IsVisible == false, "Following the guide wins level " + level);
     }
+
     private static IEnumerator StableCard(TutorialOverlay overlay, float seconds)
     {
+        const float cardLayoutTolerance = 0.1f;
+
         Vector2 position = overlay.Card.anchoredPosition, size = overlay.Card.sizeDelta;
         double end = EditorApplication.timeSinceStartup + seconds;
 
         while (EditorApplication.timeSinceStartup < end)
         {
-            CheckThat(Vector2.Distance(position, overlay.Card.anchoredPosition) < 0.1f && Vector2.Distance(size, overlay.Card.sizeDelta) < 0.1f,
-                "Tip stays fixed while cats animate", false);
+            CheckThat(
+                Vector2.Distance(position, overlay.Card.anchoredPosition) < cardLayoutTolerance && Vector2.Distance(size, overlay.Card.sizeDelta) < cardLayoutTolerance,
+                "Tip stays fixed while cats animate",
+                false);
             var corners = new Vector3[4];
             overlay.Card.GetWorldCorners(corners);
             Vector2 min = overlay.transform.InverseTransformPoint(corners[0]), max = overlay.transform.InverseTransformPoint(corners[2]);
@@ -620,15 +698,23 @@ public static class TutorialPlayModeChecks
 
         Report.Add("PASS: tip stays fixed while cats animate");
     }
+
     private static TutorialController Tutorial() => UnityEngine.Object.FindObjectOfType<TutorialController>();
+
     private static TutorialOverlay Overlay() => UnityEngine.Object.FindObjectOfType<TutorialOverlay>();
+
     private static IEnumerator LoadLevel(int index)
     {
+        const int sceneLoadTimeoutSeconds = 15;
+        const float sceneSettleSeconds = 0.2f;
+
         LevelProgress.EditorPreviewIndex = index;
         var operation = SceneManager.LoadSceneAsync(ScenePath);
-        yield return Wait(() => operation.isDone, 15); yield return Seconds(0.2f);
+        yield return Wait(() => operation.isDone, sceneLoadTimeoutSeconds);
+        yield return Seconds(sceneSettleSeconds);
         CaptureGameFraming();
     }
+
     private static IEnumerator Wait(Func<bool> condition, float timeout)
     {
         double end = EditorApplication.timeSinceStartup + timeout;
@@ -639,6 +725,7 @@ public static class TutorialPlayModeChecks
             yield return null;
         }
     }
+
     private static IEnumerator Seconds(float seconds)
     {
         double end = EditorApplication.timeSinceStartup + seconds;
@@ -646,6 +733,7 @@ public static class TutorialPlayModeChecks
         while (EditorApplication.timeSinceStartup < end)
             yield return null;
     }
+
     private static void CheckThat(bool condition, string message, bool log = true)
     {
         if (condition == false)

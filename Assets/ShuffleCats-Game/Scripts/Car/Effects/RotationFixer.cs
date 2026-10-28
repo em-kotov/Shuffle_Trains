@@ -19,6 +19,8 @@ public class RotationFixer : MonoBehaviour
 
     public void ApplyFix()
     {
+        const float quarterTurnDegrees = 90f;
+
         if (_applyRotation == false)
             return;
 
@@ -26,11 +28,11 @@ public class RotationFixer : MonoBehaviour
 
         if (_rotateLeft)
         {
-            angle = 90f;
+            angle = quarterTurnDegrees;
         }
         else
         {
-            angle = -90f;
+            angle = -quarterTurnDegrees;
         }
 
         // Direct transform rotation would be overwritten by SpriteFacingLock.
@@ -48,7 +50,9 @@ public class RotationFixer : MonoBehaviour
             return;
         }
 
-        Debug.LogWarning($"{nameof(RotationFixer)} on '{name}': assign a SpriteFacingLock " +
-            "or a Target in the inspector — there is nothing to rotate.", this);
+        Debug.LogWarning(
+            $"{nameof(RotationFixer)} on '{name}': assign a SpriteFacingLock " +
+            "or a Target in the inspector — there is nothing to rotate.",
+            this);
     }
 }

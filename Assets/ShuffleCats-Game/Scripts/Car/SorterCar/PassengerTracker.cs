@@ -29,16 +29,16 @@ public class PassengerTracker : SeatTracker
 
         _holdPoints = holdPoints;
         _rightPassengers = new();
-        base.Initialize(_wrongPassengers, _holdPoints);
+        this.Initialize(_wrongPassengers, _holdPoints);
     }
 
-    override public void AddPassenger(Passenger passenger, Transform holdPoint)
+    public override void AddPassenger(Passenger passenger, Transform holdPoint)
     {
         base.AddPassenger(passenger, holdPoint);
         _rightPassengers.Add(passenger);
     }
 
-    override public void RemovePassenger(Passenger passenger)
+    public override void RemovePassenger(Passenger passenger)
     {
         base.RemovePassenger(passenger);
         _wrongPassengers.Remove(passenger);

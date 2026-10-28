@@ -4,12 +4,24 @@ using UnityEngine;
 [RequireComponent(typeof(CanvasRenderer))]
 public sealed class TutorialSpotlightGraphic : UnityEngine.UI.MaskableGraphic
 {
-    private readonly List<Rect> _holes = new();
-    private readonly List<float> _columns = new();
-    private readonly List<Rect> _bands = new();
     private const float Radius = 16;
     private static readonly Color Shade = new Color32(20, 24, 37, 190);
     private static readonly Color Rim = new Color32(255, 221, 120, 255);
+    private readonly List<Rect> _holes = new();
+    private readonly List<float> _columns = new();
+    private readonly List<Rect> _bands = new();
+
+    public static bool Contains(Rect hole, Vector2 point)
+    {
+        if (hole.Contains(point) == false)
+            return false;
+
+        float radius = Mathf.Min(Radius, Mathf.Min(hole.width, hole.height) * 0.5f);
+        Vector2 nearest = new Vector2(
+            Mathf.Clamp(point.x, hole.xMin + radius, hole.xMax - radius),
+            Mathf.Clamp(point.y, hole.yMin + radius, hole.yMax - radius));
+        return (point - nearest).sqrMagnitude <= radius * radius;
+    }
 
     public void SetHoles(IReadOnlyList<Rect> holes)
     {
@@ -19,17 +31,6 @@ public sealed class TutorialSpotlightGraphic : UnityEngine.UI.MaskableGraphic
             _holes.Add(hole);
 
         SetVerticesDirty();
-    }
-
-    public static bool Contains(Rect hole, Vector2 point)
-    {
-        if (hole.Contains(point) == false)
-            return false;
-
-        float radius = Mathf.Min(Radius, Mathf.Min(hole.width, hole.height) * 0.5f);
-        Vector2 nearest = new Vector2(Mathf.Clamp(point.x, hole.xMin + radius, hole.xMax - radius),
-            Mathf.Clamp(point.y, hole.yMin + radius, hole.yMax - radius));
-        return (point - nearest).sqrMagnitude <= radius * radius;
     }
 
     protected override void OnPopulateMesh(UnityEngine.UI.VertexHelper mesh)
@@ -64,8 +65,10 @@ public sealed class TutorialSpotlightGraphic : UnityEngine.UI.MaskableGraphic
             _bands.Clear();
 
             foreach (Rect hole in _holes)
+            {
                 if (middle > hole.xMin && middle < hole.xMax)
                     _bands.Add(hole);
+            }
 
             _bands.Sort((a, b) => a.yMin.CompareTo(b.yMin));
             float bottom = all.yMin;
@@ -89,6 +92,8 @@ public sealed class TutorialSpotlightGraphic : UnityEngine.UI.MaskableGraphic
 
     private static void DrawHole(UnityEngine.UI.VertexHelper mesh, Rect hole, bool drawRim)
     {
+        const float rimWidth = 2.5f;
+
         float radius = Mathf.Min(Radius, Mathf.Min(hole.width, hole.height) * 0.5f);
         const int segments = 10;
         Vector2 firstInner = default, firstOuter = default, previousInner = default, previousOuter = default;
@@ -119,14 +124,14 @@ public sealed class TutorialSpotlightGraphic : UnityEngine.UI.MaskableGraphic
 
             Vector2 sign = new Vector2(signX, signY);
             Vector2 tip = hole.center + Vector2.Scale(hole.size * 0.5f, sign);
-            Vector2 center = tip - sign * radius;
+            Vector2 center = tip - (sign * radius);
 
             for (int i = 0; i <= segments; i++)
             {
-                float angle = (corner * 90 + i * 90f / segments) * Mathf.Deg2Rad;
+                float angle = ((corner * 90) + (i * 90f / segments)) * Mathf.Deg2Rad;
                 Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-                Vector2 inner = center + direction * radius;
-                Vector2 outer = center + direction * (radius + 2.5f);
+                Vector2 inner = center + (direction * radius);
+                Vector2 outer = center + (direction * (radius + rimWidth));
 
                 if (drawRim == false)
                 {
@@ -134,7 +139,9 @@ public sealed class TutorialSpotlightGraphic : UnityEngine.UI.MaskableGraphic
                         Triangle(mesh, tip, previousInner, inner, Shade);
                 }
                 else if (corner != 0 || i != 0)
+                {
                     Strip(mesh, previousInner, previousOuter, inner, outer);
+                }
                 else
                 {
                     firstInner = inner;
@@ -161,13 +168,16 @@ public sealed class TutorialSpotlightGraphic : UnityEngine.UI.MaskableGraphic
 
     private static void Strip(UnityEngine.UI.VertexHelper mesh, Vector2 a, Vector2 b, Vector2 c, Vector2 d)
     {
-        Triangle(mesh, a, b, d, Rim); Triangle(mesh, a, d, c, Rim);
+        Triangle(mesh, a, b, d, Rim);
+        Triangle(mesh, a, d, c, Rim);
     }
 
     private static void Triangle(UnityEngine.UI.VertexHelper mesh, Vector2 a, Vector2 b, Vector2 c, Color color)
     {
         int start = mesh.currentVertCount;
-        mesh.AddVert(a, color, Vector2.zero); mesh.AddVert(b, color, Vector2.zero); mesh.AddVert(c, color, Vector2.zero);
+        mesh.AddVert(a, color, Vector2.zero);
+        mesh.AddVert(b, color, Vector2.zero);
+        mesh.AddVert(c, color, Vector2.zero);
         mesh.AddTriangle(start, start + 1, start + 2);
     }
 }

@@ -4,15 +4,15 @@ using UnityEngine.UI;
 
 public class ShopUI : UIPanel
 {
+    private readonly List<ShopSectionUI> _sections = new List<ShopSectionUI>();
+    private readonly List<ShopSlotUI> _slots = new List<ShopSlotUI>();
+
     [SerializeField] private Shop _shop;
     [SerializeField] private Button _openButton;
     [SerializeField] private Button _closeButton;
     [SerializeField] private Transform _sectionsParent;
     [SerializeField] private ShopSectionUI _sectionPrefab;
     [SerializeField] private ShopSlotUI _slotPrefab;
-
-    private readonly List<ShopSectionUI> _sections = new List<ShopSectionUI>();
-    private readonly List<ShopSlotUI> _slots = new List<ShopSlotUI>();
 
     private void OnEnable()
     {

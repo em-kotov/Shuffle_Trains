@@ -24,8 +24,10 @@ public class AutoLoose : MonoBehaviour
         StopChecking();
     }
 
-    public void Initialize(ParkingRegistrator parkingRegistrator,
-                        SorterRegistrator sorterRegistrator, TrackRegistrator trackRegistrator)
+    public void Initialize(
+        ParkingRegistrator parkingRegistrator,
+        SorterRegistrator sorterRegistrator,
+        TrackRegistrator trackRegistrator)
     {
         HideWindow();
         _parkingRegistrator = parkingRegistrator;
@@ -54,7 +56,9 @@ public class AutoLoose : MonoBehaviour
 
     private IEnumerator StartCheck()
     {
-        WaitForSeconds wait = new WaitForSeconds(6f);
+        const float lossCheckDelaySeconds = 6f;
+
+        WaitForSeconds wait = new WaitForSeconds(lossCheckDelaySeconds);
 
         while (enabled)
         {

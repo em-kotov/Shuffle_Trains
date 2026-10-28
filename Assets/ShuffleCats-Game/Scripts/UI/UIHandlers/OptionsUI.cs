@@ -17,7 +17,26 @@ public class OptionsUI : UIPanel
     private HintLampGraphic _hintsLamp;
 
     public UnityEngine.UI.Button OpenButton => _optionsButton;
+
     public UnityEngine.UI.Button RestartButton => _restartButton;
+
+    private static RectTransform NewHintsRect(string name, Transform parent, Vector2 position, Vector2 size)
+    {
+        var rect = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
+        rect.SetParent(parent, false);
+        rect.anchorMin = rect.anchorMax = Vector2.one * 0.5f;
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
+        return rect;
+    }
+
+    private static void UpdateVolumeLabel(TMPro.TMP_Text label, float value)
+    {
+        const float percentScale = 100f;
+
+        if (label != null)
+            label.text = $"{Mathf.RoundToInt(value * percentScale)}%";
+    }
 
     private void Awake()
     {
@@ -154,6 +173,9 @@ public class OptionsUI : UIPanel
 
     private void BuildHintsControl(Transform panel)
     {
+        const int checkboxSize = 18;
+        const int labelFontSize = 17;
+
         Toggle source;
 
         if (_musicToggle != null)
@@ -179,7 +201,7 @@ public class OptionsUI : UIPanel
         _hintsLamp.raycastTarget = false;
         RefreshHintsLamp();
 
-        RectTransform box = NewHintsRect("Background", root, new Vector2(23, 23), Vector2.one * 18);
+        RectTransform box = NewHintsRect("Background", root, new Vector2(23, 23), Vector2.one * checkboxSize);
         var background = box.gameObject.AddComponent<UnityEngine.UI.Image>();
 
         if (source.targetGraphic is UnityEngine.UI.Image sourceBackground)
@@ -190,7 +212,7 @@ public class OptionsUI : UIPanel
         }
 
         background.raycastTarget = false;
-        RectTransform check = NewHintsRect("Checkmark", box, Vector2.zero, Vector2.one * 18);
+        RectTransform check = NewHintsRect("Checkmark", box, Vector2.zero, Vector2.one * checkboxSize);
         var checkmark = check.gameObject.AddComponent<UnityEngine.UI.Image>();
 
         if (source.graphic is UnityEngine.UI.Image sourceCheck)
@@ -217,7 +239,7 @@ public class OptionsUI : UIPanel
             label.font = Resources.Load<TMPro.TMP_FontAsset>("Fonts/Eno Black SDF");
         }
 
-        label.fontSize = 17;
+        label.fontSize = labelFontSize;
         label.color = new Color32(92, 62, 47, 255);
         label.alignment = TMPro.TextAlignmentOptions.Center;
         label.enableWordWrapping = false;
@@ -225,18 +247,10 @@ public class OptionsUI : UIPanel
         LocalizationBinder.Set(label, "Hints");
 
         foreach (string name in new[] { "RestartButton", "RestartButtonShadow" })
+        {
             if (panel.Find(name) is RectTransform rect)
                 rect.anchoredPosition = new Vector2(62, rect.anchoredPosition.y);
-    }
-
-    private static RectTransform NewHintsRect(string name, Transform parent, Vector2 position, Vector2 size)
-    {
-        var rect = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
-        rect.SetParent(parent, false);
-        rect.anchorMin = rect.anchorMax = Vector2.one * 0.5f;
-        rect.anchoredPosition = position;
-        rect.sizeDelta = size;
-        return rect;
+        }
     }
 
     private void OnHintsChanged(bool enabled)
@@ -249,6 +263,7 @@ public class OptionsUI : UIPanel
     private void RefreshHintsLamp()
     {
         if (_hintsLamp != null)
+        {
             if (HintSettings.Enabled)
             {
                 _hintsLamp.color = Color.white;
@@ -257,6 +272,7 @@ public class OptionsUI : UIPanel
             {
                 _hintsLamp.color = HintLampGraphic.DisabledTint;
             }
+        }
     }
 
     private void OnMusicVolumeChanged(float value)
@@ -273,12 +289,6 @@ public class OptionsUI : UIPanel
             AudioManager.Instance.SfxVolume = value;
 
         UpdateVolumeLabel(_sfxVolumeLabel, value);
-    }
-
-    private static void UpdateVolumeLabel(TMPro.TMP_Text label, float value)
-    {
-        if (label != null)
-            label.text = $"{Mathf.RoundToInt(value * 100f)}%";
     }
 
     private void OnMusicChanged(bool value)

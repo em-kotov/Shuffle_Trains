@@ -11,6 +11,7 @@ public class Shop : MonoBehaviour
     public event Action Changed;
 
     public ShopCatalog Catalog => _catalog;
+
     public IWalletSpender Wallet => _wallet;
 
     private void Awake()

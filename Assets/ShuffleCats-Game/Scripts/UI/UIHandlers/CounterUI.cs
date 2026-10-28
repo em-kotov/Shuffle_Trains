@@ -3,9 +3,10 @@ using UnityEngine;
 
 public class CounterUI : UIPanel
 {
-    public override bool BlocksGameplay => false;
     [SerializeField] private TextMeshProUGUI _currentCarsText;
     [SerializeField] private TextMeshProUGUI _maxCarsText;
+
+    public override bool BlocksGameplay => false;
 
     public void ShowCount(int current, int max)
     {

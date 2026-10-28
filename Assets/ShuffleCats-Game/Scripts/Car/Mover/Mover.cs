@@ -27,7 +27,9 @@ public class Mover : MonoBehaviour
 
     private IEnumerator SmoothMoveTo(Vector3 target, float percent, float speedMultiplier)
     {
-        float duration = _slideDuration / Mathf.Max(0.01f, speedMultiplier);
+        const float minimumSpeedMultiplier = 0.01f;
+
+        float duration = _slideDuration / Mathf.Max(minimumSpeedMultiplier, speedMultiplier);
         float elapsed = 0f;
         Vector3 start = _carHead.position;
 
@@ -45,7 +47,9 @@ public class Mover : MonoBehaviour
 
     private IEnumerator SmoothMoveToPercent(Vector3 target, float percent, float speedMultiplier)
     {
-        float duration = _slideDuration / Mathf.Max(0.01f, speedMultiplier);
+        const float minimumSpeedMultiplier = 0.01f;
+
+        float duration = _slideDuration / Mathf.Max(minimumSpeedMultiplier, speedMultiplier);
         float elapsed = 0f;
         Vector3 start = _carHead.position;
         Vector3 newTarget;

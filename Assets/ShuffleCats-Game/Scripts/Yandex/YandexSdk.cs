@@ -4,26 +4,14 @@ using UnityEngine;
 
 public static class YandexSdk
 {
-#if UNITY_WEBGL && !UNITY_EDITOR
-    [DllImport("__Internal")] private static extern void YG_Init();
-    [DllImport("__Internal")] private static extern void YG_Dispose();
-    [DllImport("__Internal")] private static extern void YG_GameReady();
-    [DllImport("__Internal")] private static extern void YG_GameplayStart();
-    [DllImport("__Internal")] private static extern void YG_GameplayStop();
-    [DllImport("__Internal")] private static extern void YG_ShowFullscreenAdv();
-    [DllImport("__Internal")] private static extern void YG_ShowRewardedVideo();
-    [DllImport("__Internal")] private static extern void YG_SaveData(string json);
-    [DllImport("__Internal")] private static extern void YG_LoadData();
-    [DllImport("__Internal")] private static extern string YG_GetLanguage();
-    [DllImport("__Internal")] private static extern string YG_GetDeviceType();
+    private const float MinSecondsBetweenInterstitials = 60f;
 
+#if UNITY_WEBGL && !UNITY_EDITOR
     // Use readonly to avoid compile-time unreachable branches in editor builds.
     private static readonly bool RunsOnYandex = true;
 #else
     private static readonly bool RunsOnYandex = false;
 #endif
-
-    private const float MinSecondsBetweenInterstitials = 60f;
 
     private static YandexBridge _bridge;
     private static bool _initializeRequested;
@@ -52,10 +40,12 @@ public static class YandexSdk
     public static bool IsResolved { get; private set; }
 
     public static bool IsPaused { get; private set; }
+
     public static bool IsAudioPaused { get; private set; }
 
     public static bool IsOnlyOptionsPaused => IsPaused && _optionsOpen &&
         IsAudioPaused == false && _leaderboardOpen == false && _shopOpen == false && _tutorialOpen == false;
+
     public static bool IsOnlyTutorialPaused => IsPaused && _tutorialOpen &&
         IsAudioPaused == false && _leaderboardOpen == false && _shopOpen == false && _optionsOpen == false;
 
@@ -214,6 +204,30 @@ public static class YandexSdk
         YandexBridge.ReportDataLoaded(string.Empty);
     }
 
+    public static void SetLeaderboardOpen(bool open)
+    {
+        _leaderboardOpen = open;
+        ApplyPause();
+    }
+
+    public static void SetOptionsOpen(bool open)
+    {
+        _optionsOpen = open;
+        ApplyPause();
+    }
+
+    public static void SetTutorialOpen(bool open)
+    {
+        _tutorialOpen = open;
+        ApplyPause();
+    }
+
+    public static void SetShopOpen(bool open)
+    {
+        _shopOpen = open;
+        ApplyPause();
+    }
+
     internal static void HandleSdkInitialized()
     {
         IsInitialized = true;
@@ -303,39 +317,50 @@ public static class YandexSdk
         _lastInterstitialTime = float.NegativeInfinity;
     }
 
-    private static bool CanShowAdvertisement()
-    {
-        return RunsOnYandex && IsInitialized && IsPaused == false && _bridge != null;
-    }
-
-    public static void SetLeaderboardOpen(bool open)
-    {
-        _leaderboardOpen = open;
-        ApplyPause();
-    }
-
-    public static void SetOptionsOpen(bool open)
-    {
-        _optionsOpen = open;
-        ApplyPause();
-    }
-
-    public static void SetTutorialOpen(bool open)
-    {
-        _tutorialOpen = open;
-        ApplyPause();
-    }
-
-    public static void SetShopOpen(bool open)
-    {
-        _shopOpen = open;
-        ApplyPause();
-    }
-
     internal static void HandleAuthDialog(bool open)
     {
         _authDialogOpen = open;
         ApplyPause();
+    }
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+    [DllImport("__Internal")]
+    private static extern void YG_Init();
+
+    [DllImport("__Internal")]
+    private static extern void YG_Dispose();
+
+    [DllImport("__Internal")]
+    private static extern void YG_GameReady();
+
+    [DllImport("__Internal")]
+    private static extern void YG_GameplayStart();
+
+    [DllImport("__Internal")]
+    private static extern void YG_GameplayStop();
+
+    [DllImport("__Internal")]
+    private static extern void YG_ShowFullscreenAdv();
+
+    [DllImport("__Internal")]
+    private static extern void YG_ShowRewardedVideo();
+
+    [DllImport("__Internal")]
+    private static extern void YG_SaveData(string json);
+
+    [DllImport("__Internal")]
+    private static extern void YG_LoadData();
+
+    [DllImport("__Internal")]
+    private static extern string YG_GetLanguage();
+
+    [DllImport("__Internal")]
+    private static extern string YG_GetDeviceType();
+#endif
+
+    private static bool CanShowAdvertisement()
+    {
+        return RunsOnYandex && IsInitialized && IsPaused == false && _bridge != null;
     }
 
     private static void OpenAdvertisement()

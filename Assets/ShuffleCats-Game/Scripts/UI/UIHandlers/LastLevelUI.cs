@@ -19,7 +19,7 @@ public class LastLevelUI : UIPanel
 
     public void ShowWindow()
     {
-        base.Show();
+        this.Show();
         _playAgainButton.interactable = true;
 
         if (AudioManager.Instance != null)
@@ -29,6 +29,6 @@ public class LastLevelUI : UIPanel
     public void HideWindow()
     {
         _playAgainButton.interactable = false;
-        base.Hide();
+        this.Hide();
     }
 }

@@ -11,19 +11,8 @@ public static class UiFontTool
 {
     private const string SourceFontPath = "Assets/ShuffleCats-Game/Resources/Fonts/Eno Black.ttf";
     private const string FontAssetPath = "Assets/ShuffleCats-Game/Resources/Fonts/Eno Black SDF.asset";
-    // Shop prefabs are instantiated at runtime and would be missed by a scene-only sweep.
-    private static readonly string[] PrefabPaths =
-    {
-        "Assets/ShuffleCats-Game/Resources/Prefabs/UI/Canvas.prefab",
-        "Assets/ShuffleCats-Game/Resources/Prefabs/UI/ShopSection.prefab",
-        "Assets/ShuffleCats-Game/Resources/Prefabs/UI/ShopSlot.prefab",
-    };
-    private const string PreviousUiFontPath = "Assets/FPSFont/FPS Gaming Font/Square-Black SDF.asset";
 
-    private static readonly string[] ScenePaths =
-    {
-        "Assets/ShuffleCats-Game/Scenes/Level-1.unity",
-    };
+    private const string PreviousUiFontPath = "Assets/FPSFont/FPS Gaming Font/Square-Black SDF.asset";
 
     private const string Latin =
         " !\"#$%&'()*+,-./0123456789:;<=>?@" +
@@ -35,6 +24,7 @@ public static class UiFontTool
         "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
 
     private const string Punctuation = "«»—…";
+
     // The remaining Turkish glyphs are supplied by the baked fallback font.
     private const string Turkish = "ÇçÖöÜü";
 
@@ -42,6 +32,19 @@ public static class UiFontTool
     private const int SamplingPointSize = 48;
     private const int AtlasPadding = 5;
     private const int AtlasSize = 1024;
+
+    // Shop prefabs are instantiated at runtime and would be missed by a scene-only sweep.
+    private static readonly string[] PrefabPaths =
+    {
+        "Assets/ShuffleCats-Game/Resources/Prefabs/UI/Canvas.prefab",
+        "Assets/ShuffleCats-Game/Resources/Prefabs/UI/ShopSection.prefab",
+        "Assets/ShuffleCats-Game/Resources/Prefabs/UI/ShopSlot.prefab",
+    };
+
+    private static readonly string[] ScenePaths =
+    {
+        "Assets/ShuffleCats-Game/Scenes/Level-1.unity",
+    };
 
     [MenuItem("Tools/Yandex Games/Rebuild UI Font")]
     public static void Rebuild()

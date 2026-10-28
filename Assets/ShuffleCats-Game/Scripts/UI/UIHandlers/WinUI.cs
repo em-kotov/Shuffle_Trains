@@ -21,7 +21,7 @@ public class WinUI : UIPanel
 
     public void ShowWindow(int levelNumber)
     {
-        base.Show();
+        this.Show();
         _nextButton.interactable = true;
         ShowText(levelNumber);
 
@@ -32,7 +32,7 @@ public class WinUI : UIPanel
     public void HideWindow()
     {
         _nextButton.interactable = false;
-        base.Hide();
+        this.Hide();
     }
 
     private void ShowText(int levelNumber)

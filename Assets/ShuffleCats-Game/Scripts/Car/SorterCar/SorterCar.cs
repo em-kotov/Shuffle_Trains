@@ -12,11 +12,17 @@ public class SorterCar : MonoBehaviour
     private SorterRegistrator _sorterRegistrator;
 
     public bool IsFinished { get; private set; }
+
     public bool IsSorting { get; private set; }
 
-    public void Initialize(StationOperator stationOperator, PassengerTracker passengerTracker,
-                        List<Passenger> passengers, List<Transform> holdPoints,
-                        CatColor catColor, int stationCount, SorterRegistrator sorterRegistrator)
+    public void Initialize(
+        StationOperator stationOperator,
+        PassengerTracker passengerTracker,
+        List<Passenger> passengers,
+        List<Transform> holdPoints,
+        CatColor catColor,
+        int stationCount,
+        SorterRegistrator sorterRegistrator)
     {
         _stationOperator = stationOperator;
         _passengerTracker = passengerTracker;
@@ -68,12 +74,6 @@ public class SorterCar : MonoBehaviour
         {
             _stationOperator.ResetProgress();
         }
-    }
-
-    public bool HaveSeats(out int count, out CatColor catColor)
-    {
-        catColor = _catColor;
-        return _passengerTracker.HaveFreeSeats(out count);
     }
 
     public bool CanExchangeWith(Station station)

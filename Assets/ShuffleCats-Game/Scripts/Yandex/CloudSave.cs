@@ -72,13 +72,13 @@ public static class CloudSave
             return;
         }
 
-        if (cloud == null || cloud.version <= 0)
+        if (cloud == null || cloud.Version <= 0)
         {
             return;
         }
 
         // A restarted campaign can have a higher personal record but a lower current index.
-        LevelProgress.MergeBestCompletedLevel(Mathf.Max(cloud.bestCompletedLevel, cloud.levelIndex));
+        LevelProgress.MergeBestCompletedLevel(Mathf.Max(cloud.BestCompletedLevel, cloud.LevelIndex));
 
         if (cloud.IsAheadOf(SaveSnapshot.FromLocal()) == false)
         {

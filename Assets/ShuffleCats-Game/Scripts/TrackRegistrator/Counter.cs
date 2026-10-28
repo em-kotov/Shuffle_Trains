@@ -6,8 +6,9 @@ public class Counter : MonoBehaviour
 
     private int _startCount = 0;
 
-    public int CurrentCount {get;private set;}
-    public int MaxCount {get;private set;}
+    public int CurrentCount { get; private set; }
+
+    public int MaxCount { get; private set; }
 
     public void Initialize(int maxCount)
     {
@@ -19,7 +20,7 @@ public class Counter : MonoBehaviour
     {
         CurrentCount++;
     }
-    
+
     public void Remove()
     {
         CurrentCount--;

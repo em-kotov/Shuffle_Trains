@@ -8,6 +8,7 @@ public class ShopCatalog : ScriptableObject
     [SerializeField] private List<Theme> _themes = new List<Theme>();
 
     public string ShopHeader => _shopHeader;
+
     public IReadOnlyList<Theme> Themes => _themes;
 
     public Theme Find(string id)

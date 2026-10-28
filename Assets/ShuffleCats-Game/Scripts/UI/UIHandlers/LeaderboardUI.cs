@@ -5,22 +5,168 @@ using UnityEngine;
 public sealed class LeaderboardUI : UIPanel
 {
     private static readonly Color Ink = new Color32(92, 62, 47, 255);
-    private RectTransform _root, _panel, _card, _content, _refreshIcon;
-    private UnityEngine.UI.Button _open, _signIn, _refresh;
+    private RectTransform _root;
+    private RectTransform _panel;
+    private RectTransform _card;
+    private RectTransform _content;
+    private RectTransform _refreshIcon;
+    private UnityEngine.UI.Button _open;
+    private UnityEngine.UI.Button _signIn;
+    private UnityEngine.UI.Button _refresh;
     private UnityEngine.UI.ScrollRect _scroll;
-    private TMP_Text _status, _summary, _refreshText, _title, _titleShadow, _settingsTitle;
+    private TMP_Text _status;
+    private TMP_Text _summary;
+    private TMP_Text _refreshText;
+    private TMP_Text _title;
+    private TMP_Text _titleShadow;
+    private TMP_Text _settingsTitle;
     private TMP_FontAsset _font;
     private Sprite _panelSprite;
     private int _requestVersion;
-    private bool _busy, _isOpen;
+    private bool _busy;
+    private bool _isOpen;
     private float _refreshAt;
     private YandexLeaderboard.Result _lastResult;
     private bool _authorizing;
+
+    private void OnDestroy()
+    {
+        Localization.Changed -= RefreshLanguage;
+        _requestVersion++;
+
+        // The child CanvasGroup may already be destroyed during scene teardown.
+        if (_isOpen)
+            YandexSdk.SetLeaderboardOpen(false);
+    }
+
+    private void Update()
+    {
+        const int maximumCardWidth = 440;
+        const int maximumCardHeight = 560;
+        const int viewportPadding = 24;
+        const int refreshRotationDegreesPerSecond = 180;
+
+        if (IsVisible == false)
+            return;
+
+        var size = new Vector2(
+            Mathf.Min(maximumCardWidth, _root.rect.width - viewportPadding),
+            Mathf.Min(maximumCardHeight, _root.rect.height - viewportPadding));
+
+        if (_card.sizeDelta != size)
+        {
+            _card.sizeDelta = size;
+            ResponsiveGameUI.StyleWindowTitle(_title, _settingsTitle, size.x);
+            ResponsiveGameUI.StyleWindowTitle(_titleShadow, _settingsTitle, size.x, true);
+        }
+
+        int seconds = Mathf.CeilToInt(_refreshAt - Time.realtimeSinceStartup);
+        bool countingDown;
+
+        if (_busy == false && seconds > 0)
+        {
+            countingDown = true;
+        }
+        else
+        {
+            countingDown = false;
+        }
+
+        if (_busy == false && countingDown == false)
+        {
+            _refresh.interactable = true;
+        }
+        else
+        {
+            _refresh.interactable = false;
+        }
+
+        if (countingDown)
+        {
+            _refreshText.text = seconds.ToString();
+        }
+        else
+        {
+            _refreshText.text = Localization.Get("Refresh");
+        }
+
+        // Gameplay is paused while the leaderboard is open; use unscaled time.
+        if (countingDown)
+            _refreshIcon.Rotate(0, 0, -refreshRotationDegreesPerSecond * Time.unscaledDeltaTime);
+        else
+            _refreshIcon.localRotation = Quaternion.identity;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Close();
+    }
 
     public static void Attach(Canvas canvas)
     {
         if (canvas != null && canvas.GetComponent<LeaderboardUI>() == null)
             canvas.gameObject.AddComponent<LeaderboardUI>().Build(canvas);
+    }
+
+    public void Open()
+    {
+        if (IsVisible)
+            return;
+
+        foreach (UIPanel panel in FindObjectsOfType<UIPanel>(true))
+        {
+            if (panel != this && panel.BlocksGameplay)
+                return;
+        }
+
+        AudioManager.PlayUIClickStatic();
+        _panel.SetAsLastSibling();
+        Show();
+        _isOpen = true;
+        _open.interactable = false;
+        YandexSdk.SetLeaderboardOpen(true);
+        Refresh();
+    }
+
+    public void Close()
+    {
+        if (IsVisible == false)
+            return;
+
+        AudioManager.PlayUIClickStatic();
+        _requestVersion++;
+        Hide();
+        _refreshIcon.localRotation = Quaternion.identity;
+        _isOpen = false;
+        _open.interactable = true;
+        YandexSdk.SetLeaderboardOpen(false);
+    }
+
+    private static RectTransform Rect(string name, Transform parent)
+    {
+        var rect = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
+        rect.SetParent(parent, false);
+        return rect;
+    }
+
+    private static void Place(RectTransform rect, Vector2 anchor, Vector2 position, Vector2 size)
+    {
+        rect.anchorMin = rect.anchorMax = anchor;
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
+    }
+
+    private static void TopBand(RectTransform rect, float left, float right, float bottom, float height)
+    {
+        rect.anchorMin = new Vector2(0, 1);
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = new Vector2(left, bottom);
+        rect.offsetMax = new Vector2(right, bottom + height);
+    }
+
+    private static void Stretch(RectTransform rect)
+    {
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = rect.offsetMax = Vector2.zero;
     }
 
     private void Build(Canvas canvas)
@@ -113,120 +259,37 @@ public sealed class LeaderboardUI : UIPanel
         _status = Label("Status", scrollRoot, "Loading rankings...", 18);
         Stretch(_status.rectTransform);
         _status.margin = new Vector4(12, 8, 12, 8);
-        _summary = Label("Summary", _card, "", 14);
+        _summary = Label("Summary", _card, string.Empty, 14);
         _summary.rectTransform.anchorMin = new Vector2(0, 0);
         _summary.rectTransform.anchorMax = new Vector2(1, 0);
         _summary.rectTransform.anchoredPosition = new Vector2(0, 88);
         _summary.rectTransform.sizeDelta = new Vector2(-36, 64);
 
-        _signIn = Button("SignIn", _card, "Sign in with Yandex", Vector2.zero,
-            new Vector2(132, 34), new Vector2(228, 42), SignIn);
-        _refresh = Button("Refresh", _card, "Refresh", new Vector2(1, 0),
-            new Vector2(-72, 34), new Vector2(108, 42), Refresh, languageStyle: true);
+        _signIn = Button(
+            "SignIn",
+            _card,
+            "Sign in with Yandex",
+            Vector2.zero,
+            new Vector2(132, 34),
+            new Vector2(228, 42),
+            SignIn);
+        _refresh = Button(
+            "Refresh",
+            _card,
+            "Refresh",
+            new Vector2(1, 0),
+            new Vector2(-72, 34),
+            new Vector2(108, 42),
+            Refresh,
+            languageStyle: true);
         _refreshText = _refresh.GetComponentInChildren<TMP_Text>();
         BuildRefreshIcon();
         Localization.Changed += RefreshLanguage;
         Hide();
     }
 
-    public void Open()
-    {
-        if (IsVisible)
-            return;
-
-        foreach (UIPanel panel in FindObjectsOfType<UIPanel>(true))
-            if (panel != this && panel.BlocksGameplay)
-                return;
-
-        AudioManager.PlayUIClickStatic();
-        _panel.SetAsLastSibling();
-        Show();
-        _isOpen = true;
-        _open.interactable = false;
-        YandexSdk.SetLeaderboardOpen(true);
-        Refresh();
-    }
-
-    public void Close()
-    {
-        if (IsVisible == false)
-            return;
-
-        AudioManager.PlayUIClickStatic();
-        _requestVersion++;
-        Hide();
-        _refreshIcon.localRotation = Quaternion.identity;
-        _isOpen = false;
-        _open.interactable = true;
-        YandexSdk.SetLeaderboardOpen(false);
-    }
-
-    private void OnDestroy()
-    {
-        Localization.Changed -= RefreshLanguage;
-        _requestVersion++;
-
-        // The child CanvasGroup may already be destroyed during scene teardown.
-        if (_isOpen)
-            YandexSdk.SetLeaderboardOpen(false);
-    }
-
-    private void Update()
-    {
-        if (IsVisible == false)
-            return;
-
-        var size = new Vector2(Mathf.Min(440, _root.rect.width - 24),
-            Mathf.Min(560, _root.rect.height - 24));
-
-        if (_card.sizeDelta != size)
-        {
-            _card.sizeDelta = size;
-            ResponsiveGameUI.StyleWindowTitle(_title, _settingsTitle, size.x);
-            ResponsiveGameUI.StyleWindowTitle(_titleShadow, _settingsTitle, size.x, true);
-        }
-
-        int seconds = Mathf.CeilToInt(_refreshAt - Time.realtimeSinceStartup);
-        bool countingDown;
-
-        if (_busy == false && seconds > 0)
-        {
-            countingDown = true;
-        }
-        else
-        {
-            countingDown = false;
-        }
-
-        if (_busy == false && countingDown == false)
-        {
-            _refresh.interactable = true;
-        }
-        else
-        {
-            _refresh.interactable = false;
-        }
-
-        if (countingDown)
-        {
-            _refreshText.text = seconds.ToString();
-        }
-        else
-        {
-            _refreshText.text = Localization.Get("Refresh");
-        }
-
-        // Gameplay is paused while the leaderboard is open; use unscaled time.
-        if (countingDown)
-            _refreshIcon.Rotate(0, 0, -180 * Time.unscaledDeltaTime);
-        else
-            _refreshIcon.localRotation = Quaternion.identity;
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-            Close();
-    }
-
     private void Refresh() => Request(false);
+
     private void SignIn() => Request(true);
 
     private void Request(bool authorize)
@@ -258,7 +321,7 @@ public sealed class LeaderboardUI : UIPanel
                 return;
 
             _busy = false;
-            _refreshAt = Time.realtimeSinceStartup + result.retryAfter;
+            _refreshAt = Time.realtimeSinceStartup + result.RetryAfter;
             ShowResult(result);
         };
 
@@ -270,10 +333,17 @@ public sealed class LeaderboardUI : UIPanel
 
     private void ShowResult(YandexLeaderboard.Result result)
     {
+        const int gapFontSize = 14;
+        const int gapHeight = 20;
+        const int highlightedRankCount = 3;
+        const int rowHeight = 40;
+        const int maximumPlayerNameLength = 80;
+        const int rowFontSize = 17;
+
         _lastResult = result;
         bool canSignIn;
 
-        if (result.authorizationKnown && result.authorized == false && YandexSdk.IsInitialized)
+        if (result.AuthorizationKnown && result.Authorized == false && YandexSdk.IsInitialized)
         {
             canSignIn = true;
         }
@@ -290,14 +360,18 @@ public sealed class LeaderboardUI : UIPanel
         }
         else
         {
-            _summary.text = Localization.Format("Your best: {0}", Mathf.Max(LevelProgress.BestCompletedLevel, result.bestScore));
+            _summary.text = Localization.Format("Your best: {0}", Mathf.Max(LevelProgress.BestCompletedLevel, result.BestScore));
         }
 
-        if (result.authorized && result.userRank > 0)
-            _summary.text = Localization.Format("Your rank: #{0}   Best: {1}", result.userRank,
-                Mathf.Max(LevelProgress.BestCompletedLevel, result.bestScore));
+        if (result.Authorized && result.UserRank > 0)
+        {
+            _summary.text = Localization.Format(
+                "Your rank: #{0}   Best: {1}",
+                result.UserRank,
+                Mathf.Max(LevelProgress.BestCompletedLevel, result.BestScore));
+        }
 
-        if (result.authorized && string.IsNullOrEmpty(result.scoreStatus) == false)
+        if (result.Authorized && string.IsNullOrEmpty(result.ScoreStatus) == false)
             _summary.text += "\n" + Localization.Get("Your result is saved locally. Sync will retry.");
 
         RectTransform refreshRect = _refresh.GetComponent<RectTransform>();
@@ -336,8 +410,8 @@ public sealed class LeaderboardUI : UIPanel
 
         Place(refreshRect, refreshAnchor, refreshPosition, refreshSize);
 
-        _status.gameObject.SetActive(result.Succeeded == false || result.entries.Length == 0);
-        switch (result.status)
+        _status.gameObject.SetActive(result.Succeeded == false || result.Entries.Length == 0);
+        switch (result.Status)
         {
             case "ok":
                 _status.text = Localization.Get("No scores yet. Complete a level to join!");
@@ -364,26 +438,26 @@ public sealed class LeaderboardUI : UIPanel
 
         int previousRank = 0;
 
-        foreach (YandexLeaderboard.Entry entry in result.entries)
+        foreach (YandexLeaderboard.Entry entry in result.Entries)
         {
-            if (entry.rank == previousRank)
+            if (entry.Rank == previousRank)
                 continue;
 
-            if (previousRank > 0 && entry.rank > previousRank + 1)
+            if (previousRank > 0 && entry.Rank > previousRank + 1)
             {
-                TMP_Text gap = Label("Gap", _content, "...", 14);
-                gap.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = 20;
+                TMP_Text gap = Label("Gap", _content, "...", gapFontSize);
+                gap.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = gapHeight;
             }
 
-            previousRank = entry.rank;
-            RectTransform row = Rect("Rank" + entry.rank, _content);
+            previousRank = entry.Rank;
+            RectTransform row = Rect("Rank" + entry.Rank, _content);
             Color rowColor;
 
-            if (entry.isUser)
+            if (entry.IsUser)
             {
                 rowColor = new Color32(255, 220, 141, 255);
             }
-            else if (entry.rank <= 3)
+            else if (entry.Rank <= highlightedRankCount)
             {
                 rowColor = new Color32(255, 237, 186, 255);
             }
@@ -393,24 +467,24 @@ public sealed class LeaderboardUI : UIPanel
             }
 
             Image(row, rowColor);
-            row.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = 40;
+            row.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = rowHeight;
             string name;
 
-            if (string.IsNullOrWhiteSpace(entry.name))
+            if (string.IsNullOrWhiteSpace(entry.Name))
             {
                 name = Localization.Get("Player");
             }
             else
             {
-                name = entry.name;
+                name = entry.Name;
             }
 
             name = name.Replace('\n', ' ').Replace('\r', ' ').Replace('\t', ' ');
 
-            if (name.Length > 80)
-                name = name.Substring(0, 80);
+            if (name.Length > maximumPlayerNameLength)
+                name = name.Substring(0, maximumPlayerNameLength);
 
-            Columns(row, entry.rank.ToString(), name, entry.score.ToString(), 17);
+            Columns(row, entry.Rank.ToString(), name, entry.Score.ToString(), rowFontSize);
         }
 
         UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
@@ -501,28 +575,34 @@ public sealed class LeaderboardUI : UIPanel
 
     private void BuildRefreshIcon()
     {
+        const int iconSize = 20;
+        const int horizontalPadding = 8;
+        const int iconTextSpacing = 6;
+        const int minimumFontSize = 12;
+        const int maximumFontSize = 17;
+
         _refreshIcon = Rect("Icon", _refresh.transform);
         _refreshIcon.SetAsFirstSibling();
-        _refreshIcon.sizeDelta = Vector2.one * 20;
+        _refreshIcon.sizeDelta = Vector2.one * iconSize;
         var icon = Image(_refreshIcon, Ink, false);
         icon.sprite = Resources.Load<Sprite>("Textures/Icons/restart_icon");
         icon.preserveAspect = true;
         icon.raycastTarget = false;
         var iconLayout = _refreshIcon.gameObject.AddComponent<UnityEngine.UI.LayoutElement>();
-        iconLayout.minWidth = iconLayout.preferredWidth = 20;
-        iconLayout.minHeight = iconLayout.preferredHeight = 20;
+        iconLayout.minWidth = iconLayout.preferredWidth = iconSize;
+        iconLayout.minHeight = iconLayout.preferredHeight = iconSize;
 
         var layout = _refresh.gameObject.AddComponent<UnityEngine.UI.HorizontalLayoutGroup>();
-        layout.padding = new RectOffset(8, 8, 0, 0);
-        layout.spacing = 6;
+        layout.padding = new RectOffset(horizontalPadding, horizontalPadding, 0, 0);
+        layout.spacing = iconTextSpacing;
         layout.childAlignment = TextAnchor.MiddleCenter;
         layout.childControlWidth = layout.childControlHeight = true;
         layout.childForceExpandWidth = layout.childForceExpandHeight = false;
         _refreshText.margin = Vector4.zero;
         _refreshText.enableWordWrapping = false;
         _refreshText.enableAutoSizing = true;
-        _refreshText.fontSizeMin = 12;
-        _refreshText.fontSizeMax = 17;
+        _refreshText.fontSizeMin = minimumFontSize;
+        _refreshText.fontSizeMax = maximumFontSize;
     }
 
     private void BuildCloseButton()
@@ -545,10 +625,21 @@ public sealed class LeaderboardUI : UIPanel
         button.onClick.AddListener(Close);
     }
 
-    private UnityEngine.UI.Button Button(string name, Transform parent, string text,
-        Vector2 anchor, Vector2 position, Vector2 size, UnityEngine.Events.UnityAction action,
+    private UnityEngine.UI.Button Button(
+        string name,
+        Transform parent,
+        string text,
+        Vector2 anchor,
+        Vector2 position,
+        Vector2 size,
+        UnityEngine.Events.UnityAction action,
         bool languageStyle = false)
     {
+        const int languageButtonFontSize = 17;
+        const int defaultFontSize = 15;
+        const int horizontalTextMargin = 5;
+        const int verticalTextMargin = 2;
+
         RectTransform rect = Rect(name, parent);
         Place(rect, anchor, position, size);
         UnityEngine.UI.Graphic background;
@@ -564,7 +655,9 @@ public sealed class LeaderboardUI : UIPanel
             shadow.effectDistance = new Vector2(0, -3);
         }
         else
+        {
             background = Image(rect, new Color32(241, 184, 112, 255));
+        }
 
         var button = rect.gameObject.AddComponent<UnityEngine.UI.Button>();
         button.targetGraphic = background;
@@ -582,16 +675,16 @@ public sealed class LeaderboardUI : UIPanel
 
         if (languageStyle)
         {
-            fontSize = 17;
+            fontSize = languageButtonFontSize;
         }
         else
         {
-            fontSize = 15;
+            fontSize = defaultFontSize;
         }
 
         TMP_Text label = Label("Text", rect, text, fontSize);
         Stretch(label.rectTransform);
-        label.margin = new Vector4(5, 2, 5, 2);
+        label.margin = new Vector4(horizontalTextMargin, verticalTextMargin, horizontalTextMargin, verticalTextMargin);
         return button;
     }
 
@@ -607,34 +700,5 @@ public sealed class LeaderboardUI : UIPanel
         }
 
         return image;
-    }
-
-    private static RectTransform Rect(string name, Transform parent)
-    {
-        var rect = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
-        rect.SetParent(parent, false);
-        return rect;
-    }
-
-    private static void Place(RectTransform rect, Vector2 anchor, Vector2 position, Vector2 size)
-    {
-        rect.anchorMin = rect.anchorMax = anchor;
-        rect.anchoredPosition = position;
-        rect.sizeDelta = size;
-    }
-
-    private static void TopBand(RectTransform rect, float left, float right, float bottom, float height)
-    {
-        rect.anchorMin = new Vector2(0, 1);
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = new Vector2(left, bottom);
-        rect.offsetMax = new Vector2(right, bottom + height);
-    }
-
-    private static void Stretch(RectTransform rect)
-    {
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = rect.offsetMax = Vector2.zero;
     }
 }

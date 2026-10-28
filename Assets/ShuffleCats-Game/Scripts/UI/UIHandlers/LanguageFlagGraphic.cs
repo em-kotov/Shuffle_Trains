@@ -1,9 +1,18 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(CanvasRenderer))]
 public sealed class LanguageFlagGraphic : UnityEngine.UI.MaskableGraphic
 {
-    public string Code = "ru";
+    [SerializeField]
+    [FormerlySerializedAs("Code")]
+    private string _code = "ru";
+
+    public string Code
+    {
+        get => _code;
+        set => _code = value;
+    }
 
     protected override void OnPopulateMesh(UnityEngine.UI.VertexHelper mesh)
     {
@@ -62,9 +71,12 @@ public sealed class LanguageFlagGraphic : UnityEngine.UI.MaskableGraphic
                     secondRadius = 0.125f;
                 }
 
-                Polygon(mesh, white, center,
-                    center + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * firstRadius,
-                    center + new Vector2(Mathf.Cos(b), Mathf.Sin(b)) * secondRadius);
+                Polygon(
+                    mesh,
+                    white,
+                    center,
+                    center + (new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * firstRadius),
+                    center + (new Vector2(Mathf.Cos(b), Mathf.Sin(b)) * secondRadius));
             }
         }
     }
@@ -79,7 +91,7 @@ public sealed class LanguageFlagGraphic : UnityEngine.UI.MaskableGraphic
         for (int i = 0; i < points.Length; i++)
         {
             float angle = i * Mathf.PI * 2 / points.Length;
-            points[i] = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+            points[i] = center + (new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius);
         }
 
         Polygon(mesh, tint, points);
@@ -91,7 +103,7 @@ public sealed class LanguageFlagGraphic : UnityEngine.UI.MaskableGraphic
         int first = mesh.currentVertCount;
 
         foreach (Vector2 p in points)
-            mesh.AddVert(new Vector2(rect.xMin + p.x * rect.width / 1.5f, rect.yMin + p.y * rect.height), tint * color, Vector2.zero);
+            mesh.AddVert(new Vector2(rect.xMin + (p.x * rect.width / 1.5f), rect.yMin + (p.y * rect.height)), tint * color, Vector2.zero);
 
         for (int i = 1; i < points.Length - 1; i++)
             mesh.AddTriangle(first, first + i, first + i + 1);

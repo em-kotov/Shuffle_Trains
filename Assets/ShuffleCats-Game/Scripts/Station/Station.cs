@@ -18,6 +18,9 @@ public class Station : SeatTracker
 
     public void SetPortraitPresentation(bool isPortraitActive)
     {
+        const float portraitScale = 0.8f;
+        const float horizontalPositionLimit = 8.3f;
+
         if (_model == null || (isPortraitActive == false && _presentation == null))
             return;
 
@@ -39,7 +42,7 @@ public class Station : SeatTracker
 
         if (isPortraitActive)
         {
-            presentationScale = 0.8f;
+            presentationScale = portraitScale;
         }
         else
         {
@@ -51,7 +54,7 @@ public class Station : SeatTracker
         if (isPortraitActive)
         {
             Vector3 position = _presentation.position;
-            position.x = Mathf.Clamp(position.x, -8.3f, 8.3f);
+            position.x = Mathf.Clamp(position.x, -horizontalPositionLimit, horizontalPositionLimit);
             _presentation.position = position;
         }
     }
@@ -59,7 +62,7 @@ public class Station : SeatTracker
     public void Initialize()
     {
         _passengers = new();
-        base.Initialize(null, _holdPoints);
+        this.Initialize(null, _holdPoints);
         SetColor(CatColor.Uncolored);
         ClearCurrentCar();
     }
@@ -74,12 +77,12 @@ public class Station : SeatTracker
         for (int i = 0; i < passengers.Count; i++)
         {
             Transform holdPoint = passengers[i].transform.parent;
-            base.AddPassenger(passengers[i], holdPoint);
+            this.AddPassenger(passengers[i], holdPoint);
             _passengers.Add(passengers[i]);
         }
     }
 
-    override public void RemovePassenger(Passenger passenger)
+    public override void RemovePassenger(Passenger passenger)
     {
         base.RemovePassenger(passenger);
         _passengers.Remove(passenger);
@@ -125,6 +128,25 @@ public class Station : SeatTracker
         return _passengers.Count > 0;
     }
 
+    private void OnDrawGizmos()
+    {
+        const float seatGizmoRadius = 0.15f;
+
+        List<(Transform HoldPoint, Passenger Passenger)> gizmoSeats = new();
+
+        if (gizmoSeats.Count == 0)
+        {
+            foreach (Transform holdPoint in _holdPoints)
+                gizmoSeats.Add((holdPoint, null));
+        }
+
+        for (int i = 0; i < gizmoSeats.Count; i++)
+        {
+            Gizmos.color = Color.white;
+            Gizmos.DrawWireSphere(gizmoSeats[i].HoldPoint.position, seatGizmoRadius);
+        }
+    }
+
     private void SetColor(CatColor catColor)
     {
         CatColor = catColor;
@@ -146,22 +168,5 @@ public class Station : SeatTracker
         }
 
         return passengers;
-    }
-
-    private void OnDrawGizmos()
-    {
-        List<(Transform holdPoint, Passenger passenger)> gizmoSeats = new();
-
-        if (gizmoSeats.Count == 0)
-        {
-            foreach (Transform holdPoint in _holdPoints)
-                gizmoSeats.Add((holdPoint, null));
-        }
-
-        for (int i = 0; i < gizmoSeats.Count; i++)
-        {
-            Gizmos.color = Color.white;
-            Gizmos.DrawWireSphere(gizmoSeats[i].holdPoint.position, 0.15f);
-        }
     }
 }

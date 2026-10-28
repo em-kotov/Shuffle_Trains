@@ -11,25 +11,6 @@ public class YandexBridge : MonoBehaviour
 
     public static event Action<string> DataLoaded;
 
-    public static YandexBridge Create()
-    {
-        if (_instance != null)
-        {
-            return _instance;
-        }
-
-        GameObject host = new GameObject(ObjectName);
-        _instance = host.AddComponent<YandexBridge>();
-        DontDestroyOnLoad(host);
-
-        return _instance;
-    }
-
-    public static void ReportDataLoaded(string json)
-    {
-        DataLoaded?.Invoke(json);
-    }
-
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -68,17 +49,36 @@ public class YandexBridge : MonoBehaviour
         _instance = null;
     }
 
-    public void OnGameApiPause(string _)
+    public static YandexBridge Create()
+    {
+        if (_instance != null)
+        {
+            return _instance;
+        }
+
+        GameObject host = new GameObject(ObjectName);
+        _instance = host.AddComponent<YandexBridge>();
+        DontDestroyOnLoad(host);
+
+        return _instance;
+    }
+
+    public static void ReportDataLoaded(string json)
+    {
+        DataLoaded?.Invoke(json);
+    }
+
+    public void OnGameApiPause(string unusedMessage)
     {
         YandexSdk.HandleSdkPause(true);
     }
 
-    public void OnGameApiResume(string _)
+    public void OnGameApiResume(string unusedMessage)
     {
         YandexSdk.HandleSdkPause(false);
     }
 
-    public void OnSdkInitialized(string _)
+    public void OnSdkInitialized(string unusedMessage)
     {
         YandexSdk.HandleSdkInitialized();
     }
@@ -88,12 +88,12 @@ public class YandexBridge : MonoBehaviour
         YandexSdk.HandleSdkFailed(reason);
     }
 
-    public void OnAdvOpened(string _)
+    public void OnAdvOpened(string unusedMessage)
     {
         // The JS bridge requires this callback; the pause is already applied when requesting the ad.
     }
 
-    public void OnAdvClosed(string _)
+    public void OnAdvClosed(string unusedMessage)
     {
         YandexSdk.HandleInterstitialClosed();
     }

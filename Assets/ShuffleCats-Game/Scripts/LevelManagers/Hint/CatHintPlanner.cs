@@ -3,41 +3,6 @@ using System.Text;
 
 public sealed class CatHintPlanner
 {
-    public sealed class Cat
-    {
-        public int Color, Capacity, Right;
-        public int[] Wrong;
-        public ulong Blockers;
-    }
-
-    public struct StationState
-    {
-        public int Color, Count, Capacity;
-    }
-
-    private sealed class Rider
-    {
-        public int Index, Right;
-        public List<int> Wrong;
-        public Rider Copy() => new Rider { Index = Index, Right = Right, Wrong = new List<int>(Wrong) };
-    }
-
-    private sealed class State
-    {
-        public ulong Parked;
-        public List<Rider> Active = new List<Rider>();
-        public StationState[] Stations;
-        public State Copy()
-        {
-            var copy = new State { Parked = Parked, Stations = (StationState[])Stations.Clone() };
-
-            foreach (Rider rider in Active)
-                copy.Active.Add(rider.Copy());
-
-            return copy;
-        }
-    }
-
     private readonly Cat[] _cats;
     private readonly int _capacity;
     private readonly HashSet<string> _failed = new HashSet<string>();
@@ -51,7 +16,9 @@ public sealed class CatHintPlanner
 
     public int FindNext(ulong parked, int[] activeOrder, StationState[] stations, int nodeBudget = 6000)
     {
-        if (_cats.Length > 63 || _capacity <= 0 || parked == 0)
+        const int maximumSupportedCats = 63;
+
+        if (_cats.Length > maximumSupportedCats || _capacity <= 0 || parked == 0)
             return -1;
 
         _failed.Clear();
@@ -77,8 +44,44 @@ public sealed class CatHintPlanner
         return -1;
     }
 
-    private Rider CreateRider(int index) => new Rider {
-        Index = index, Right = _cats[index].Right, Wrong = new List<int>(_cats[index].Wrong)
+    private static string Key(State state)
+    {
+        var key = new StringBuilder().Append(state.Parked).Append('|');
+
+        foreach (Rider rider in state.Active)
+        {
+            key.Append(rider.Index).Append(':').Append(rider.Right).Append(':');
+
+            foreach (int color in rider.Wrong)
+                key.Append(color).Append(',');
+
+            key.Append(';');
+        }
+
+        key.Append('|');
+
+        foreach (StationState station in state.Stations)
+        {
+            int stationColor;
+
+            if (station.Count == 0)
+            {
+                stationColor = -1;
+            }
+            else
+            {
+                stationColor = station.Color;
+            }
+
+            key.Append(stationColor).Append(':').Append(station.Count).Append(';');
+        }
+
+        return key.ToString();
+    }
+
+    private Rider CreateRider(int index) => new Rider
+    {
+        Index = index, Right = _cats[index].Right, Wrong = new List<int>(_cats[index].Wrong),
     };
 
     private State Launch(State state, int index)
@@ -104,8 +107,10 @@ public sealed class CatHintPlanner
             return false;
 
         foreach (int index in Choices(state))
+        {
             if (CanFinish(Launch(state, index)))
                 return true;
+        }
 
         return false;
     }
@@ -115,8 +120,10 @@ public sealed class CatHintPlanner
         var choices = new List<int>();
 
         for (int i = 0; i < _cats.Length; i++)
+        {
             if ((state.Parked & (1UL << i)) != 0 && (_cats[i].Blockers & state.Parked) == 0)
                 choices.Add(i);
+        }
 
         choices.Sort((a, b) =>
         {
@@ -139,8 +146,10 @@ public sealed class CatHintPlanner
         int score = 0;
 
         foreach (StationState station in state.Stations)
+        {
             if (station.Count > 0 && station.Color == _cats[index].Color)
                 score += station.Count;
+        }
 
         return score;
     }
@@ -179,8 +188,10 @@ public sealed class CatHintPlanner
                             bool stored = false;
 
                             foreach (StationState other in state.Stations)
+                            {
                                 if (other.Count > 0 && other.Color == color)
                                     stored = true;
+                            }
 
                             if (stored == false)
                             {
@@ -236,41 +247,57 @@ public sealed class CatHintPlanner
             }
 
             state.Active.RemoveAll(rider => rider.Wrong.Count == 0 && rider.Right == _cats[rider.Index].Capacity);
-        } while (changed);
+        }
+        while (changed);
     }
 
-    private static string Key(State state)
+    public struct StationState
     {
-        var key = new StringBuilder().Append(state.Parked).Append('|');
+        public int Color;
+        public int Count;
+        public int Capacity;
+    }
 
-        foreach (Rider rider in state.Active)
+    public sealed class Cat
+    {
+        public int Color { get; set; }
+
+        public int Capacity { get; set; }
+
+        public int Right { get; set; }
+
+        public int[] Wrong { get; set; }
+
+        public ulong Blockers { get; set; }
+    }
+
+    private sealed class Rider
+    {
+        public int Index { get; set; }
+
+        public int Right { get; set; }
+
+        public List<int> Wrong { get; set; }
+
+        public Rider Copy() => new Rider { Index = Index, Right = Right, Wrong = new List<int>(Wrong) };
+    }
+
+    private sealed class State
+    {
+        public ulong Parked { get; set; }
+
+        public List<Rider> Active { get; } = new List<Rider>();
+
+        public StationState[] Stations { get; set; }
+
+        public State Copy()
         {
-            key.Append(rider.Index).Append(':').Append(rider.Right).Append(':');
+            var copy = new State { Parked = Parked, Stations = (StationState[])Stations.Clone() };
 
-            foreach (int color in rider.Wrong)
-                key.Append(color).Append(',');
+            foreach (Rider rider in Active)
+                copy.Active.Add(rider.Copy());
 
-            key.Append(';');
+            return copy;
         }
-
-        key.Append('|');
-
-        foreach (StationState station in state.Stations)
-        {
-            int stationColor;
-
-            if (station.Count == 0)
-            {
-                stationColor = -1;
-            }
-            else
-            {
-                stationColor = station.Color;
-            }
-
-            key.Append(stationColor).Append(':').Append(station.Count).Append(';');
-        }
-
-        return key.ToString();
     }
 }

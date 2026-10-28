@@ -6,15 +6,25 @@ public class ShopSectionUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _header;
     [SerializeField] private Transform _slotsParent;
 
-    public Transform SlotsParent => _slotsParent;
-
     private UnityEngine.UI.GridLayoutGroup _grid;
     private UnityEngine.UI.ScrollRect _scroll;
     private UnityEngine.UI.VerticalLayoutGroup _sectionLayout;
     private float _lastWidth = -1;
 
+    public Transform SlotsParent => _slotsParent;
+
     private void Awake()
     {
+        const int cellWidth = 136;
+        const int cellHeight = 204;
+        const int cellSpacing = 12;
+        const int gridBottomPadding = 4;
+        const int sectionHorizontalPadding = 2;
+        const int sectionVerticalPadding = 4;
+        const int headerSpacing = 10;
+        const int headerFontSize = 20;
+        const int headerHeight = 28;
+
         ((RectTransform)transform).pivot = new Vector2(0.5f, 1);
         ((RectTransform)_slotsParent).pivot = new Vector2(0.5f, 1);
         _grid = _slotsParent.GetComponent<UnityEngine.UI.GridLayoutGroup>();
@@ -22,27 +32,33 @@ public class ShopSectionUI : MonoBehaviour
 
         if (_grid != null)
         {
-            _grid.cellSize = new Vector2(136, 204);
-            _grid.spacing = new Vector2(12, 12);
-            _grid.padding = new RectOffset(0, 0, 0, 4);
+            _grid.cellSize = new Vector2(cellWidth, cellHeight);
+            _grid.spacing = new Vector2(cellSpacing, cellSpacing);
+            _grid.padding = new RectOffset(0, 0, 0, gridBottomPadding);
         }
 
         if (_sectionLayout != null)
         {
-            _sectionLayout.padding = new RectOffset(2, 2, 4, 4);
-            _sectionLayout.spacing = 10;
+            _sectionLayout.padding = new RectOffset(sectionHorizontalPadding, sectionHorizontalPadding, sectionVerticalPadding, sectionVerticalPadding);
+            _sectionLayout.spacing = headerSpacing;
         }
 
         if (_header != null)
         {
-            _header.fontSize = _header.fontSizeMax = 20;
+            _header.fontSize = _header.fontSizeMax = headerFontSize;
             _header.fontStyle = FontStyles.Normal;
-            _header.rectTransform.sizeDelta = new Vector2(0, 28);
+            _header.rectTransform.sizeDelta = new Vector2(0, headerHeight);
         }
     }
 
     private void LateUpdate()
     {
+        const int minimumCellWidth = 136;
+        const int maximumCellWidth = 208;
+        const int cellHeight = 204;
+        const int maximumColumns = 3;
+        const int minimumColumns = 1;
+
         if (_slotsParent == null)
             return;
 
@@ -87,10 +103,10 @@ public class ShopSectionUI : MonoBehaviour
 
         _lastWidth = width;
         float available = width - _grid.padding.horizontal;
-        int columns = Mathf.Clamp(Mathf.FloorToInt((available + _grid.spacing.x) / (136 + _grid.spacing.x)), 1, 3);
+        int columns = Mathf.Clamp(Mathf.FloorToInt((available + _grid.spacing.x) / (minimumCellWidth + _grid.spacing.x)), minimumColumns, maximumColumns);
         _grid.constraint = UnityEngine.UI.GridLayoutGroup.Constraint.FixedColumnCount;
         _grid.constraintCount = columns;
-        _grid.cellSize = new Vector2(Mathf.Min(208, (available - (columns - 1) * _grid.spacing.x) / columns), 204);
+        _grid.cellSize = new Vector2(Mathf.Min(maximumCellWidth, (available - ((columns - 1) * _grid.spacing.x)) / columns), cellHeight);
         _grid.childAlignment = TextAnchor.UpperCenter;
 
         if (_scroll != null)

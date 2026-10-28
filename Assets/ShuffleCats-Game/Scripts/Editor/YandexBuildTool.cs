@@ -22,6 +22,7 @@ public static class YandexBuildTool
         string archivePath = Path.Combine(projectRoot, ArchiveFile);
 
         ApplyYandexPlayerSettings();
+
         // Localization tables are Addressables and must be rebuilt alongside the player.
         LocalizationSetup.BuildAddressables();
 
@@ -116,6 +117,8 @@ public static class YandexBuildTool
 
     private static string ToMegabytes(long bytes)
     {
-        return (bytes / (1024f * 1024f)).ToString("0.0");
+        const float bytesPerMebibyte = 1024f * 1024f;
+
+        return (bytes / bytesPerMebibyte).ToString("0.0");
     }
 }

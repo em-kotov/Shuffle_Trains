@@ -22,17 +22,26 @@ public class LevelLayout : ScriptableObject
     [SerializeField] private List<bool> _activeStations = new();
 
     public int LevelNumber => _levelNumber;
+
     public int LevelWinBonus => _levelWinBonus;
+
     public int LevelCarBonus => _levelCarBonus;
+
     // Zero inherits the base config value.
     public int MaxCarsOnTrackCount => _maxCarsOnTrackCount;
+
     public IReadOnlyList<CatPlacement> Cats => _cats;
+
     public IReadOnlyList<bool> ActiveStations => _activeStations;
 
 #if UNITY_EDITOR
-    public void EditorSet(int levelNumber, int winBonus, int carBonus,
-                        int maxCarsOnTrackCount,
-                        List<CatPlacement> cats, List<bool> activeStations)
+    public void EditorSet(
+        int levelNumber,
+        int winBonus,
+        int carBonus,
+        int maxCarsOnTrackCount,
+        List<CatPlacement> cats,
+        List<bool> activeStations)
     {
         _levelNumber = levelNumber;
         _levelWinBonus = winBonus;

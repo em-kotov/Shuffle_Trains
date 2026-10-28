@@ -12,7 +12,9 @@ public sealed class CatHintGraphic : UnityEngine.UI.MaskableGraphic
     private readonly Vector2[] _shapeUV = new Vector2[4];
     private Sprite _sprite;
     private Material _glow;
-    private Vector2 _uvOrigin, _uvX, _uvY;
+    private Vector2 _uvOrigin;
+    private Vector2 _uvX;
+    private Vector2 _uvY;
     private Rect _spriteRect;
     private bool _ready;
 
@@ -28,19 +30,6 @@ public sealed class CatHintGraphic : UnityEngine.UI.MaskableGraphic
             {
                 return Texture2D.whiteTexture;
             }
-        }
-    }
-
-    protected override void Awake()
-    {
-        base.Awake();
-        raycastTarget = false;
-        Shader shader = Resources.Load<Shader>("CatHintGlow");
-
-        if (shader != null)
-        {
-            _glow = new Material(shader) { name = "Cat hint silhouette glow" };
-            material = _glow;
         }
     }
 
@@ -64,8 +53,11 @@ public sealed class CatHintGraphic : UnityEngine.UI.MaskableGraphic
         float paddingPixels = PaddingUnits * glowScale;
         float padX = paddingPixels * _spriteRect.width / Mathf.Max(1f, Vector2.Distance(bottomLeft, bottomRight));
         float padY = paddingPixels * _spriteRect.height / Mathf.Max(1f, Vector2.Distance(bottomLeft, topLeft));
-        Rect padded = Rect.MinMaxRect(_spriteRect.xMin - padX, _spriteRect.yMin - padY,
-            _spriteRect.xMax + padX, _spriteRect.yMax + padY);
+        Rect padded = Rect.MinMaxRect(
+            _spriteRect.xMin - padX,
+            _spriteRect.yMin - padY,
+            _spriteRect.xMax + padX,
+            _spriteRect.yMax + padY);
         Camera uiCamera;
 
         if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
@@ -111,8 +103,9 @@ public sealed class CatHintGraphic : UnityEngine.UI.MaskableGraphic
             }
 
             RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screen, uiCamera, out _positions[i]);
-            _textureUV[i] = _uvOrigin + _uvX * local.x + _uvY * local.y;
-            _shapeUV[i] = new Vector2((local.x - _spriteRect.xMin) / _spriteRect.width,
+            _textureUV[i] = _uvOrigin + (_uvX * local.x) + (_uvY * local.y);
+            _shapeUV[i] = new Vector2(
+                (local.x - _spriteRect.xMin) / _spriteRect.width,
                 (local.y - _spriteRect.yMin) / _spriteRect.height);
         }
 
@@ -124,42 +117,17 @@ public sealed class CatHintGraphic : UnityEngine.UI.MaskableGraphic
         SetVerticesDirty();
     }
 
-    private static Vector3 Project(SpriteRenderer cat, Camera camera, Vector2 point)
+    protected override void Awake()
     {
-        if (cat.flipX)
-            point.x = -point.x;
+        base.Awake();
+        raycastTarget = false;
+        Shader shader = Resources.Load<Shader>("CatHintGlow");
 
-        if (cat.flipY)
-            point.y = -point.y;
-
-        return camera.WorldToScreenPoint(cat.transform.TransformPoint(point));
-    }
-
-    private void CacheSprite(Sprite sprite)
-    {
-        _sprite = sprite;
-        _spriteRect = new Rect(-sprite.pivot / sprite.pixelsPerUnit, sprite.rect.size / sprite.pixelsPerUnit);
-        // Recover UVs from the mesh to support trimmed and rotated atlas sprites.
-        Vector2[] vertices = sprite.vertices;
-        Vector2[] uv = sprite.uv;
-        ushort[] triangles = sprite.triangles;
-        int a = triangles[0], b = triangles[1], c = triangles[2];
-        Vector2 ab = vertices[b] - vertices[a], ac = vertices[c] - vertices[a];
-        Vector2 uvAB = uv[b] - uv[a], uvAC = uv[c] - uv[a];
-        float determinant = ab.x * ac.y - ab.y * ac.x;
-        _uvX = (uvAB * ac.y - uvAC * ab.y) / determinant;
-        _uvY = (uvAC * ab.x - uvAB * ac.x) / determinant;
-        _uvOrigin = uv[a] - _uvX * vertices[a].x - _uvY * vertices[a].y;
-        Vector2 min = uv[0], max = uv[0];
-
-        foreach (Vector2 coordinate in uv)
+        if (shader != null)
         {
-            min = Vector2.Min(min, coordinate);
-            max = Vector2.Max(max, coordinate);
+            _glow = new Material(shader) { name = "Cat hint silhouette glow" };
+            material = _glow;
         }
-
-        _glow.SetVector(UVBoundsId, new Vector4(min.x, min.y, max.x, max.y));
-        SetMaterialDirty();
     }
 
     protected override void OnPopulateMesh(UnityEngine.UI.VertexHelper mesh)
@@ -189,5 +157,44 @@ public sealed class CatHintGraphic : UnityEngine.UI.MaskableGraphic
             Destroy(_glow);
 
         base.OnDestroy();
+    }
+
+    private static Vector3 Project(SpriteRenderer cat, Camera camera, Vector2 point)
+    {
+        if (cat.flipX)
+            point.x = -point.x;
+
+        if (cat.flipY)
+            point.y = -point.y;
+
+        return camera.WorldToScreenPoint(cat.transform.TransformPoint(point));
+    }
+
+    private void CacheSprite(Sprite sprite)
+    {
+        _sprite = sprite;
+        _spriteRect = new Rect(-sprite.pivot / sprite.pixelsPerUnit, sprite.rect.size / sprite.pixelsPerUnit);
+
+        // Recover UVs from the mesh to support trimmed and rotated atlas sprites.
+        Vector2[] vertices = sprite.vertices;
+        Vector2[] uv = sprite.uv;
+        ushort[] triangles = sprite.triangles;
+        int a = triangles[0], b = triangles[1], c = triangles[2];
+        Vector2 ab = vertices[b] - vertices[a], ac = vertices[c] - vertices[a];
+        Vector2 uvAB = uv[b] - uv[a], uvAC = uv[c] - uv[a];
+        float determinant = (ab.x * ac.y) - (ab.y * ac.x);
+        _uvX = ((uvAB * ac.y) - (uvAC * ab.y)) / determinant;
+        _uvY = ((uvAC * ab.x) - (uvAB * ac.x)) / determinant;
+        _uvOrigin = uv[a] - (_uvX * vertices[a].x) - (_uvY * vertices[a].y);
+        Vector2 min = uv[0], max = uv[0];
+
+        foreach (Vector2 coordinate in uv)
+        {
+            min = Vector2.Min(min, coordinate);
+            max = Vector2.Max(max, coordinate);
+        }
+
+        _glow.SetVector(UVBoundsId, new Vector4(min.x, min.y, max.x, max.y));
+        SetMaterialDirty();
     }
 }
